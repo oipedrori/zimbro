@@ -1,14 +1,15 @@
 import React, { useRef, useState } from 'react';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Edit2 } from 'lucide-react';
 
-const SwipeableItem = ({ children, onDelete }) => {
+const SwipeableItem = ({ children, onDelete, onEdit }) => {
     const [startX, setStartX] = useState(0);
     const [currentX, setCurrentX] = useState(0);
     const [isDragging, setIsDragging] = useState(false);
     const [isDeleted, setIsDeleted] = useState(false);
     const itemRef = useRef(null);
 
-    const threshold = -80; // Distance to trigger delete reveal
+    const deleteThreshold = -80;
+    const editThreshold = 80;
 
     const handleTouchStart = (e) => {
         setStartX(e.touches[0].clientX);
@@ -19,20 +20,23 @@ const SwipeableItem = ({ children, onDelete }) => {
         if (!isDragging) return;
         const x = e.touches[0].clientX;
         const diff = x - startX;
-        // Only allow swiping left
+
+        // Allow both left (negative) and right (positive)
         if (diff < 0) {
-            setCurrentX(Math.max(diff, -100)); // cap at -100px
+            setCurrentX(Math.max(diff, -100)); // cap left
+        } else if (diff > 0 && onEdit) {
+            setCurrentX(Math.min(diff, 100)); // cap right only if edit action exists
         }
     };
 
     const handleTouchEnd = () => {
         setIsDragging(false);
-        if (currentX < threshold) {
-            // Snap to open
+        if (currentX < deleteThreshold) {
             setCurrentX(-80);
+        } else if (currentX > editThreshold && onEdit) {
+            setCurrentX(80);
         } else {
-            // Snap back
-            setCurrentX(0);
+            setCurrentX(0); // Snap back
         }
     };
 
@@ -40,7 +44,12 @@ const SwipeableItem = ({ children, onDelete }) => {
         setIsDeleted(true);
         setTimeout(() => {
             onDelete();
-        }, 300); // Wait for transition
+        }, 300);
+    };
+
+    const handleEditClick = () => {
+        setCurrentX(0); // Snap back on edit click
+        if (onEdit) onEdit();
     };
 
     if (isDeleted) {
@@ -53,26 +62,53 @@ const SwipeableItem = ({ children, onDelete }) => {
 
     return (
         <div style={{ position: 'relative', overflow: 'hidden', width: '100%' }}>
-            {/* Background Action (Trash) */}
+            {/* Background Actions Container */}
             <div style={{
                 position: 'absolute',
-                top: 0, bottom: 0, right: 0,
-                width: '100px',
-                background: 'var(--danger-color)',
+                top: 0, bottom: 0, left: 0, right: 0,
                 display: 'flex',
-                justifyContent: 'flex-end',
-                alignItems: 'center',
-                paddingRight: '20px',
-                color: 'white',
+                justifyContent: 'space-between',
                 zIndex: 0
             }}>
-                <button
-                    onClick={handleDeleteClick}
-                    style={{ color: 'white', background: 'transparent', border: 'none', cursor: 'pointer', padding: '10px' }}
-                    aria-label="Apagar"
-                >
-                    <Trash2 size={24} />
-                </button>
+                {/* Left Side (Edit) */}
+                <div style={{
+                    width: '100px',
+                    background: 'var(--success-color)',
+                    display: 'flex',
+                    justifyContent: 'flex-start',
+                    alignItems: 'center',
+                    borderRadius: '16px 0 0 16px',
+                    paddingLeft: '20px'
+                }}>
+                    {onEdit && (
+                        <button
+                            onClick={handleEditClick}
+                            style={{ color: 'white', background: 'transparent', border: 'none', cursor: 'pointer', padding: '10px' }}
+                            aria-label="Editar"
+                        >
+                            <Edit2 size={24} />
+                        </button>
+                    )}
+                </div>
+
+                {/* Right Side (Delete) */}
+                <div style={{
+                    width: '100px',
+                    background: 'var(--danger-color)',
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    alignItems: 'center',
+                    borderRadius: '0 16px 16px 0',
+                    paddingRight: '20px'
+                }}>
+                    <button
+                        onClick={handleDeleteClick}
+                        style={{ color: 'white', background: 'transparent', border: 'none', cursor: 'pointer', padding: '10px' }}
+                        aria-label="Apagar"
+                    >
+                        <Trash2 size={24} />
+                    </button>
+                </div>
             </div>
 
             {/* Foreground Item */}
@@ -84,13 +120,16 @@ const SwipeableItem = ({ children, onDelete }) => {
                 style={{
                     transform: `translateX(${currentX}px)`,
                     transition: isDragging ? 'none' : 'transform 0.2s ease-out',
-                    background: 'var(--bg-color)',
+                    background: 'var(--surface-color)', // Needs solid bg to hide background buttons
+                    width: '100%',
                     position: 'relative',
                     zIndex: 1,
-                    width: '100%'
+                    display: 'flex'
                 }}
             >
-                {children}
+                <div style={{ width: '100%' }}>
+                    {children}
+                </div>
             </div>
         </div>
     );

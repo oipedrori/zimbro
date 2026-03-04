@@ -64,8 +64,8 @@ const Wallet = () => {
     return (
         <div className="page-container animate-fade-in" style={{ paddingBottom: '110px' }}>
             <header style={{ paddingTop: '10px', marginBottom: '24px' }}>
-                <h1 style={{ fontSize: '1.5rem', color: 'var(--primary-darkest)', fontWeight: '700' }}>Minhas Contas</h1>
-                <p style={{ color: 'var(--primary-dark)', fontSize: '0.95rem' }}>Onde seu dinheiro está guardado.</p>
+                <h1 style={{ fontSize: '1.5rem', color: 'var(--text-main)', fontWeight: '700' }}>Minhas Contas</h1>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>Onde seu dinheiro está guardado.</p>
             </header>
 
             {/* Total Wealth Panel */}
@@ -87,10 +87,10 @@ const Wallet = () => {
             ) : (
                 <form onSubmit={handleAddAccount} className="glass-panel" style={{ padding: '20px', marginBottom: '24px', position: 'relative' }}>
                     <button type="button" onClick={() => setIsAdding(false)} style={{ position: 'absolute', top: '10px', right: '10px', color: 'var(--text-muted)', fontSize: '1.2rem' }}>&times;</button>
-                    <h3 style={{ fontSize: '1.1rem', color: 'var(--primary-darkest)', marginBottom: '16px' }}>Nova Instituição</h3>
+                    <h3 style={{ fontSize: '1.1rem', color: 'var(--text-main)', marginBottom: '16px' }}>Nova Instituição</h3>
 
                     <div style={{ marginBottom: '12px' }}>
-                        <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--primary-dark)', marginBottom: '6px' }}>Nome da Conta</label>
+                        <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '6px' }}>Nome da Conta</label>
                         <input
                             required
                             type="text"
@@ -102,7 +102,7 @@ const Wallet = () => {
                     </div>
 
                     <div style={{ marginBottom: '12px' }}>
-                        <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--primary-dark)', marginBottom: '6px' }}>Saldo Atual (R$)</label>
+                        <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '6px' }}>Saldo Atual (R$)</label>
                         <input
                             required
                             type="number"
@@ -115,7 +115,7 @@ const Wallet = () => {
                     </div>
 
                     <div style={{ marginBottom: '20px' }}>
-                        <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--primary-dark)', marginBottom: '6px' }}>Tipo Conta</label>
+                        <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '6px' }}>Tipo Conta</label>
                         <select
                             value={accountType}
                             onChange={(e) => setAccountType(e.target.value)}
@@ -128,7 +128,7 @@ const Wallet = () => {
                         </select>
                     </div>
 
-                    <button type="submit" style={{ width: '100%', padding: '14px', borderRadius: '12px', background: 'var(--primary-color)', color: 'var(--primary-darkest)', fontWeight: 'bold' }}>
+                    <button type="submit" style={{ width: '100%', padding: '14px', borderRadius: '12px', background: 'var(--primary-color)', color: 'var(--text-main)', fontWeight: 'bold' }}>
                         Adicionar Conta
                     </button>
                 </form>
@@ -137,7 +137,7 @@ const Wallet = () => {
             {/* Accounts List */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {Object.keys(accounts).length === 0 && !isAdding && (
-                    <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--primary-dark)' }}>
+                    <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>
                         <p>Nenhuma conta cadastrada.<br />Adicione cartões ou contas de banco para controlar o patrimônio.</p>
                     </div>
                 )}
@@ -145,11 +145,11 @@ const Wallet = () => {
                 {Object.entries(accounts).map(([id, val]) => (
                     <div key={id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 20px', background: 'var(--surface-color)', borderRadius: '20px', boxShadow: '0 4px 15px rgba(0,0,0,0.03)' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                            <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'var(--primary-light)', color: 'var(--primary-dark)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                            <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'var(--primary-light)', color: 'var(--text-muted)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                                 {getIconForType(val.type)}
                             </div>
                             <div>
-                                <h3 style={{ fontSize: '1.05rem', fontWeight: '600', color: 'var(--primary-darkest)' }}>{val.name}</h3>
+                                <h3 style={{ fontSize: '1.05rem', fontWeight: '600', color: 'var(--text-main)' }}>{val.name}</h3>
                                 <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'capitalize' }}>
                                     {val.type === 'bank' ? 'Banco' : val.type === 'cash' ? 'Carteira' : val.type === 'investment' ? 'Investimento' : 'Crédito'}
                                 </p>

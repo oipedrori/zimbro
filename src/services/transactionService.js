@@ -41,6 +41,29 @@ export const deleteTransaction = async (userId, transactionId) => {
     }
 };
 
+export const updateTransaction = async (userId, transactionId, data) => {
+    try {
+        const docRef = doc(db, TRANSACTIONS_COLLECTION, transactionId);
+
+        const updatedData = {
+            amount: data.amount,
+            type: data.type,
+            category: data.category,
+            description: data.description,
+            date: data.date,
+            repeatType: data.repeatType || 'none',
+            installments: data.installments || 1,
+            updatedAt: new Date().toISOString()
+        };
+
+        await updateDoc(docRef, updatedData);
+        return { id: transactionId, ...updatedData };
+    } catch (error) {
+        console.error("Error updating transaction: ", error);
+        throw error;
+    }
+};
+
 /**
  * Busca todas as transações de um usuário de um mes específico.
  * format month: 'YYYY-MM'

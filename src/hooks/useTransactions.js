@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getTransactionsByMonth, addTransaction, deleteTransaction } from '../services/transactionService';
+import { getTransactionsByMonth, addTransaction, deleteTransaction, updateTransaction } from '../services/transactionService';
 import { useAuth } from '../contexts/AuthContext';
 
 export const useTransactions = (currentMonth) => { // format 'YYYY-MM'
@@ -36,6 +36,16 @@ export const useTransactions = (currentMonth) => { // format 'YYYY-MM'
         }
     };
 
+    const updateTx = async (id, data) => {
+        if (!currentUser) return;
+        try {
+            await updateTransaction(currentUser.uid, id, data);
+            await fetchTransactions(); // refresh list
+        } catch (err) {
+            throw err;
+        }
+    };
+
     const deleteTx = async (id) => {
         if (!currentUser) return;
         try {
@@ -46,5 +56,5 @@ export const useTransactions = (currentMonth) => { // format 'YYYY-MM'
         }
     };
 
-    return { transactions, loading, error, addTx, deleteTx, refetch: fetchTransactions };
+    return { transactions, loading, error, addTx, updateTx, deleteTx, refetch: fetchTransactions };
 };

@@ -1,104 +1,179 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Mic, TrendingUp, ShieldCheck } from 'lucide-react';
+import { Mic, TrendingUp, ShieldCheck, Sparkles } from 'lucide-react';
+
+const stories = [
+    {
+        id: 0,
+        icon: <img src="/Z.png" alt="Zimbro" style={{ width: '64px', height: '64px', objectFit: 'contain' }} />,
+        title: "Boas vindas ao Zimbro",
+        desc: "O seu dinheiro agora tem uma inteligência artificial completa e focada em te ajudar."
+    },
+    {
+        id: 1,
+        icon: <Mic size={48} color="white" />,
+        title: "Sua voz no controle",
+        desc: "Apenas fale o que gastou. O Zimbro entende o contexto e cataloga tudo sozinho."
+    },
+    {
+        id: 2,
+        icon: <ShieldCheck size={48} color="white" />,
+        title: "Previsão Inteligente",
+        desc: "Despesas parceladas e compras recorrentes são calculadas no seu fluxo futuro automaticamente."
+    },
+    {
+        id: 3,
+        icon: <Sparkles size={48} color="white" />,
+        title: "Decisões melhores",
+        desc: "Converse com a IA para pedir conselhos financeiros e atingir suas metas mais rápido."
+    }
+];
+
+const STORY_DURATION = 5000; // 5 segundos por story
 
 const Onboarding = () => {
     const { loginWithGoogle } = useAuth();
     const navigate = useNavigate();
     const [isLoggingIn, setIsLoggingIn] = useState(false);
+    const [currentStory, setCurrentStory] = useState(0);
 
     const handleLogin = async () => {
         setIsLoggingIn(true);
         try {
             await loginWithGoogle();
-            navigate('/'); // Redireciona para home se sucesso
+            navigate('/');
         } catch (error) {
             console.error("Falha ao fazer login", error);
             setIsLoggingIn(false);
         }
     };
 
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setCurrentStory((prev) => (prev + 1) % stories.length); // Loop infinito
+        }, STORY_DURATION);
+
+        return () => clearTimeout(timer);
+    }, [currentStory]);
+
+    const handleTouchLeft = () => {
+        setCurrentStory((prev) => (prev === 0 ? stories.length - 1 : prev - 1));
+    };
+
+    const handleTouchRight = () => {
+        setCurrentStory((prev) => (prev + 1) % stories.length);
+    };
+
     return (
-        <div className="fluid-bg" style={{
+        <div style={{
             display: 'flex',
             flexDirection: 'column',
-            minHeight: '100vh',
-            backgroundColor: 'var(--primary-color)',
+            height: '100vh',
+            height: '100dvh',
+            backgroundColor: 'var(--primary-darkest)',
             color: 'white',
-            padding: '40px 24px',
-            justifyContent: 'space-between',
             position: 'relative',
             overflow: 'hidden'
         }}>
-            {/* Background decoration */}
+            {/* Background gradient animado usando a identidade visual */}
+            <div className="onboarding-bg"></div>
+
+            {/* Top Progress Bars (Estilo Stories) */}
             <div style={{
                 position: 'absolute',
-                top: '-10%',
-                right: '-20%',
-                width: '300px',
-                height: '300px',
-                borderRadius: '50%',
-                background: 'rgba(255, 255, 255, 0.1)',
-                filter: 'blur(40px)',
-                zIndex: 0
-            }}></div>
+                top: '0', left: '0', right: '0',
+                padding: '24px 16px 10px', // Mais padding no topo para celular
+                display: 'flex',
+                gap: '8px',
+                zIndex: 10
+            }}>
+                {stories.map((story, idx) => {
+                    let fillWidth = '0%';
+                    let applyAnimation = false;
 
-            <div style={{ zIndex: 1 }} className="animate-slide-up">
-                {/* Logo area */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '40px' }}>
-                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                        <TrendingUp color={"var(--primary-color)"} size={28} />
-                    </div>
-                    <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>Zimbro</h1>
-                </div>
+                    if (idx < currentStory) {
+                        fillWidth = '100%';
+                    } else if (idx === currentStory) {
+                        applyAnimation = true;
+                    }
 
-                <h2 style={{ fontSize: '2.5rem', lineHeight: 1.1, marginBottom: '24px', fontWeight: '600' }}>
-                    O primeiro<br />assistente financeiro<br />movido a IA.
-                </h2>
-
-                <p style={{ fontSize: '1.1rem', opacity: 0.85, marginBottom: '48px', lineHeight: 1.6 }}>
-                    Converse naturalmente para adicionar despesas, planejar o futuro e alcançar sua liberdade financeira.
-                </p>
-
-                {/* Feature List */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                    <FeatureItem
-                        icon={<Mic size={24} />}
-                        title="Sua voz no controle"
-                        desc="Apenas diga o que gastou e o Zimbro resolve o resto."
-                    />
-                    <FeatureItem
-                        icon={<ShieldCheck size={24} />}
-                        title="Previsão Inteligente"
-                        desc="Despesas parceladas e recorrentes são calculadas no futuro automaticamente."
-                    />
-                </div>
+                    return (
+                        <div key={story.id} style={{
+                            flex: 1,
+                            height: '4px',
+                            background: 'rgba(255, 255, 255, 0.3)',
+                            borderRadius: '2px',
+                            overflow: 'hidden'
+                        }}>
+                            <div
+                                className={applyAnimation ? 'progress-fill active' : 'progress-fill'}
+                                style={{
+                                    width: applyAnimation ? '0%' : fillWidth,
+                                }}
+                            ></div>
+                        </div>
+                    );
+                })}
             </div>
 
-            <div style={{ zIndex: 1, marginTop: '40px' }} className="animate-fade-in">
+            {/* Áreas Invisíveis de Toque (Laterais) */}
+            <div style={{ position: 'absolute', top: 0, bottom: '100px', left: 0, width: '35%', zIndex: 5, cursor: 'pointer' }} onClick={handleTouchLeft} />
+            <div style={{ position: 'absolute', top: 0, bottom: '100px', right: 0, width: '65%', zIndex: 5, cursor: 'pointer' }} onClick={handleTouchRight} />
+
+            {/* Conteúdo Dinâmico do Story com Fade */}
+            <div
+                key={currentStory}
+                className="story-content"
+                style={{
+                    flex: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    padding: '24px',
+                    textAlign: 'center',
+                    zIndex: 2,
+                    pointerEvents: 'none' // Clicks passam por cima pras bordas
+                }}
+            >
+                <div style={{
+                    width: '120px', height: '120px', borderRadius: '40px', background: 'rgba(0,0,0,0.2)',
+                    display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '40px',
+                    backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
+                }}>
+                    {stories[currentStory].icon}
+                </div>
+
+                <h2 style={{ fontSize: '2.2rem', lineHeight: 1.1, marginBottom: '20px', fontWeight: '800', textShadow: '0 4px 15px rgba(0,0,0,0.3)', letterSpacing: '-0.5px' }}>
+                    {stories[currentStory].title}
+                </h2>
+                <p style={{ fontSize: '1.2rem', opacity: 0.9, lineHeight: 1.5, maxWidth: '85%' }}>
+                    {stories[currentStory].desc}
+                </p>
+            </div>
+
+            {/* Botão Base Fixado */}
+            <div style={{
+                padding: '24px',
+                zIndex: 10,
+                background: 'transparent',
+                paddingBottom: 'calc(env(safe-area-inset-bottom, 20px) + 20px)'
+            }}>
                 <button
                     onClick={handleLogin}
                     disabled={isLoggingIn}
                     style={{
-                        width: '100%',
-                        padding: '18px',
-                        backgroundColor: 'white',
-                        color: 'var(--primary-color)',
-                        borderRadius: 'var(--border-radius-lg)',
-                        fontSize: '1.1rem',
-                        fontWeight: '600',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        gap: '12px',
-                        boxShadow: '0 8px 16px rgba(0,0,0,0.15)',
-                        transition: 'transform 0.2s'
+                        width: '100%', padding: '18px', backgroundColor: 'white', color: 'var(--primary-color)',
+                        borderRadius: 'var(--border-radius-lg)', fontSize: '1.1rem', fontWeight: '700',
+                        display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px',
+                        boxShadow: '0 8px 25px rgba(0,0,0,0.2)', transition: 'transform 0.2s',
+                        zIndex: 10
                     }}
                 >
                     {isLoggingIn ? 'Conectando...' : (
                         <>
-                            {/* Ícone simples do Google em SVG */}
                             <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
                                 <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
@@ -112,36 +187,45 @@ const Onboarding = () => {
             </div>
 
             <style>{`
-                .fluid-bg {
-                    background: linear-gradient(135deg, #10b981 0%, #059669 40%, #047857 100%);
+                .onboarding-bg {
+                    position: absolute;
+                    top: 0; left: 0; right: 0; bottom: 0;
+                    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
                     background-size: 200% 200%;
-                    animation: gradientAnim 8s ease infinite;
+                    animation: gradientAnim 15s ease infinite;
+                    z-index: 0;
                 }
                 @keyframes gradientAnim {
                     0% { background-position: 0% 50%; }
                     50% { background-position: 100% 50%; }
                     100% { background-position: 0% 50%; }
                 }
+
+                .progress-fill {
+                    height: 100%;
+                    background: white;
+                }
+                
+                .progress-fill.active {
+                    animation: fillProgress ${STORY_DURATION}ms linear forwards;
+                }
+
+                @keyframes fillProgress {
+                    from { width: 0%; }
+                    to { width: 100%; }
+                }
+
+                .story-content {
+                    animation: fadeInScale 0.4s ease-out forwards;
+                }
+
+                @keyframes fadeInScale {
+                    from { opacity: 0; transform: scale(0.95); filter: blur(4px); }
+                    to { opacity: 1; transform: scale(1); filter: blur(0px); }
+                }
             `}</style>
-        </div >
+        </div>
     );
 };
-
-const FeatureItem = ({ icon, title, desc }) => (
-    <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
-        <div style={{
-            background: 'rgba(255,255,255,0.15)',
-            padding: '12px',
-            borderRadius: '50%',
-            backdropFilter: 'blur(10px)'
-        }}>
-            {icon}
-        </div>
-        <div>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '4px' }}>{title}</h3>
-            <p style={{ fontSize: '0.9rem', opacity: 0.8, lineHeight: 1.4 }}>{desc}</p>
-        </div>
-    </div>
-);
 
 export default Onboarding;

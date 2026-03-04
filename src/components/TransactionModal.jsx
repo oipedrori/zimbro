@@ -3,8 +3,8 @@ import { useTransactions } from '../hooks/useTransactions';
 import { CATEGORIAS_DESPESA, CATEGORIAS_RECEITA } from '../utils/categories';
 import { format } from 'date-fns';
 
-const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', onSuccess }) => {
-    const { addTx } = useTransactions(format(new Date(), 'yyyy-MM'));
+const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialData = null, onSuccess }) => {
+    const { addTx, updateTx } = useTransactions(format(new Date(), 'yyyy-MM'));
     const [type, setType] = useState(defaultType);
     const [amount, setAmount] = useState('');
     const [description, setDescription] = useState('');
@@ -15,6 +15,30 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', onSuccess 
     const [repeatType, setRepeatType] = useState('none'); // none, recurring, installment
     const [installments, setInstallments] = useState(1);
     const [loading, setLoading] = useState(false);
+
+    // Pre-fill if editing
+    React.useEffect(() => {
+        if (isOpen && initialData) {
+            setType(initialData.type || defaultType);
+            setAmount(initialData.amount ? String(initialData.amount).replace('.', ',') : '');
+            setDescription(initialData.description || '');
+            setCategory(initialData.category || (initialData.type === 'expense' ? CATEGORIAS_DESPESA[0].id : CATEGORIAS_RECEITA[0].id));
+
+            // Extract original date, not virtualDate, for editing
+            setDate(initialData.date || format(new Date(), 'yyyy-MM-dd'));
+            setRepeatType(initialData.repeatType || 'none');
+            setInstallments(initialData.installments || 1);
+        } else if (isOpen && !initialData) {
+            // Reset to defaults on open for new tx
+            setType(defaultType);
+            setAmount('');
+            setDescription('');
+            setCategory(defaultType === 'expense' ? CATEGORIAS_DESPESA[0].id : CATEGORIAS_RECEITA[0].id);
+            setDate(format(new Date(), 'yyyy-MM-dd'));
+            setRepeatType('none');
+            setInstallments(1);
+        }
+    }, [isOpen, initialData, defaultType]);
 
     if (!isOpen) return null;
 
@@ -32,7 +56,7 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', onSuccess 
                 return;
             }
 
-            await addTx({
+            const txData = {
                 type,
                 amount: numericAmount,
                 description,
@@ -40,7 +64,13 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', onSuccess 
                 date,
                 repeatType,
                 installments: repeatType === 'installment' ? Number(installments) : 1
-            });
+            };
+
+            if (initialData?.id) {
+                await updateTx(initialData.id, txData);
+            } else {
+                await addTx(txData);
+            }
 
             onSuccess?.();
             onClose();
@@ -56,7 +86,7 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', onSuccess 
         <div className="modal-overlay">
             <div className="modal-content animate-slide-up">
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-                    <h2>Nova Transação</h2>
+                    <h2>{initialData ? 'Editar Transação' : 'Nova Transação'}</h2>
                     <button onClick={onClose} style={{ fontSize: '1.2rem', color: 'var(--text-muted)' }}>✕</button>
                 </div>
 
@@ -158,7 +188,7 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', onSuccess 
                             color: 'white', borderRadius: 'var(--border-radius-lg)', fontWeight: 'bold', fontSize: '1.1rem'
                         }}
                     >
-                        {loading ? 'Adicionando...' : 'Adicionar'}
+                        {loading ? 'Salvando...' : initialData ? 'Salvar Alterações' : 'Adicionar'}
                     </button>
                 </form>
             </div>

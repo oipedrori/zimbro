@@ -43,21 +43,21 @@
 /* Dark mode basic variables */
 @media (prefers-color-scheme: dark) {
   :root:not(.theme-light) {
-    --bg-color: #0f172a;
-    --surface-color: #1e293b;
+    --bg-color: #0E2210;
+    --surface-color: #1B4520;
     --text-main: #f8fafc;
-    --text-muted: #94a3b8;
-    --glass-bg: rgba(30, 41, 59, 0.75);
+    --text-muted: #d4f0db;
+    --glass-bg: rgba(27, 69, 32, 0.75);
     --glass-border: rgba(255, 255, 255, 0.1);
   }
 }
 
 :root.theme-dark {
-  --bg-color: #0f172a;
-  --surface-color: #1e293b;
+  --bg-color: #0E2210;
+  --surface-color: #1B4520;
   --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --glass-bg: rgba(30, 41, 59, 0.75);
+  --text-muted: #d4f0db;
+  --glass-bg: rgba(27, 69, 32, 0.75);
   --glass-border: rgba(255, 255, 255, 0.1);
 }
 
@@ -136,6 +136,10 @@ p {
   gap: 24px;
 }
 
+.page-container>* {
+  flex-shrink: 0;
+}
+
 .page-container::-webkit-scrollbar {
   display: none;
 }
@@ -175,6 +179,16 @@ p {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
   }
 }
 

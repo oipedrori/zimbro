@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Layout from './components/Layout';
@@ -8,6 +8,7 @@ import Limits from './pages/Limits';
 import Wallet from './pages/Wallet';
 import Onboarding from './pages/Onboarding';
 import Profile from './pages/Profile';
+import InstallPrompt from './components/InstallPrompt';
 import './index.css';
 
 const PrivateRoute = ({ children }) => {
@@ -39,8 +40,23 @@ function AppRoutes() {
 }
 
 function App() {
+  useEffect(() => {
+    const theme = localStorage.getItem('zimbro_theme') || 'system';
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('theme-dark');
+      root.classList.remove('theme-light');
+    } else if (theme === 'light') {
+      root.classList.add('theme-light');
+      root.classList.remove('theme-dark');
+    } else {
+      root.classList.remove('theme-dark', 'theme-light');
+    }
+  }, []);
+
   return (
     <AuthProvider>
+      <InstallPrompt />
       <BrowserRouter>
         <AppRoutes />
       </BrowserRouter>

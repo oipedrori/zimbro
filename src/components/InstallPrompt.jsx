@@ -1,0 +1,144 @@
+import React, { useState, useEffect } from 'react';
+import { X, Share, MoreVertical, PlusSquare } from 'lucide-react';
+
+const InstallPrompt = () => {
+    const [isVisible, setIsVisible] = useState(false);
+    const [os, setOs] = useState(null);
+    const [deferredPrompt, setDeferredPrompt] = useState(null);
+
+    useEffect(() => {
+        // Verifica se já viu o prompt ou se já está rodando como app standalone (PWA instalado)
+        const hasSeenPrompt = localStorage.getItem('zimbro_install_prompt_seen');
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+        if (hasSeenPrompt === 'true' || isStandalone) {
+            return;
+        }
+
+        // Detectar o OS
+        const userAgent = window.navigator.userAgent.toLowerCase();
+        const isIOS = /iphone|ipad|ipod/.test(userAgent);
+        const isAndroid = /android/.test(userAgent);
+
+        if (isIOS) {
+            setOs('ios');
+            // Mostra o prompt com atraso de 3 segundos para não interromper a entrada inicial
+            const timer = setTimeout(() => setIsVisible(true), 3000);
+            return () => clearTimeout(timer);
+        } else if (isAndroid) {
+            setOs('android');
+            // No Android, tentamos interceptar o evento nativo de instalação
+            window.addEventListener('beforeinstallprompt', (e) => {
+                // Previne o mini-infobar padrão do chrome de aparecer
+                e.preventDefault();
+                // Guarda o evento para disparar quando o usuário clicar no botão
+                setDeferredPrompt(e);
+                setIsVisible(true);
+            });
+
+            // Fallback caso o evento não dispare (sem manifest, etc)
+            const timer = setTimeout(() => setIsVisible(true), 4000);
+            return () => clearTimeout(timer);
+        }
+    }, []);
+
+    const handleDismiss = () => {
+        setIsVisible(false);
+        localStorage.setItem('zimbro_install_prompt_seen', 'true');
+    };
+
+    const handleInstallAndroid = async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                console.log('User accepted the A2HS prompt');
+            }
+            setDeferredPrompt(null);
+        }
+        handleDismiss();
+    };
+
+    if (!isVisible) return null;
+
+    return (
+        <div style={{
+            position: 'fixed',
+            bottom: '20px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '90%',
+            maxWidth: '360px',
+            backgroundColor: 'var(--surface-color)',
+            borderRadius: '16px',
+            boxShadow: '0 8px 30px rgba(0,0,0,0.2)',
+            border: '1px solid var(--glass-border)',
+            padding: '16px',
+            zIndex: 9999,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px',
+            animation: 'slideUpBounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+        }}>
+            <button
+                onClick={handleDismiss}
+                style={{ position: 'absolute', top: '12px', right: '12px', background: 'rgba(0,0,0,0.05)', borderRadius: '50%', padding: '4px' }}
+            >
+                <X size={16} color="var(--text-muted)" />
+            </button>
+
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: 'var(--primary-color)', display: 'flex', justifyContent: 'center', alignItems: 'center', flexShrink: 0 }}>
+                    <img src="/favicon.png" alt="Zimbro Icon" style={{ width: '28px', height: '28px' }} />
+                </div>
+                <div>
+                    <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)' }}>Instale o Zimbro</h4>
+                    <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: '1.4', marginTop: '4px' }}>
+                        Adicione à sua tela inicial para usar como um aplicativo real.
+                    </p>
+                </div>
+            </div>
+
+            {os === 'ios' ? (
+                <div style={{ backgroundColor: 'rgba(0,0,0,0.03)', padding: '12px', borderRadius: '8px', fontSize: '0.85rem', color: 'var(--text-main)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontWeight: 'bold' }}>1.</span> Toque no ícone <Share size={18} color="var(--primary-color)" /> na barra inferior do Safari.
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontWeight: 'bold' }}>2.</span> Selecione <PlusSquare size={18} color="var(--text-main)" /> <b>Adicionar à Tela de Início</b>.
+                    </div>
+                </div>
+            ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {deferredPrompt ? (
+                        <button
+                            onClick={handleInstallAndroid}
+                            style={{ width: '100%', padding: '12px', background: 'var(--primary-color)', color: 'white', borderRadius: '8px', fontWeight: '600' }}
+                        >
+                            Instalar Agora
+                        </button>
+                    ) : (
+                        <div style={{ backgroundColor: 'rgba(0,0,0,0.03)', padding: '12px', borderRadius: '8px', fontSize: '0.85rem', color: 'var(--text-main)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{ fontWeight: 'bold' }}>1.</span> Toque no menu <MoreVertical size={18} color="var(--primary-color)" /> no canto superior.
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{ fontWeight: 'bold' }}>2.</span> Selecione <b>Adicionar à tela inicial</b>.
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            <style>{`
+                @keyframes slideUpBounce {
+                    0% { transform: translate(-50%, 100%); opacity: 0; }
+                    50% { transform: translate(-50%, -10%); opacity: 1; }
+                    100% { transform: translate(-50%, 0); opacity: 1; }
+                }
+            `}</style>
+        </div>
+    );
+};
+
+export default InstallPrompt;

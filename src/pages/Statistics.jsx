@@ -79,56 +79,93 @@ const Statistics = () => {
             </div>
 
             <header style={{ marginBottom: '24px', textAlign: 'center' }}>
-                <h1 style={{ fontSize: '1.4rem', color: 'var(--primary-darkest)', fontWeight: '700' }}>Estatísticas</h1>
+                <h1 style={{ fontSize: '1.4rem', color: 'var(--text-main)', fontWeight: '700' }}>Estatísticas</h1>
             </header>
 
             {/* Gráfico Anual de Saldos */}
             <section className="glass-panel" style={{ padding: '24px 16px', marginBottom: '24px' }}>
-                <h3 style={{ fontSize: '1rem', fontWeight: '600', color: 'var(--primary-darkest)', marginBottom: '24px' }}>Saldos Projetados ({currentYear})</h3>
+                <h3 style={{ fontSize: '1rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '24px' }}>Saldos Projetados ({currentYear})</h3>
 
                 {loadingYearly ? (
                     <p style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Carregando projeção...</p>
                 ) : (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '160px', paddingBottom: '20px', borderBottom: '1px solid var(--glass-border)' }}>
-                        {yearlyStats.map((stat) => {
-                            const isCurrent = stat.month === currentMonthNum;
-                            const isNegative = stat.balance < 0;
-                            const fillPercentage = Math.min((Math.abs(stat.balance) / maxBarValue) * 100, 100);
-                            const minHeight = 4; // pra sempre mostrar alguma cor
+                    <div style={{ position: 'relative', height: '180px', paddingBottom: '20px', borderBottom: '1px solid var(--glass-border)' }}>
+                        {/* Linha Zero Central */}
+                        <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', background: 'var(--glass-border)', zIndex: 0 }}></div>
 
-                            // Cores premium
-                            const barColor = isNegative ? 'var(--danger-color)' : 'var(--primary-color)';
-                            const barOpacity = isCurrent ? 1 : 0.4;
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '100%', position: 'relative', zIndex: 1 }}>
+                            {yearlyStats.map((stat) => {
+                                const isCurrent = stat.month === currentMonthNum;
+                                const isNegative = stat.balance < 0;
+                                const absValue = Math.abs(stat.balance);
 
-                            return (
-                                <div key={stat.month} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', height: '100%', justifyContent: 'flex-end', width: '20px' }}>
-                                    {/* Tooltip super simplificada */}
-                                    {isCurrent && (
-                                        <div style={{ position: 'absolute', top: '-10px', fontSize: '0.6rem', fontWeight: 'bold', color: barColor }}>
-                                            {stat.balance > 0 ? '+' : ''}{(stat.balance / 1000).toFixed(1)}k
+                                // Escala baseada na metade superior (ou inferior) do gráfico (que é 50% de 180px)
+                                const fillPercentage = Math.min((absValue / maxBarValue) * 100, 100);
+                                const minHeight = 2; // pixel minimo pra aparecer cor
+
+                                const barColor = isNegative ? 'var(--danger-color)' : 'var(--primary-color)';
+                                const barOpacity = isCurrent ? 1 : 0.4;
+
+                                return (
+                                    <div key={stat.month} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '28px', height: '100%' }}>
+                                        {/* Metade Positiva Superior (flex-end para barra crescer de baixo pra cima) */}
+                                        <div style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center' }}>
+                                            {!isNegative && isCurrent && (
+                                                <span style={{ fontSize: '0.65rem', fontWeight: '700', color: barColor, marginBottom: '2px', whiteSpace: 'nowrap' }}>
+                                                    +{(stat.balance / 1000).toFixed(1)}k
+                                                </span>
+                                            )}
+                                            {!isNegative && (
+                                                <div style={{
+                                                    width: '100%',
+                                                    height: `${Math.max(fillPercentage, minHeight)}%`,
+                                                    background: barColor,
+                                                    borderRadius: '4px 4px 0 0',
+                                                    opacity: barOpacity,
+                                                    transition: 'height 0.5s ease-out'
+                                                }}></div>
+                                            )}
                                         </div>
-                                    )}
-                                    <div style={{
-                                        width: '100%',
-                                        height: `${Math.max(fillPercentage, minHeight)}%`,
-                                        background: barColor,
-                                        borderRadius: '4px',
-                                        opacity: barOpacity,
-                                        transition: 'height 0.5s ease-out'
-                                    }}></div>
-                                    <span style={{ fontSize: '0.65rem', color: isCurrent ? 'var(--primary-darkest)' : 'var(--text-muted)', fontWeight: isCurrent ? '700' : '500' }}>
-                                        {stat.label.charAt(0)}
-                                    </span>
-                                </div>
-                            );
-                        })}
+
+                                        {/* Espaçador central representando a linha do zero */}
+                                        <div style={{ height: '4px', width: '100%' }}></div>
+
+                                        {/* Metade Negativa Inferior (flex-start para barra crescer de cima pra baixo) */}
+                                        <div style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center' }}>
+                                            {isNegative && (
+                                                <div style={{
+                                                    width: '100%',
+                                                    height: `${Math.max(fillPercentage, minHeight)}%`,
+                                                    background: barColor,
+                                                    borderRadius: '0 0 4px 4px',
+                                                    opacity: barOpacity,
+                                                    transition: 'height 0.5s ease-out'
+                                                }}></div>
+                                            )}
+                                            {isNegative && isCurrent && (
+                                                <span style={{ fontSize: '0.65rem', fontWeight: '700', color: barColor, marginTop: '2px', whiteSpace: 'nowrap' }}>
+                                                    {(stat.balance / 1000).toFixed(1)}k
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        {/* Letra do Mês fixa na base total */}
+                                        <div style={{ position: 'absolute', bottom: '-15px' }}>
+                                            <span style={{ fontSize: '0.65rem', color: isCurrent ? 'var(--primary-darkest)' : 'var(--text-muted)', fontWeight: isCurrent ? '700' : '500' }}>
+                                                {stat.label.charAt(0)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
                 )}
             </section>
 
             {/* Gráfico de Pizza (Categorias do Mês) */}
             <section className="glass-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <h3 style={{ width: '100%', fontSize: '1rem', fontWeight: '600', color: 'var(--primary-darkest)', marginBottom: '8px' }}>
+                <h3 style={{ width: '100%', fontSize: '1rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '8px' }}>
                     Despesas de {format(currentDate, 'MMMM', { locale: ptBR }).replace(/^\w/, c => c.toUpperCase())}
                 </h3>
 

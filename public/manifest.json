@@ -1,0 +1,35 @@
+{
+    "name": "Zimbro",
+    "short_name": "Zimbro",
+    "description": "Seu assistente financeiro inteligente.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#064e3b",
+    "theme_color": "#10b981",
+    "icons": [
+        {
+            "src": "/favicon.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/favicon.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Nova Transação por Voz",
+            "short_name": "Falar gasto",
+            "description": "Adicionar um registro financeiro com a Inteligência Artificial",
+            "url": "/?action=voice",
+            "icons": [
+                {
+                    "src": "/favicon.png",
+                    "sizes": "192x192"
+                }
+            ]
+        }
+    ]
+}
