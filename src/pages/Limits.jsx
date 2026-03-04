@@ -1,0 +1,205 @@
+import React, { useState, useEffect } from 'react';
+import { useTransactions } from '../hooks/useTransactions';
+import { format } from 'date-fns';
+import { CATEGORIAS_DESPESA } from '../utils/categories';
+import { Plus, Trash2 } from 'lucide-react';
+
+const Limits = () => {
+    const monthPrefix = format(new Date(), 'yyyy-MM');
+    const { transactions } = useTransactions(monthPrefix);
+
+    // Store limits in local state/storage for MVP
+    const [limits, setLimits] = useState(() => {
+        const saved = localStorage.getItem('zimbro_limits');
+        return saved ? JSON.parse(saved) : {};
+    });
+
+    const [isAdding, setIsAdding] = useState(false);
+    const [selectedCat, setSelectedCat] = useState('');
+    const [limitValue, setLimitValue] = useState('');
+
+    useEffect(() => {
+        localStorage.setItem('zimbro_limits', JSON.stringify(limits));
+    }, [limits]);
+
+    const formatCurrency = (val) => {
+        return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+    };
+
+    const expensesByCategory = transactions
+        .filter(t => t.type === 'expense')
+        .reduce((acc, t) => {
+            acc[t.category] = (acc[t.category] || 0) + t.amount;
+            return acc;
+        }, {});
+
+    const handleAddLimit = (e) => {
+        e.preventDefault();
+        if (selectedCat && limitValue) {
+            setLimits(prev => ({
+                ...prev,
+                [selectedCat]: parseFloat(limitValue)
+            }));
+            setIsAdding(false);
+            setLimitValue('');
+            setSelectedCat('');
+        }
+    };
+
+    const handleRemoveLimit = (catId) => {
+        setLimits(prev => {
+            const newLimits = { ...prev };
+            delete newLimits[catId];
+            return newLimits;
+        });
+    };
+
+    // Filter categories that don't have a limit yet
+    const availableCategories = CATEGORIAS_DESPESA.filter(c => !limits[c.id]);
+
+    // Calculate pie chart colors and stops
+    const totalExpenses = Object.values(expensesByCategory).reduce((acc, val) => acc + val, 0);
+    const conicStops = [];
+    let cumPercent = 0;
+
+    if (totalExpenses > 0) {
+        Object.entries(expensesByCategory).forEach(([catId, amount]) => {
+            const category = CATEGORIAS_DESPESA.find(c => c.id === catId) || { color: '#999' };
+            const pct = (amount / totalExpenses) * 100;
+            conicStops.push(`${category.color} ${cumPercent}% ${cumPercent + pct}%`);
+            cumPercent += pct;
+        });
+    }
+
+    const pieChartBg = totalExpenses > 0
+        ? `conic-gradient(${conicStops.join(', ')})`
+        : 'var(--glass-border)';
+
+    return (
+        <div className="page-container animate-fade-in" style={{ paddingBottom: '110px' }}>
+            <header style={{ paddingTop: '10px', marginBottom: '16px' }}>
+                <h1 style={{ fontSize: '1.5rem', color: 'var(--primary-darkest)', fontWeight: '700' }}>Categorias</h1>
+                <p style={{ color: 'var(--primary-dark)', fontSize: '0.95rem' }}>Acompanhe o ritmo dos seus gastos.</p>
+            </header>
+
+            {/* Pie Chart Representation */}
+            {totalExpenses > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
+                    <div style={{
+                        width: '160px', height: '160px',
+                        borderRadius: '50%',
+                        background: pieChartBg,
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.06)',
+                        display: 'flex', justifyContent: 'center', alignItems: 'center'
+                    }}>
+                        {/* Inner Hole for Donut Look */}
+                        <div style={{ width: '100px', height: '100px', background: 'var(--bg-color)', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
+                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Total Gasto</span>
+                            <span style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--primary-darkest)', marginTop: '-4px' }}>{formatCurrency(totalExpenses)}</span>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {!isAdding ? (
+                availableCategories.length > 0 && (
+                    <button
+                        onClick={() => setIsAdding(true)}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', padding: '16px', borderRadius: '16px', background: 'var(--surface-color)', border: '2px dashed var(--primary-color)', color: 'var(--primary-color)', fontWeight: '600', marginBottom: '24px', transition: 'transform 0.2s', cursor: 'pointer' }}
+                    >
+                        <Plus size={20} />
+                        Definir Novo Limite
+                    </button>
+                )
+            ) : (
+                <form onSubmit={handleAddLimit} className="glass-panel" style={{ padding: '20px', marginBottom: '24px', position: 'relative' }}>
+                    <button type="button" onClick={() => setIsAdding(false)} style={{ position: 'absolute', top: '10px', right: '10px', color: 'var(--text-muted)' }}><X size={20} /></button>
+                    <h3 style={{ fontSize: '1rem', color: 'var(--primary-darkest)', marginBottom: '16px' }}>Configurar Limite</h3>
+
+                    <div style={{ marginBottom: '12px' }}>
+                        <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--primary-dark)', marginBottom: '6px' }}>Categoria</label>
+                        <select
+                            required
+                            value={selectedCat}
+                            onChange={(e) => setSelectedCat(e.target.value)}
+                            style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid var(--glass-border)', background: 'var(--bg-color)', WebkitAppearance: 'none' }}
+                        >
+                            <option value="">Selecione...</option>
+                            {availableCategories.map(c => (
+                                <option key={c.id} value={c.id}>{c.icon} {c.label}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div style={{ marginBottom: '20px' }}>
+                        <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--primary-dark)', marginBottom: '6px' }}>Valor Limite (R$)</label>
+                        <input
+                            required
+                            type="number"
+                            step="0.01"
+                            value={limitValue}
+                            onChange={(e) => setLimitValue(e.target.value)}
+                            placeholder="Ex: 500"
+                            style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid var(--glass-border)', background: 'var(--bg-color)' }}
+                        />
+                    </div>
+
+                    <button type="submit" style={{ width: '100%', padding: '14px', borderRadius: '12px', background: 'var(--primary-color)', color: 'var(--primary-darkest)', fontWeight: 'bold' }}>
+                        Salvar Limite
+                    </button>
+                </form>
+            )}
+
+            {/* Gallery of Limits */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {Object.keys(limits).length === 0 && !isAdding && (
+                    <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--primary-dark)' }}>
+                        <p>Nenhum limite configurado.<br />Comece definindo orçamentos para suas categorias!</p>
+                    </div>
+                )}
+
+                {Object.entries(limits).map(([catId, limitAmount]) => {
+                    const category = CATEGORIAS_DESPESA.find(c => c.id === catId) || { label: catId, color: '#999', icon: '📌' };
+                    const spent = expensesByCategory[catId] || 0;
+                    const percentage = Math.min((spent / limitAmount) * 100, 100);
+
+                    const isOverLimit = spent > limitAmount;
+                    const barColor = isOverLimit ? 'var(--danger-color)' : category.color;
+                    const bgColor = isOverLimit ? 'rgba(239, 68, 68, 0.1)' : `${category.color}20`;
+
+                    return (
+                        <div key={catId} style={{ background: 'var(--surface-color)', borderRadius: '20px', padding: '20px', boxShadow: '0 4px 15px rgba(0,0,0,0.03)', position: 'relative' }}>
+                            <button onClick={() => handleRemoveLimit(catId)} style={{ position: 'absolute', top: '16px', right: '16px', color: 'var(--text-muted)', opacity: 0.5 }}>
+                                <Trash2 size={16} />
+                            </button>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: bgColor, color: barColor, display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '1.2rem' }}>
+                                    {category.icon}
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                    <h3 style={{ fontSize: '1.05rem', fontWeight: '600', color: 'var(--primary-darkest)' }}>{category.label}</h3>
+                                    <p style={{ fontSize: '0.8rem', color: isOverLimit ? 'var(--danger-color)' : 'var(--primary-dark)', fontWeight: '500' }}>
+                                        {isOverLimit ? 'Limite Excedido!' : `${percentage.toFixed(1)}% utilizado`}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Progress Bar */}
+                            <div style={{ width: '100%', height: '8px', background: 'var(--bg-color)', borderRadius: '4px', marginBottom: '12px', overflow: 'hidden' }}>
+                                <div style={{ width: `${percentage}%`, height: '100%', background: barColor, borderRadius: '4px', transition: 'width 0.5s ease-out' }}></div>
+                            </div>
+
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', fontWeight: '600' }}>
+                                <span style={{ color: isOverLimit ? 'var(--danger-color)' : 'var(--text-main)' }}>{formatCurrency(spent)}</span>
+                                <span style={{ color: 'var(--text-muted)' }}>{formatCurrency(limitAmount)}</span>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+};
+
+export default Limits;
