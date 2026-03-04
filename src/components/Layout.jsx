@@ -26,77 +26,80 @@ const Layout = () => {
     };
 
     // Swipe Navigation Logic tracking finger
-    const [touchStart, setTouchStart] = useState(null);
+    const [touchStart, setTouchStart] = useState({ x: null, y: null });
     const [currentPull, setCurrentPull] = useState(0);
     const [isAnimating, setIsAnimating] = useState(false);
     const [disableTransition, setDisableTransition] = useState(false);
 
-    const minSwipeDistance = 120; // threshold for navigating
+    const minSwipeDistance = 80;
 
     const onTouchStart = (e) => {
         if (isAnimating) return;
-        setTouchStart(e.targetTouches[0].clientY);
+        setTouchStart({
+            x: e.targetTouches[0].clientX,
+            y: e.targetTouches[0].clientY
+        });
     };
 
     const onTouchMove = (e) => {
-        if (!touchStart || isAnimating) return;
-        const currentY = e.targetTouches[0].clientY;
-        const dy = currentY - touchStart;
-        const isAtTop = e.currentTarget.scrollTop <= 0;
+        if (!touchStart.x || isAnimating) return;
 
-        if (location.pathname === '/' && dy > 0 && isAtTop) {
-            // No Home, puxar pra baixo
-            setCurrentPull(dy * 0.6);
-        } else if (location.pathname === '/statistics' && dy < 0) {
-            // Nos Graficos, puxar pra cima
-            setCurrentPull(dy * 0.6);
+        const currentX = e.targetTouches[0].clientX;
+        const currentY = e.targetTouches[0].clientY;
+        const dx = currentX - touchStart.x;
+        const dy = currentY - touchStart.y;
+
+        // If scrolling vertically more than horizontally, cancel horizontal swipe
+        if (Math.abs(dy) > Math.abs(dx)) return;
+
+        if (location.pathname === '/' && dx < 0) {
+            // Home -> Stats (Swipe Left)
+            setCurrentPull(dx);
+        } else if (location.pathname === '/statistics' && dx > 0) {
+            // Stats -> Home (Swipe Right)
+            setCurrentPull(dx);
         }
     };
 
     const onTouchEnd = () => {
-        if (!touchStart || isAnimating) return;
+        if (!touchStart.x || isAnimating) return;
 
-        if (location.pathname === '/' && currentPull > minSwipeDistance) {
-            triggerNavigation('/statistics', window.innerHeight);
-        } else if (location.pathname === '/statistics' && currentPull < -minSwipeDistance) {
-            triggerNavigation('/', -window.innerHeight);
+        if (location.pathname === '/' && currentPull < -minSwipeDistance) {
+            triggerNavigation('/statistics', -window.innerWidth);
+        } else if (location.pathname === '/statistics' && currentPull > minSwipeDistance) {
+            triggerNavigation('/', window.innerWidth);
         } else {
-            // Mola de volta ao centro
+            // Snap back
             setIsAnimating(true);
             setCurrentPull(0);
             setTimeout(() => {
                 setIsAnimating(false);
             }, 250);
         }
-        setTouchStart(null);
+        setTouchStart({ x: null, y: null });
     };
 
     const triggerNavigation = (path, exitPull) => {
         setIsAnimating(true);
-        setCurrentPull(exitPull); // desliza tela pra fora
+        setCurrentPull(exitPull);
 
         setTimeout(() => {
             navigate(path);
 
-            // Reposiciona a tela instantaneamente do lado oposto sem animação
             setDisableTransition(true);
-            setCurrentPull(-exitPull);
+            setCurrentPull(-exitPull); // start from other side
 
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
-                    // Liga a animação de volta e desliza pro centro
                     setDisableTransition(false);
-                    setCurrentPull(0);
-
-                    setTimeout(() => {
-                        setIsAnimating(false);
-                    }, 250);
+                    setCurrentPull(0); // slide to center
+                    setTimeout(() => setIsAnimating(false), 250);
                 });
             });
-        }, 250); // ms do css
+        }, 200);
     };
 
-    const mainTransitionStyle = disableTransition || (touchStart !== null && !isAnimating)
+    const mainTransitionStyle = disableTransition || (touchStart.x !== null && !isAnimating && currentPull !== 0)
         ? 'none'
         : 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)';
 
@@ -109,7 +112,7 @@ const Layout = () => {
                 onTouchMove={onTouchMove}
                 onTouchEnd={onTouchEnd}
                 style={{
-                    transform: `translateY(${currentPull}px)`,
+                    transform: `translateX(${currentPull}px)`,
                     transition: mainTransitionStyle,
                     willChange: 'transform'
                 }}
