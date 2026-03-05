@@ -104,7 +104,35 @@ const Layout = () => {
         : 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)';
 
     return (
-        <div className="app-container" style={{ overflow: 'hidden' }}>
+        <div className="app-container" style={{ overflow: 'hidden', position: 'relative' }}>
+
+            {/* Visual Pagination Indicator (Dots) */}
+            <div style={{
+                position: 'absolute',
+                top: 'env(safe-area-inset-top, 10px)',
+                left: 0, right: 0,
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '8px',
+                zIndex: 50,
+                pointerEvents: 'none'
+            }}>
+                <div style={{
+                    width: location.pathname === '/' ? '16px' : '8px',
+                    height: '8px',
+                    borderRadius: '4px',
+                    background: location.pathname === '/' ? 'var(--primary-color)' : 'var(--glass-border)',
+                    transition: 'all 0.3s ease'
+                }} />
+                <div style={{
+                    width: location.pathname === '/statistics' ? '16px' : '8px',
+                    height: '8px',
+                    borderRadius: '4px',
+                    background: location.pathname === '/statistics' ? 'var(--primary-color)' : 'var(--glass-border)',
+                    transition: 'all 0.3s ease'
+                }} />
+            </div>
+
             {/* O conteúdo das páginas (Home, Stats) será renderizado aqui */}
             <main
                 className="main-content"
