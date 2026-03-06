@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useTransactions } from '../hooks/useTransactions';
 import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { ptBR, enUS, es, fr } from 'date-fns/locale';
 import { ChevronUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { CATEGORIAS_DESPESA } from '../utils/categories';
 import { getYearlyStats } from '../services/transactionService';
 import { useAuth } from '../contexts/AuthContext';
+import { useI18n } from '../contexts/I18nContext';
 
 const Statistics = () => {
     const navigate = useNavigate();
@@ -18,6 +19,7 @@ const Statistics = () => {
 
     // Transações do mês atual para montar o gráfico de pizza
     const { transactions } = useTransactions(monthPrefix);
+    const { t, formatCurrency, locale } = useI18n();
 
     const [yearlyStats, setYearlyStats] = useState([]);
     const [loadingYearly, setLoadingYearly] = useState(true);
@@ -30,10 +32,6 @@ const Statistics = () => {
             });
         }
     }, [currentUser, currentYear]);
-
-    const formatCurrency = (val) => {
-        return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
-    };
 
     // --- PIP CHART LOGIC (MÊS ATUAL) ---
     const expensesByCategory = transactions
@@ -65,19 +63,20 @@ const Statistics = () => {
     // --- BAR CHART LOGIC (ANO) ---
     // Encontrar o valor maximo absoluto para escalar as barras (considerando saldos positivos e negativos altos)
     const maxBarValue = Math.max(...yearlyStats.map(s => Math.abs(s.balance)), 1);
+    const dateLocales = { pt: ptBR, en: enUS, es: es, fr: fr };
 
     return (
         <div className="page-container animate-fade-in" style={{ paddingBottom: '100px', animation: 'fadeIn 0.4s forwards' }}>
             <header style={{ marginBottom: '24px', textAlign: 'center', paddingTop: 'env(safe-area-inset-top, 10px)' }}>
-                <h1 style={{ fontSize: '1.4rem', color: 'var(--text-main)', fontWeight: '700' }}>Estatísticas</h1>
+                <h1 style={{ fontSize: '1.4rem', color: 'var(--text-main)', fontWeight: '700' }}>{t('statistics')}</h1>
             </header>
 
             {/* Gráfico Anual de Saldos */}
             <section className="glass-panel" style={{ padding: '24px 16px', marginBottom: '24px' }}>
-                <h3 style={{ fontSize: '1rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '24px' }}>Saldos Projetados ({currentYear})</h3>
+                <h3 style={{ fontSize: '1rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '24px' }}>{t('monthly_balances_current_year', { defaultValue: 'Saldos Mensais (ano vigente)' })} ({currentYear})</h3>
 
                 {loadingYearly ? (
-                    <p style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Carregando projeção...</p>
+                    <p style={{ textAlign: 'center', color: 'var(--text-muted)' }}>{t('loading_data', { defaultValue: 'Carregando dados...' })}</p>
                 ) : (
                     <div style={{ position: 'relative', height: '180px', paddingBottom: '20px', borderBottom: '1px solid var(--glass-border)' }}>
                         {/* Linha Zero Central */}
@@ -153,10 +152,9 @@ const Statistics = () => {
                 )}
             </section>
 
-            {/* Gráfico de Pizza (Categorias do Mês) */}
             <section className="glass-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <h3 style={{ width: '100%', fontSize: '1rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '8px' }}>
-                    Despesas de {format(currentDate, 'MMMM', { locale: ptBR }).replace(/^\w/, c => c.toUpperCase())}
+                    {t('expenses_of', { month: format(currentDate, 'MMMM', { locale: dateLocales[locale] || enUS }).replace(/^\w/, c => c.toUpperCase()), defaultValue: 'Despesas do mês' })}
                 </h3>
 
                 {totalExpenses > 0 ? (
@@ -168,9 +166,8 @@ const Statistics = () => {
                                 background: pieChartBg,
                                 display: 'flex', justifyContent: 'center', alignItems: 'center'
                             }}>
-                                {/* Inner Hole for Donut Look */}
                                 <div style={{ width: '130px', height: '130px', background: 'var(--bg-color)', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', boxShadow: 'inset 0 4px 10px rgba(0,0,0,0.05)' }}>
-                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Total Gasto</span>
+                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{t('total_spent', { defaultValue: 'Total Gasto' })}</span>
                                     <span style={{ fontSize: '1.2rem', fontWeight: '700', color: 'var(--danger-color)', marginTop: '-2px' }}>{formatCurrency(totalExpenses)}</span>
                                 </div>
                             </div>
@@ -193,7 +190,7 @@ const Statistics = () => {
                     </>
                 ) : (
                     <div style={{ padding: '40px 0', textAlign: 'center', color: 'var(--text-muted)' }}>
-                        <p>Nenhuma despesa registrada neste mês ainda!</p>
+                        <p>{t('no_data_stats')}</p>
                     </div>
                 )}
             </section>

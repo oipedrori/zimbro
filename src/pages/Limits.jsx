@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useTransactions } from '../hooks/useTransactions';
 import { format } from 'date-fns';
 import { CATEGORIAS_DESPESA } from '../utils/categories';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, X } from 'lucide-react';
+import { useI18n } from '../contexts/I18nContext';
 
 const Limits = () => {
     const monthPrefix = format(new Date(), 'yyyy-MM');
@@ -18,13 +19,11 @@ const Limits = () => {
     const [selectedCat, setSelectedCat] = useState('');
     const [limitValue, setLimitValue] = useState('');
 
+    const { t, formatCurrency } = useI18n();
+
     useEffect(() => {
         localStorage.setItem('zimbro_limits', JSON.stringify(limits));
     }, [limits]);
-
-    const formatCurrency = (val) => {
-        return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
-    };
 
     const expensesByCategory = transactions
         .filter(t => t.type === 'expense')
@@ -78,8 +77,8 @@ const Limits = () => {
     return (
         <div className="page-container animate-fade-in" style={{ paddingBottom: '110px' }}>
             <header style={{ paddingTop: '10px', marginBottom: '16px' }}>
-                <h1 style={{ fontSize: '1.5rem', color: 'var(--text-main)', fontWeight: '700' }}>Categorias</h1>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>Acompanhe o ritmo dos seus gastos.</p>
+                <h1 style={{ fontSize: '1.5rem', color: 'var(--text-main)', fontWeight: '700' }}>{t('limits_title')}</h1>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>{t('limits_subtitle')}</p>
             </header>
 
             {/* Pie Chart Representation */}
@@ -94,7 +93,7 @@ const Limits = () => {
                     }}>
                         {/* Inner Hole for Donut Look */}
                         <div style={{ width: '100px', height: '100px', background: 'var(--bg-color)', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
-                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Total Gasto</span>
+                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{t('total_spent')}</span>
                             <span style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--text-main)', marginTop: '-4px' }}>{formatCurrency(totalExpenses)}</span>
                         </div>
                     </div>
@@ -108,16 +107,16 @@ const Limits = () => {
                         style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', padding: '16px', borderRadius: '16px', background: 'var(--surface-color)', border: '2px dashed var(--primary-color)', color: 'var(--primary-color)', fontWeight: '600', marginBottom: '24px', transition: 'transform 0.2s', cursor: 'pointer' }}
                     >
                         <Plus size={20} />
-                        Definir Novo Limite
+                        {t('set_new_limit')}
                     </button>
                 )
             ) : (
                 <form onSubmit={handleAddLimit} className="glass-panel" style={{ padding: '20px', marginBottom: '24px', position: 'relative' }}>
                     <button type="button" onClick={() => setIsAdding(false)} style={{ position: 'absolute', top: '10px', right: '10px', color: 'var(--text-muted)' }}><X size={20} /></button>
-                    <h3 style={{ fontSize: '1rem', color: 'var(--text-main)', marginBottom: '16px' }}>Configurar Limite</h3>
+                    <h3 style={{ fontSize: '1rem', color: 'var(--text-main)', marginBottom: '16px' }}>{t('config_limit')}</h3>
 
                     <div style={{ marginBottom: '12px' }}>
-                        <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '6px' }}>Categoria</label>
+                        <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '6px' }}>{t('category')}</label>
                         <select
                             required
                             value={selectedCat}
@@ -126,13 +125,13 @@ const Limits = () => {
                         >
                             <option value="">Selecione...</option>
                             {availableCategories.map(c => (
-                                <option key={c.id} value={c.id}>{c.icon} {c.label}</option>
+                                <option key={c.id} value={c.id}>{c.icon} {t(c.label, { defaultValue: c.label })}</option>
                             ))}
                         </select>
                     </div>
 
                     <div style={{ marginBottom: '20px' }}>
-                        <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '6px' }}>Valor Limite (R$)</label>
+                        <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '6px' }}>{t('limit_value')}</label>
                         <input
                             required
                             type="number"
@@ -145,7 +144,7 @@ const Limits = () => {
                     </div>
 
                     <button type="submit" style={{ width: '100%', padding: '14px', borderRadius: '12px', background: 'var(--primary-color)', color: 'var(--text-main)', fontWeight: 'bold' }}>
-                        Salvar Limite
+                        {t('save_limit')}
                     </button>
                 </form>
             )}
@@ -154,7 +153,7 @@ const Limits = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {Object.keys(limits).length === 0 && !isAdding && (
                     <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>
-                        <p>Nenhum limite configurado.<br />Comece definindo orçamentos para suas categorias!</p>
+                        <p>{t('no_limits')}</p>
                     </div>
                 )}
 
@@ -178,9 +177,9 @@ const Limits = () => {
                                     {category.icon}
                                 </div>
                                 <div style={{ flex: 1 }}>
-                                    <h3 style={{ fontSize: '1.05rem', fontWeight: '600', color: 'var(--text-main)' }}>{category.label}</h3>
+                                    <h3 style={{ fontSize: '1.05rem', fontWeight: '600', color: 'var(--text-main)' }}>{t(category.label, { defaultValue: category.label })}</h3>
                                     <p style={{ fontSize: '0.8rem', color: isOverLimit ? 'var(--danger-color)' : 'var(--primary-dark)', fontWeight: '500' }}>
-                                        {isOverLimit ? 'Limite Excedido!' : `${percentage.toFixed(1)}% utilizado`}
+                                        {isOverLimit ? t('limit_exceeded') : t('utilized', { percentage: percentage.toFixed(1) })}
                                     </p>
                                 </div>
                             </div>

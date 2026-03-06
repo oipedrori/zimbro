@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Share, MoreVertical, PlusSquare } from 'lucide-react';
+import { useI18n } from '../contexts/I18nContext';
 
 const InstallPrompt = () => {
     const [isVisible, setIsVisible] = useState(false);
     const [os, setOs] = useState(null);
     const [deferredPrompt, setDeferredPrompt] = useState(null);
+    const { t } = useI18n();
 
     useEffect(() => {
         // Verifica se já viu o prompt ou se já está rodando como app standalone (PWA instalado)
@@ -22,8 +24,8 @@ const InstallPrompt = () => {
 
         if (isIOS) {
             setOs('ios');
-            // Mostra o prompt com atraso de 3 segundos para não interromper a entrada inicial
-            const timer = setTimeout(() => setIsVisible(true), 3000);
+            // Mostra o prompt com atraso de 1 segundo para mostrar rapidamente
+            const timer = setTimeout(() => setIsVisible(true), 1000);
             return () => clearTimeout(timer);
         } else if (isAndroid) {
             setOs('android');
@@ -37,7 +39,7 @@ const InstallPrompt = () => {
             });
 
             // Fallback caso o evento não dispare (sem manifest, etc)
-            const timer = setTimeout(() => setIsVisible(true), 4000);
+            const timer = setTimeout(() => setIsVisible(true), 2000);
             return () => clearTimeout(timer);
         }
     }, []);
@@ -92,9 +94,9 @@ const InstallPrompt = () => {
                     <img src="/favicon.png" alt="Zimbro Icon" style={{ width: '28px', height: '28px' }} />
                 </div>
                 <div>
-                    <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)' }}>Instale o Zimbro</h4>
+                    <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{t('install_title')}</h4>
                     <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: '1.4', marginTop: '4px' }}>
-                        Adicione à sua tela inicial para usar como um aplicativo real.
+                        {t('install_desc')}
                     </p>
                 </div>
             </div>
@@ -102,10 +104,10 @@ const InstallPrompt = () => {
             {os === 'ios' ? (
                 <div style={{ backgroundColor: 'rgba(0,0,0,0.03)', padding: '12px', borderRadius: '8px', fontSize: '0.85rem', color: 'var(--text-main)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontWeight: 'bold' }}>1.</span> Toque no ícone <Share size={18} color="var(--primary-color)" /> na barra inferior do Safari.
+                        <span style={{ fontWeight: 'bold' }}>1.</span> {t('install_ios_step1', { icon: <Share size={18} color="var(--primary-color)" /> })}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontWeight: 'bold' }}>2.</span> Selecione <PlusSquare size={18} color="var(--text-main)" /> <b>Adicionar à Tela de Início</b>.
+                        <span style={{ fontWeight: 'bold' }}>2.</span> {t('install_ios_step2', { icon: <PlusSquare size={18} color="var(--text-main)" /> })}
                     </div>
                 </div>
             ) : (
@@ -115,15 +117,15 @@ const InstallPrompt = () => {
                             onClick={handleInstallAndroid}
                             style={{ width: '100%', padding: '12px', background: 'var(--primary-color)', color: 'white', borderRadius: '8px', fontWeight: '600' }}
                         >
-                            Instalar Agora
+                            {t('install_android_btn')}
                         </button>
                     ) : (
                         <div style={{ backgroundColor: 'rgba(0,0,0,0.03)', padding: '12px', borderRadius: '8px', fontSize: '0.85rem', color: 'var(--text-main)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <span style={{ fontWeight: 'bold' }}>1.</span> Toque no menu <MoreVertical size={18} color="var(--primary-color)" /> no canto superior.
+                                <span style={{ fontWeight: 'bold' }}>1.</span> {t('install_android_step1', { icon: <MoreVertical size={18} color="var(--primary-color)" /> })}
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <span style={{ fontWeight: 'bold' }}>2.</span> Selecione <b>Adicionar à tela inicial</b>.
+                                <span style={{ fontWeight: 'bold' }}>2.</span> {t('install_android_step2')}
                             </div>
                         </div>
                     )}

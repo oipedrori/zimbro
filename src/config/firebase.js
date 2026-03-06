@@ -5,27 +5,52 @@ import { getFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCBmdLKxQRhWWdWM5ISxcDCHuyEdq0lq-o",
-  authDomain: "zimbro-ia.firebaseapp.com",
-  projectId: "zimbro-ia",
-  storageBucket: "zimbro-ia.firebasestorage.app",
-  messagingSenderId: "326755658556",
-  appId: "1:326755658556:web:e111628648211d2a168c39",
-  measurementId: "G-FGPB6XD6MP"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+let app;
+let analytics;
+let auth;
+let googleProvider;
+let db;
 
-// Initialize Firebase Authentication and get a reference to the service
-const auth = getAuth(app);
-const googleProvider = new GoogleAuthProvider();
-googleProvider.setCustomParameters({
-  prompt: 'select_account'
+console.log("🔥 Initializing Firebase with config:", {
+  projectId: firebaseConfig.projectId,
+  apiKey: firebaseConfig.apiKey ? "PRESENT" : "MISSING"
 });
 
-// Initialize Cloud Firestore and get a reference to the service
-const db = getFirestore(app);
+try {
+  if (!firebaseConfig.apiKey) {
+    throw new Error("Firebase API Key is missing from environment variables.");
+  }
+
+  app = initializeApp(firebaseConfig);
+
+  try {
+    analytics = getAnalytics(app);
+  } catch (e) {
+    console.warn("Analytics initialization failed (ignoring):", e);
+  }
+
+  auth = getAuth(app);
+  googleProvider = new GoogleAuthProvider();
+  googleProvider.setCustomParameters({
+    prompt: 'select_account'
+  });
+  db = getFirestore(app);
+
+  console.log("✅ Firebase initialized successfully");
+} catch (error) {
+  console.error("❌ Firebase initialization failed CRITICALLY:", error);
+  // We still export the variables as undefined, but let's at least have a provider
+  googleProvider = new GoogleAuthProvider();
+}
 
 export { app, analytics, auth, googleProvider, db };

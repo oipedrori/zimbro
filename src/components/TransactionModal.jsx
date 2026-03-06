@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTransactions } from '../hooks/useTransactions';
 import { CATEGORIAS_DESPESA, CATEGORIAS_RECEITA } from '../utils/categories';
 import { format } from 'date-fns';
+import { useI18n } from '../contexts/I18nContext';
 
 const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialData = null, onSuccess }) => {
     const { addTx, updateTx } = useTransactions(format(new Date(), 'yyyy-MM'));
@@ -15,6 +16,7 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
     const [repeatType, setRepeatType] = useState('none'); // none, recurring, installment
     const [installments, setInstallments] = useState(1);
     const [loading, setLoading] = useState(false);
+    const { t, getCurrencySymbol } = useI18n();
 
     // Pre-fill if editing
     React.useEffect(() => {
@@ -93,7 +95,7 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
         <div className="modal-overlay">
             <div className="modal-content animate-slide-up">
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-                    <h2>{initialData ? 'Editar Transação' : 'Nova Transação'}</h2>
+                    <h2>{initialData ? t('edit_transaction') : t('add_transaction')}</h2>
                     <button onClick={onClose} style={{ fontSize: '1.2rem', color: 'var(--text-muted)' }}>✕</button>
                 </div>
 
@@ -108,7 +110,7 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
                         }}
                         onClick={() => { setType('expense'); setCategory(CATEGORIAS_DESPESA[0].id); }}
                     >
-                        Despesa
+                        {t('expense')}
                     </button>
                     <button
                         type="button"
@@ -120,70 +122,70 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
                         }}
                         onClick={() => { setType('income'); setCategory(CATEGORIAS_RECEITA[0].id); }}
                     >
-                        Receita
+                        {t('income')}
                     </button>
                 </div>
 
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     <div>
-                        <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Valor (R$)</label>
+                        <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>{t('value')} ({getCurrencySymbol()})</label>
                         <input
                             type="number" step="0.01" value={amount} onChange={e => setAmount(e.target.value)}
-                            placeholder="0,00" required
+                            placeholder="0.00" required
                             style={{ color: 'var(--text-main)', boxSizing: 'border-box', width: '100%', padding: '12px', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--glass-border)', background: 'var(--bg-color)', fontSize: '1.2rem' }}
                         />
                     </div>
 
                     <div>
-                        <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Descrição</label>
+                        <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>{t('description')}</label>
                         <input
                             type="text" value={description} onChange={e => setDescription(e.target.value)}
-                            placeholder="Ex: Mercado" required
+                            placeholder="" required
                             style={{ color: 'var(--text-main)', boxSizing: 'border-box', width: '100%', padding: '12px', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--glass-border)', background: 'var(--bg-color)' }}
                         />
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '16px', width: '100%' }}>
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Data</label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', width: '100%' }}>
+                        <div style={{ minWidth: 0 }}>
+                            <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>{t('date')}</label>
                             <input
                                 type="date" value={date} onChange={e => setDate(e.target.value)} required
-                                style={{ color: 'var(--text-main)', boxSizing: 'border-box', width: '100%', padding: '12px', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--glass-border)', background: 'var(--bg-color)' }}
+                                style={{ color: 'var(--text-main)', boxSizing: 'border-box', width: '100%', padding: '12px', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--glass-border)', background: 'var(--bg-color)', fontSize: '0.9rem' }}
                             />
                         </div>
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Categoria</label>
+                        <div style={{ minWidth: 0 }}>
+                            <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>{t('category')}</label>
                             <select
                                 value={category} onChange={e => setCategory(e.target.value)}
-                                style={{ color: 'var(--text-main)', boxSizing: 'border-box', width: '100%', padding: '12px', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--glass-border)', background: 'var(--bg-color)' }}
+                                style={{ color: 'var(--text-main)', boxSizing: 'border-box', width: '100%', padding: '12px', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--glass-border)', background: 'var(--bg-color)', fontSize: '0.9rem' }}
                             >
-                                {categories.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+                                {categories.map(c => <option key={c.id} value={c.id}>{t(c.label, { defaultValue: c.label })}</option>)}
                             </select>
                         </div>
                     </div>
 
-                    {/* Motor de Recorrência - Visível apenas para despesas por enquanto ou geral */}
+                    {/* Motor de Recorrência */}
                     <div>
-                        <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Repetição</label>
+                        <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>{t('repeat')}</label>
                         <select
                             value={repeatType} onChange={e => setRepeatType(e.target.value)}
                             style={{ color: 'var(--text-main)', boxSizing: 'border-box', width: '100%', padding: '12px', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--glass-border)', background: 'var(--bg-color)' }}
                         >
-                            <option value="none">Não repete (Única vez)</option>
-                            <option value="recurring">Mensal (Recorrente todo mês)</option>
-                            <option value="installment">Parcelado (Número definido de vezes)</option>
+                            <option value="none">{t('none')}</option>
+                            <option value="recurring">{t('recurring')}</option>
+                            <option value="installment">{t('installment')}</option>
                         </select>
                     </div>
 
                     {repeatType === 'installment' && (
                         <div>
-                            <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Quantas parcelas no total?</label>
+                            <label style={{ display: 'block', marginBottom: '4px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>{t('installments_amount')}</label>
                             <input
                                 type="number" min="2" max="120" value={installments} onChange={e => setInstallments(e.target.value)} required
                                 style={{ color: 'var(--text-main)', boxSizing: 'border-box', width: '100%', padding: '12px', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--glass-border)', background: 'var(--bg-color)' }}
                             />
                             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                                O valor {amount ? `de R$ ${amount}` : 'total'} será cobrado mensalmente por {installments} meses.
+                                {t('installments_hint', { count: installments, defaultValue: `O valor será cobrado mensalmente por ${installments} meses.` })}
                             </p>
                         </div>
                     )}
@@ -195,8 +197,36 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
                             color: 'white', borderRadius: 'var(--border-radius-lg)', fontWeight: 'bold', fontSize: '1.1rem'
                         }}
                     >
-                        {loading ? 'Salvando...' : initialData ? 'Salvar Alterações' : 'Adicionar'}
+                        {loading ? t('saving') : initialData ? t('save') : t('add')}
                     </button>
+
+                    {initialData && (
+                        <button
+                            type="button"
+                            onClick={async () => {
+                                if (window.confirm(t('confirm_delete', { defaultValue: 'Tem certeza que deseja excluir?' }))) {
+                                    setLoading(true);
+                                    try {
+                                        const { deleteTx } = useTransactions(format(new Date(), 'yyyy-MM')); // Hook approach fix needed or use callback
+                                        await deleteTx(initialData.id);
+                                        onSuccess?.();
+                                        onClose();
+                                    } catch (e) {
+                                        console.error(e);
+                                    } finally {
+                                        setLoading(false);
+                                    }
+                                }
+                            }}
+                            style={{
+                                marginTop: '8px', width: '100%', padding: '12px',
+                                border: '1px solid var(--danger-color)', color: 'var(--danger-color)',
+                                borderRadius: 'var(--border-radius-lg)', fontWeight: '600', fontSize: '1rem'
+                            }}
+                        >
+                            {t('delete_transaction', { defaultValue: 'Excluir Movimentação' })}
+                        </button>
+                    )}
                 </form>
             </div>
 

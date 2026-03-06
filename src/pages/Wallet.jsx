@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { format } from 'date-fns';
 import { Plus, Trash2, Building2, Wallet as WalletIcon, CreditCard, TrendingUp } from 'lucide-react';
+import { useI18n } from '../contexts/I18nContext';
 
 const Wallet = () => {
     // Store accounts in local state/storage for MVP
@@ -14,13 +14,11 @@ const Wallet = () => {
     const [accountBalance, setAccountBalance] = useState('');
     const [accountType, setAccountType] = useState('bank'); // bank, cash, credit
 
+    const { t, formatCurrency } = useI18n();
+
     useEffect(() => {
         localStorage.setItem('zimbro_accounts', JSON.stringify(accounts));
     }, [accounts]);
-
-    const formatCurrency = (val) => {
-        return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
-    };
 
     const handleAddAccount = (e) => {
         e.preventDefault();
@@ -64,14 +62,14 @@ const Wallet = () => {
     return (
         <div className="page-container animate-fade-in" style={{ paddingBottom: '110px' }}>
             <header style={{ paddingTop: '10px', marginBottom: '24px' }}>
-                <h1 style={{ fontSize: '1.5rem', color: 'var(--text-main)', fontWeight: '700' }}>Minhas Contas</h1>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>Onde seu dinheiro está guardado.</p>
+                <h1 style={{ fontSize: '1.5rem', color: 'var(--text-main)', fontWeight: '700' }}>{t('wallet_title')}</h1>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>{t('wallet_subtitle')}</p>
             </header>
 
             {/* Total Wealth Panel */}
             <section className="glass-panel" style={{ padding: '24px', background: 'var(--primary-darker)', color: 'white', border: 'none', position: 'relative', overflow: 'hidden', marginBottom: '30px' }}>
                 <div style={{ position: 'absolute', top: '-50%', right: '-20%', width: '200px', height: '200px', background: 'rgba(255,255,255,0.05)', filter: 'blur(30px)', borderRadius: '50%' }}></div>
-                <p style={{ fontSize: '0.9rem', opacity: 0.8, marginBottom: '8px' }}>Patrimônio Total</p>
+                <p style={{ fontSize: '0.9rem', opacity: 0.8, marginBottom: '8px' }}>{t('total_wealth')}</p>
                 <h2 style={{ fontSize: '2.5rem', fontWeight: '700', letterSpacing: '-1px' }}>{formatCurrency(totalWealth)}</h2>
             </section>
 
@@ -82,15 +80,15 @@ const Wallet = () => {
                     style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', padding: '16px', borderRadius: '16px', background: 'var(--surface-color)', border: '2px dashed var(--primary-color)', color: 'var(--primary-color)', fontWeight: '600', marginBottom: '24px', cursor: 'pointer' }}
                 >
                     <Plus size={20} />
-                    Adicionar Nova Conta
+                    {t('add_new_account')}
                 </button>
             ) : (
                 <form onSubmit={handleAddAccount} className="glass-panel" style={{ padding: '20px', marginBottom: '24px', position: 'relative' }}>
                     <button type="button" onClick={() => setIsAdding(false)} style={{ position: 'absolute', top: '10px', right: '10px', color: 'var(--text-muted)', fontSize: '1.2rem' }}>&times;</button>
-                    <h3 style={{ fontSize: '1.1rem', color: 'var(--text-main)', marginBottom: '16px' }}>Nova Instituição</h3>
+                    <h3 style={{ fontSize: '1.1rem', color: 'var(--text-main)', marginBottom: '16px' }}>{t('new_institution')}</h3>
 
                     <div style={{ marginBottom: '12px' }}>
-                        <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '6px' }}>Nome da Conta</label>
+                        <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '6px' }}>{t('account_name')}</label>
                         <input
                             required
                             type="text"
@@ -102,7 +100,7 @@ const Wallet = () => {
                     </div>
 
                     <div style={{ marginBottom: '12px' }}>
-                        <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '6px' }}>Saldo Atual (R$)</label>
+                        <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '6px' }}>{t('current_balance')}</label>
                         <input
                             required
                             type="number"
@@ -115,21 +113,21 @@ const Wallet = () => {
                     </div>
 
                     <div style={{ marginBottom: '20px' }}>
-                        <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '6px' }}>Tipo Conta</label>
+                        <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '6px' }}>{t('account_type')}</label>
                         <select
                             value={accountType}
                             onChange={(e) => setAccountType(e.target.value)}
                             style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid var(--glass-border)', background: 'var(--bg-color)' }}
                         >
-                            <option value="bank">Conta Corrente / Banco</option>
-                            <option value="credit">Cartão de Crédito</option>
-                            <option value="cash">Dinheiro em Espécie</option>
-                            <option value="investment">Investimento / Corretora</option>
+                            <option value="bank">{t('bank_acc')}</option>
+                            <option value="credit">{t('credit_card')}</option>
+                            <option value="cash">{t('cash_acc')}</option>
+                            <option value="investment">{t('investment_acc')}</option>
                         </select>
                     </div>
 
                     <button type="submit" style={{ width: '100%', padding: '14px', borderRadius: '12px', background: 'var(--primary-color)', color: 'var(--text-main)', fontWeight: 'bold' }}>
-                        Adicionar Conta
+                        {t('add')}
                     </button>
                 </form>
             )}
@@ -138,7 +136,7 @@ const Wallet = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {Object.keys(accounts).length === 0 && !isAdding && (
                     <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>
-                        <p>Nenhuma conta cadastrada.<br />Adicione cartões ou contas de banco para controlar o patrimônio.</p>
+                        <p>{t('no_accounts')}</p>
                     </div>
                 )}
 
@@ -151,7 +149,7 @@ const Wallet = () => {
                             <div>
                                 <h3 style={{ fontSize: '1.05rem', fontWeight: '600', color: 'var(--text-main)' }}>{val.name}</h3>
                                 <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'capitalize' }}>
-                                    {val.type === 'bank' ? 'Banco' : val.type === 'cash' ? 'Carteira' : val.type === 'investment' ? 'Investimento' : 'Crédito'}
+                                    {t(val.type)}
                                 </p>
                             </div>
                         </div>

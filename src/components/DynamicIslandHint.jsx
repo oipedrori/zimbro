@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { useI18n } from '../contexts/I18nContext';
 
 const DynamicIslandHint = () => {
     const [isVisible, setIsVisible] = useState(false);
     const location = useLocation();
+    const { t } = useI18n();
 
     useEffect(() => {
         setIsVisible(false);
@@ -38,7 +40,7 @@ const DynamicIslandHint = () => {
     }, [isVisible]);
 
     const isHome = location.pathname === '/';
-    const message = isHome ? "Estatísticas" : "Home";
+    const message = isHome ? t('swipe_stats') : t('swipe_home');
     const Icon = isHome ? ChevronDown : ChevronUp;
 
     return (

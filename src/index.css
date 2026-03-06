@@ -12,24 +12,24 @@
   /* Main brand green */
 
   --primary-light: #e6f7e9;
-  --primary-gradient: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  --primary-gradient: linear-gradient(135deg, #4BB45A 0%, #2D7D39 100%);
   --secondary-gradient: linear-gradient(180deg, var(--bg-color) 0%, #d4f0db 100%);
 
-  --accent-color: var(--primary-color);
+  --accent-color: var(--primary-dark);
 
   --text-main: #0E2210;
   --text-muted: #1B4520;
 
-  --danger-color: #ef4444;
-  --danger-light: #fee2e2;
-  --success-color: var(--primary-color);
+  --danger-color: #d32f2f;
+  --danger-light: #fdeded;
+  --success-color: var(--primary-dark);
   --success-light: var(--primary-light);
 
-  --glass-bg: rgba(255, 255, 255, 0.75);
-  --glass-border: rgba(255, 255, 255, 0.4);
-  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
-  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(27, 69, 32, 0.1);
+  --shadow-sm: 0 4px 6px -1px rgba(14, 34, 16, 0.05);
+  --shadow-md: 0 10px 15px -3px rgba(14, 34, 16, 0.08);
+  --shadow-lg: 0 20px 25px -5px rgba(14, 34, 16, 0.1);
 
   --border-radius-sm: 8px;
   --border-radius-md: 16px;

@@ -32,13 +32,45 @@ export const AuthProvider = ({ children }) => {
 
     // Monitorar estado da autenticação
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            setCurrentUser(user);
-            setLoading(false);
-        });
+        console.log("🎬 AuthProvider useEffect triggered (auth exists:", !!auth, ")");
 
-        return unsubscribe;
-    }, []);
+        // Safety timeout: if auth state doesn't resolve in 5s, let the app mount anyway
+        const timeout = setTimeout(() => {
+            if (loading) {
+                console.warn("⏳ Auth resolution timeout reached. Forcing loading false.");
+                setLoading(false);
+            }
+        }, 5000);
+
+        if (!auth) {
+            console.warn("⚠️ Auth service not available, skipping listener.");
+            setLoading(false);
+            clearTimeout(timeout);
+            return;
+        }
+
+        try {
+            const unsubscribe = onAuthStateChanged(auth, (user) => {
+                console.log("👤 Auth state changed:", user ? user.email : "No user");
+                setCurrentUser(user);
+                setLoading(false);
+                clearTimeout(timeout);
+            }, (error) => {
+                console.error("❌ Auth listener error:", error);
+                setLoading(false);
+                clearTimeout(timeout);
+            });
+            return () => {
+                unsubscribe();
+                clearTimeout(timeout);
+            };
+        } catch (err) {
+            console.error("❌ Auth listener critical failure:", err);
+            setLoading(false);
+            clearTimeout(timeout);
+        }
+    }, [auth]); // added auth as dependency just in case it re-initializes
+
 
     const value = {
         currentUser,
@@ -47,9 +79,28 @@ export const AuthProvider = ({ children }) => {
         loading
     };
 
+    if (loading) {
+        return (
+            <div style={{
+                height: '100vh',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                background: 'var(--primary-darkest)',
+                color: 'white',
+                fontFamily: 'sans-serif'
+            }}>
+                <div className="loader" style={{ marginBottom: '20px' }}></div>
+                <p>Zimbro App</p>
+                <p style={{ fontSize: '0.8rem', opacity: 0.7 }}>Iniciando serviços...</p>
+            </div>
+        );
+    }
+
     return (
         <AuthContext.Provider value={value}>
-            {!loading && children}
+            {children}
         </AuthContext.Provider>
     );
 };

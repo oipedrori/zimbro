@@ -1,42 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Mic, TrendingUp, ShieldCheck, Sparkles } from 'lucide-react';
-
-const stories = [
-    {
-        id: 0,
-        icon: <img src="/Z.png" alt="Zimbro" style={{ width: '64px', height: '64px', objectFit: 'contain' }} />,
-        title: "Boas vindas ao Zimbro",
-        desc: "O seu dinheiro agora tem uma inteligência artificial completa e focada em te ajudar."
-    },
-    {
-        id: 1,
-        icon: <Mic size={48} color="white" />,
-        title: "Sua voz no controle",
-        desc: "Apenas fale o que gastou. O Zimbro entende o contexto e cataloga tudo sozinho."
-    },
-    {
-        id: 2,
-        icon: <ShieldCheck size={48} color="white" />,
-        title: "Previsão Inteligente",
-        desc: "Despesas parceladas e compras recorrentes são calculadas no seu fluxo futuro automaticamente."
-    },
-    {
-        id: 3,
-        icon: <Sparkles size={48} color="white" />,
-        title: "Decisões melhores",
-        desc: "Converse com a IA para pedir conselhos financeiros e atingir suas metas mais rápido."
-    }
-];
+import { useI18n } from '../contexts/I18nContext';
+import { Mic, TrendingUp, ShieldCheck, Sparkles, Globe } from 'lucide-react';
 
 const STORY_DURATION = 5000; // 5 segundos por story
 
 const Onboarding = () => {
     const { loginWithGoogle } = useAuth();
+    const { t, locale, changeLocale } = useI18n();
     const navigate = useNavigate();
     const [isLoggingIn, setIsLoggingIn] = useState(false);
     const [currentStory, setCurrentStory] = useState(0);
+
+    const stories = [
+        {
+            id: 0,
+            icon: <img src="/Z.png" alt="Zimbro" style={{ width: '64px', height: '64px', objectFit: 'contain' }} />,
+            title: t('ob_welcome'),
+            desc: t('ob_desc_1')
+        },
+        {
+            id: 1,
+            icon: <Mic size={48} color="white" />,
+            title: t('ob_ai_title'),
+            desc: t('ob_ai_desc')
+        },
+        {
+            id: 2,
+            icon: <ShieldCheck size={48} color="white" />,
+            title: t('ob_fast_title'),
+            desc: t('ob_fast_desc')
+        },
+        {
+            id: 3,
+            icon: <Sparkles size={48} color="white" />,
+            title: t('ob_ready'),
+            desc: t('ob_start')
+        }
+    ];
 
     const handleLogin = async () => {
         setIsLoggingIn(true);
@@ -69,7 +71,6 @@ const Onboarding = () => {
         <div style={{
             display: 'flex',
             flexDirection: 'column',
-            height: '100vh',
             height: '100dvh',
             backgroundColor: 'var(--primary-darkest)',
             color: 'white',
@@ -115,6 +116,32 @@ const Onboarding = () => {
                         </div>
                     );
                 })}
+            </div>
+
+            {/* Language Selector Chip */}
+            <div style={{
+                position: 'absolute',
+                top: '50px', right: '16px',
+                zIndex: 20,
+                display: 'flex',
+                alignItems: 'center',
+                background: 'rgba(255, 255, 255, 0.2)',
+                backdropFilter: 'blur(10px)',
+                borderRadius: '20px',
+                padding: '4px 12px',
+                border: '1px solid rgba(255, 255, 255, 0.3)'
+            }}>
+                <Globe size={14} color="white" style={{ marginRight: '6px' }} />
+                <select
+                    value={locale}
+                    onChange={(e) => changeLocale(e.target.value)}
+                    style={{ background: 'transparent', border: 'none', color: 'white', fontSize: '0.85rem', fontWeight: 'bold', outline: 'none', cursor: 'pointer' }}
+                >
+                    <option value="pt" style={{ color: 'black' }}>PT</option>
+                    <option value="en" style={{ color: 'black' }}>EN</option>
+                    <option value="es" style={{ color: 'black' }}>ES</option>
+                    <option value="fr" style={{ color: 'black' }}>FR</option>
+                </select>
             </div>
 
             {/* Áreas Invisíveis de Toque (Laterais) */}
@@ -172,7 +199,7 @@ const Onboarding = () => {
                         zIndex: 10
                     }}
                 >
-                    {isLoggingIn ? 'Conectando...' : (
+                    {isLoggingIn ? t('connecting', { defaultValue: 'Conectando...' }) : (
                         <>
                             <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -180,7 +207,7 @@ const Onboarding = () => {
                                 <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
                                 <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                             </svg>
-                            Continuar com Google
+                            {t('continue_google', { defaultValue: 'Continuar com Google' })}
                         </>
                     )}
                 </button>

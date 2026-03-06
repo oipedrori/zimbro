@@ -1,12 +1,17 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { CATEGORIAS_DESPESA, CATEGORIAS_RECEITA } from '../utils/categories';
 
-// Lendo a chave de um arquivo .env para evitar vazamentos, com fallback direto para a chave atual informada para resolver problemas de cache.
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "AIzaSyDEThSbhNYqYn_imgQktAiu_NoqpqT_0GQ";
-const genAI = new GoogleGenerativeAI(API_KEY);
+// Lendo a chave de um arquivo .env para evitar vazamentos.
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
-export const analyzeTextWithGemini = async (text, transactions = [], conversationContext = null) => {
+export const analyzeTextWithGemini = async (text, transactions = [], conversationContext = null, locale = 'pt') => {
+  if (!API_KEY) {
+    console.error("Gemini API Key is missing! Check your .env file.");
+    return { error: "Erro de configuração: Chave de API não encontrada." };
+  }
+
   try {
+    const genAI = new GoogleGenerativeAI(API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const categoriesExpenseStr = CATEGORIAS_DESPESA.map(c => c.id).join(', ');
@@ -33,7 +38,8 @@ CONVERSA PENDENTE ANTERIOR (O usuário está respondendo a uma pergunta sua):
 ${conversationContext ? JSON.stringify(conversationContext) : "Nenhuma pendência"}
 
 REGRAS ESTRITAS:
-Você DEVE retornar APENAS um ÚNICO objeto JSON válido. NÃO inclua marcações markdown (\`\`\`json), nem texto antes ou depois. APENAS o JSON puro.
+1. Você DEVE retornar APENAS um ÚNICO objeto JSON válido. NÃO inclua marcações markdown (\`\`\`json), nem texto antes ou depois. APENAS o JSON puro.
+2. Você DEVE responder toda a chave "message" estritamente no idioma do usuário (${locale}). Se for "en", responda em Inglês. Se for "es", Espanhol, etc. E não traduza as propriedades do objeto JSON, apenas o conteúdo de "message".
 
 Você APENAS PODE RESPONDER com um objeto JSON puro. NÃO INCLUA \`\`\`json ou markdown. Seu JSON deve obrigatoriamente seguir um destes modelos abaixo baseado no objetivo da fala:
 
@@ -94,6 +100,6 @@ Mensagem do usuário: "${text}"
 
   } catch (error) {
     console.error("Gemini AI Error:", error);
-    return { error: "Ops, tive um problema ao analisar o que você disse." };
+    return { error: `Erro na IA: ${error.message || "Tente novamente mais tarde."}` };
   }
 };
