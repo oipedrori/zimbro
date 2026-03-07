@@ -183,6 +183,7 @@ const Onboarding = () => {
 
             {/* Botão Base Fixado */}
             <div style={{
+                position: 'relative',
                 padding: '24px',
                 zIndex: 10,
                 background: 'transparent',
