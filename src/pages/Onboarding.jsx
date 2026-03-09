@@ -162,14 +162,20 @@ const Onboarding = () => {
                     flex: 1,
                     display: 'flex',
                     flexDirection: 'column',
-                    justifyContent: 'center',
-                    alignItems: 'center',
+                    justifyContent: 'flex-end',
+                    color: 'white',
+                    fontWeight: 'sans-serif',
                     padding: '24px',
                     textAlign: 'center',
                     zIndex: 2,
                     pointerEvents: 'none' // Clicks passam por cima pras bordas
                 }}
             >
+                {/* Fundo Limpo Voltou ao Original */}
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0 }}></div>
+
+
+
                 <div style={{
                     width: '120px', height: '120px', borderRadius: '40px', background: 'rgba(0,0,0,0.2)',
                     display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '40px',

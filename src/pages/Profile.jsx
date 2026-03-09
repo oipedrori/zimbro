@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
-import { ChevronLeft, User, LogOut, Crown, Moon, Globe, DollarSign } from 'lucide-react';
+import { ChevronLeft, User, LogOut, Crown, Moon, Globe, DollarSign, Database, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Profile = () => {
@@ -144,33 +144,29 @@ const Profile = () => {
                         </div>
                     </div>
                 </div>
+
+                {/* Notion Import Button */}
+                <div
+                    onClick={() => navigate('/notion-import')}
+                    style={{
+                        marginTop: '24px',
+                        background: '#000', padding: '18px 20px', borderRadius: '24px',
+                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                        color: 'white', cursor: 'pointer', boxShadow: '0 8px 15px rgba(0,0,0,0.1)'
+                    }}
+                >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                        <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(255,255,255,0.15)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                            <Database size={20} color="white" />
+                        </div>
+                        <span style={{ fontWeight: '600', fontSize: '1rem' }}>Sincronizar com Notion</span>
+                    </div>
+                    <ArrowRight size={20} opacity={0.6} />
+                </div>
             </div>
 
-            {/* Premium Upsell Card */}
-            <section style={{ background: isPremium ? 'var(--primary-darkest)' : 'var(--primary-darker)', borderRadius: '24px', padding: '24px', color: '#f8fafc', marginBottom: '32px', position: 'relative', overflow: 'hidden', boxShadow: '0 8px 25px rgba(0,0,0,0.15)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Crown size={24} color="#fbbf24" />
-                        <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>Zimbro PRO</h3>
-                    </div>
-                    <span style={{ background: 'rgba(255,255,255,0.2)', padding: '4px 10px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: '600' }}>
-                        {isPremium ? 'Ativo' : 'Free Phase'}
-                    </span>
-                </div>
-
-                <p style={{ fontSize: '0.9rem', opacity: 0.9, marginBottom: '20px', lineHeight: '1.4' }}>
-                    {isPremium ? 'Sua assinatura premium está ativa. Você tem acesso a todos os limites e inteligência sem restrições.' : 'Desbloqueie orçamentos ilimitados, IA avançada e gráficos preditivos.'}
-                </p>
-
-                {!isPremium && (
-                    <button style={{ width: '100%', padding: '12px', borderRadius: '12px', background: 'var(--primary-color)', color: 'var(--text-main)', fontWeight: '700', fontSize: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
-                        Fazer Upgrade Agora
-                    </button>
-                )}
-            </section>
-
             {/* Log out Menu Item (settings removed as requested) */}
-            <section style={{ background: 'var(--surface-color)', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.03)' }}>
+            <section style={{ background: 'var(--surface-color)', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.03)', marginTop: '24px' }}>
                 <div
                     onClick={logout}
                     style={{ display: 'flex', alignItems: 'center', padding: '18px 20px', cursor: 'pointer' }}

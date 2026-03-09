@@ -9,6 +9,7 @@ import Limits from './pages/Limits';
 import Wallet from './pages/Wallet';
 import Onboarding from './pages/Onboarding';
 import Profile from './pages/Profile';
+import NotionImport from './pages/NotionImport';
 import InstallPrompt from './components/InstallPrompt';
 import './index.css';
 
@@ -31,7 +32,7 @@ const AppRoutes = () => {
   const [showSplash, setShowSplash] = React.useState(true);
 
   React.useEffect(() => {
-    const timer = setTimeout(() => setShowSplash(false), 2000);
+    const timer = setTimeout(() => setShowSplash(false), 800);
     return () => clearTimeout(timer);
   }, []);
 
@@ -79,6 +80,7 @@ const AppRoutes = () => {
         <Route path="limits" element={<Limits />} />
         <Route path="wallet" element={<Wallet />} />
         <Route path="profile" element={<Profile />} />
+        <Route path="notion-import" element={<NotionImport />} />
       </Route>
     </Routes>
   );

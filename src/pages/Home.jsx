@@ -29,6 +29,9 @@ const Home = () => {
     const [isClosingFlipped, setIsClosingFlipped] = useState(false);
     const [yearlyStats, setYearlyStats] = useState([]);
     const [loadingYearly, setLoadingYearly] = useState(true);
+    const [swipeDirection, setSwipeDirection] = useState(''); // 'left' or 'right'
+    const [touchStart, setTouchStart] = useState(null);
+    const [touchEnd, setTouchEnd] = useState(null);
 
     useEffect(() => {
         if (isFlipped) {
@@ -44,7 +47,7 @@ const Home = () => {
         setTimeout(() => {
             setIsFlipped(false);
             setIsClosingFlipped(false);
-        }, 450);
+        }, 300);
     };
 
     // Fetch yearly stats for the back of the card
@@ -66,8 +69,34 @@ const Home = () => {
     }, [isFlipped, setIsAiActive]);
 
     // Navegação de meses
-    const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
-    const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
+    // Navegação de meses
+    const nextMonth = () => {
+        setSwipeDirection('left');
+        setCurrentDate(addMonths(currentDate, 1));
+    };
+    const prevMonth = () => {
+        setSwipeDirection('right');
+        setCurrentDate(subMonths(currentDate, 1));
+    };
+
+    // Swipe handlers
+    const minSwipeDistance = 50;
+
+    const onTouchStart = (e) => {
+        setTouchEnd(null);
+        setTouchStart(e.targetTouches[0].clientX);
+    };
+
+    const onTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX);
+
+    const onTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > minSwipeDistance;
+        const isRightSwipe = distance < -minSwipeDistance;
+        if (isLeftSwipe) nextMonth();
+        if (isRightSwipe) prevMonth();
+    };
 
     // Cálculos do Dashboard
     const incomes = transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
@@ -121,7 +150,7 @@ const Home = () => {
                     position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
                     background: 'var(--bg-color)', zIndex: 10000,
                     padding: '24px', display: 'flex', flexDirection: 'column',
-                    animation: isClosingFlipped ? 'flipZoomOut 0.4s forwards' : 'flipZoomIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1)'
+                    animation: isClosingFlipped ? 'slideDownModal 0.3s forwards cubic-bezier(0.4, 0, 0.2, 1)' : 'slideUpModal 0.4s cubic-bezier(0.1, 0.7, 0.1, 1)',
                 }}>
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
@@ -205,7 +234,13 @@ const Home = () => {
                 </div>
             )}
 
-            <div className={`page-container animate-fade-in`} style={{ paddingBottom: '120px', animation: 'slideUp 0.3s forwards' }}>
+            <div
+                className={`page-container animate-fade-in`}
+                style={{ paddingBottom: '120px', animation: 'slideUp 0.3s forwards' }}
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEnd}
+            >
                 <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px' }}>
                     <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
                         <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--surface-color)', border: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--primary-color)' }}>
@@ -218,11 +253,17 @@ const Home = () => {
                 </header>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 10px', marginBottom: '8px' }}>
-                    <button onClick={prevMonth}><ChevronLeft size={24} color="var(--text-main)" /></button>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <button onClick={prevMonth} style={{ padding: '8px' }}><ChevronLeft size={24} color="var(--text-main)" /></button>
+                    <div
+                        key={monthPrefix}
+                        style={{
+                            display: 'flex', flexDirection: 'column', alignItems: 'center',
+                            animation: swipeDirection === 'left' ? 'slideLeftIn 0.3s ease-out' : 'slideRightIn 0.3s ease-out'
+                        }}
+                    >
                         <span style={{ fontWeight: '600', color: 'var(--text-main)', fontSize: '1.2rem', textTransform: 'capitalize' }}>{formattedMonthLabel}</span>
                     </div>
-                    <button onClick={nextMonth}><ChevronRight size={24} color="var(--text-main)" /></button>
+                    <button onClick={nextMonth} style={{ padding: '8px' }}><ChevronRight size={24} color="var(--text-main)" /></button>
                 </div>
 
                 <section
@@ -230,15 +271,14 @@ const Home = () => {
                     onClick={() => setIsFlipped(true)}
                     style={{ flexShrink: 0, padding: '24px', background: cardGradient, color: 'white', border: 'none', position: 'relative', overflow: 'hidden', cursor: 'pointer' }}
                 >
-                    <div style={{ position: 'absolute', top: '-50%', right: '-20%', width: '200px', height: '200px', background: 'rgba(255,255,255,0.1)', borderRadius: '50%' }}></div>
-
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                         <div>
                             <p style={{ fontSize: '0.9rem', opacity: 0.8, marginBottom: '8px' }}>{t('monthly_balance')}</p>
                             <h2 style={{ fontSize: 'clamp(1.8rem, 8vw, 2.5rem)', marginBottom: '24px', fontWeight: '700', letterSpacing: '-1px', wordBreak: 'break-word' }}>{formatCurrency(balance)}</h2>
                         </div>
-                        <div style={{ background: 'rgba(255,255,255,0.2)', padding: '6px', borderRadius: '50%', display: 'flex' }}>
-                            <Pointer size={16} />
+                        <div style={{ position: 'relative', display: 'flex' }}>
+                            <div className="card-aura"></div>
+                            <Pointer size={18} opacity={0.8} />
                         </div>
                     </div>
 
