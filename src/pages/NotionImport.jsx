@@ -69,6 +69,15 @@ const NotionImport = () => {
     const refreshDatabases = async () => {
         setLoading(true);
         setError(null);
+
+        // Timeout de segurança para a UI (15 segundos)
+        const uiTimeout = setTimeout(() => {
+            setLoading(false);
+            if (foundDbs.length === 0) {
+                setError("A busca demorou demais. Verifique sua internet ou tente novamente.");
+            }
+        }, 15000);
+
         try {
             console.log("Iniciando descoberta automática...");
 
@@ -83,31 +92,22 @@ const NotionImport = () => {
             const directDbs = results.filter(item => item.object === 'database');
             setFoundDbs(directDbs);
 
-            // Já encerra o loading principal aqui para liberar a UI
+            // Sucesso na busca básica: tira o loading
+            clearTimeout(uiTimeout);
             setLoading(false);
 
             // 2. Busca profunda em background (não trava mais o spinner)
             const pages = results.filter(item => item.object === 'page');
             if (pages.length > 0) {
                 setSearchingBackground(true);
-                const topPages = pages.slice(0, 3); // Apenas as 3 primeiras para ser ultra-rápido
-                for (const page of topPages) {
+                // Varremos as páginas autorizadas (as 5 primeiras)
+                for (const page of pages.slice(0, 5)) {
                     const nested = await findDatabasesOnPage(notionToken, page.id).catch(() => []);
                     if (nested.length > 0) {
                         setFoundDbs(prev => {
                             const combined = [...prev, ...nested];
                             // Remove duplicatas
                             const unique = Array.from(new Map(combined.map(d => [d.id, d])).values());
-
-                            // Auto-vínculo para as novas encontradas
-                            unique.forEach(db => {
-                                const title = (db.title[0]?.plain_text || '').toLowerCase();
-                                const isExpense = title.includes('despesa') || title.includes('gasto') || title.includes('expense') || title.includes('saída');
-                                const isIncome = title.includes('receita') || title.includes('ganho') || title.includes('income') || title.includes('entrada');
-                                if (isExpense && !localStorage.getItem('zimbroo_notion_expense_db_id')) assignDb(db.id, 'expense');
-                                if (isIncome && !localStorage.getItem('zimbroo_notion_income_db_id')) assignDb(db.id, 'income');
-                            });
-
                             return unique;
                         });
                     }
@@ -117,21 +117,13 @@ const NotionImport = () => {
 
             // A verificação final de erro (vazio) só faz sentido se realmente nada for encontrado após tudo
             // Mas para o usuário não ver erro "falso", só mostramos se realmente não houver nada após o scan rápido
-            if (directDbs.length === 0 && results.filter(r => r.object === 'page').length === 0) {
-                setError("Nenhum item autorizado encontrado. Clique em 'Excluir' e reconecte marcando os checklists.");
+            if (directDbs.length === 0 && results.length === 0) {
+                setError("O Notion não retornou nenhum item. Você já selecionou as páginas no checklist da autorização?");
             }
-
-            // 4. Auto-vínculo para as bases diretas (as profundas já vincularam acima)
-            directDbs.forEach(db => {
-                const title = (db.title[0]?.plain_text || '').toLowerCase();
-                const isExpense = title.includes('despesa') || title.includes('gasto') || title.includes('expense') || title.includes('saída');
-                const isIncome = title.includes('receita') || title.includes('ganho') || title.includes('income') || title.includes('entrada');
-                if (isExpense && !localStorage.getItem('zimbroo_notion_expense_db_id')) assignDb(db.id, 'expense');
-                if (isIncome && !localStorage.getItem('zimbroo_notion_income_db_id')) assignDb(db.id, 'income');
-            });
         } catch (e) {
+            clearTimeout(uiTimeout);
             console.error("Erro na descoberta automática:", e);
-            setError(`Falha na API: ${e.message || 'Erro desconhecido'}. Tente excluir a conexão no botão vermelho acima e refazer.`);
+            setError(`Erro: ${e.message}`);
         } finally {
             setLoading(false);
         }

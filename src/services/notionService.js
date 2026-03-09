@@ -3,7 +3,7 @@
  * Handles interaction with Notion API (proxied via Vite for dev)
  */
 
-const API_BASE = '/notion-api/v1';
+const API_BASE = '/notion-api';
 
 /**
  * Notion API Helper - Centralizes requests and avoids malformed URLs
@@ -13,29 +13,42 @@ const notionRequest = async (secret, endpoint, method = 'GET', body = null) => {
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint.substring(1) : endpoint;
     const url = `${API_BASE}/${cleanEndpoint}`;
 
-    const options = {
-        method,
-        headers: {
-            'Authorization': `Bearer ${secret}`,
-            'Notion-Version': '2022-06-28',
-            'Content-Type': 'application/json'
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 12000); // 12 seconds timeout
+
+    try {
+        const options = {
+            method,
+            signal: controller.signal,
+            headers: {
+                'Authorization': `Bearer ${secret}`,
+                'Notion-Version': '2022-06-28',
+                'Content-Type': 'application/json'
+            }
+        };
+
+        if (body) options.body = JSON.stringify(body);
+
+        const response = await fetch(url, options);
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+            let errMsg = 'Erro na comunicação';
+            try {
+                const errData = await response.json();
+                errMsg = errData.message || errMsg;
+            } catch (e) { /* fallback */ }
+            throw new Error(`Erro API Notion (${response.status}): ${errMsg}`);
         }
-    };
 
-    if (body) options.body = JSON.stringify(body);
-
-    const response = await fetch(url, options);
-
-    if (!response.ok) {
-        let errMsg = 'Erro na comunicação';
-        try {
-            const errData = await response.json();
-            errMsg = errData.message || errMsg;
-        } catch (e) { /* fallback to default */ }
-        throw new Error(`Erro API Notion (${response.status}): ${errMsg}`);
+        return response.json();
+    } catch (error) {
+        clearTimeout(timeoutId);
+        if (error.name === 'AbortError') {
+            throw new Error('A API do Notion demorou demais para responder (Timeout de 12s)');
+        }
+        throw error;
     }
-
-    return response.json();
 };
 
 /**
@@ -88,21 +101,20 @@ export const findDatabasesOnPage = async (secret, blockId) => {
     try {
         const databases = [];
         const visited = new Set();
-        const MAX_DEPTH = 2; // Reduzido para profundidade 2 (Geralmente colunas > tabelas)
+        const MAX_DEPTH = 4; // Profundidade 4 para alcançar tabelas dentro de Colunas > Toggles > Grupos
         let totalBlocksScanned = 0;
-        const MAX_TOTAL_BLOCKS = 50; // Limite rigoroso de blocos por página
+        const MAX_TOTAL_BLOCKS = 100; // Limite maior para garantir que encontre em páginas complexas
 
         const scan = async (id, level) => {
             if (visited.has(id) || level > MAX_DEPTH || totalBlocksScanned > MAX_TOTAL_BLOCKS) return;
             visited.add(id);
 
             try {
-                // Pega apenas a primeira página de filhos (geralmente as tabelas estão no topo)
-                const data = await notionRequest(secret, `blocks/${id}/children?page_size=50`);
+                const data = await notionRequest(secret, `blocks/${id}/children?page_size=100`);
 
                 for (const block of data.results) {
                     totalBlocksScanned++;
-                    if (totalBlocksScanned > MAX_TOTAL_BLOCKS || databases.length > 10) break;
+                    if (totalBlocksScanned > MAX_TOTAL_BLOCKS) break;
 
                     if (block.type === 'child_database') {
                         const dbTitle = block.child_database?.title || 'Tabela sem nome';
@@ -110,15 +122,19 @@ export const findDatabasesOnPage = async (secret, blockId) => {
                             id: block.id,
                             object: 'database',
                             title: [{ plain_text: dbTitle }],
-                            properties: {}
+                            properties: {
+                                // Mock de propriedades para o auto-vínculo detectar que é uma tabela válida
+                                "Valor": { type: "number" },
+                                "Data": { type: "date" }
+                            }
                         };
                         if (!databases.some(d => d.id === simpleDb.id)) {
                             databases.push(simpleDb);
                         }
                     }
-                    // Container types to recurse
+
                     const isContainer = [
-                        'column_list', 'column', 'toggle', 'synced_block', 'group'
+                        'column_list', 'column', 'toggle', 'synced_block', 'group', 'child_page'
                     ].includes(block.type);
 
                     if (isContainer && block.has_children && level < MAX_DEPTH) {
@@ -126,7 +142,7 @@ export const findDatabasesOnPage = async (secret, blockId) => {
                     }
                 }
             } catch (e) {
-                console.error("Erro na varredura de filhos do bloco:", id, e);
+                console.error(`Erro no scan do bloco ${id}:`, e);
             }
         };
 
