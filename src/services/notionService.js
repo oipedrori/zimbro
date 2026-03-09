@@ -9,12 +9,12 @@ const API_BASE = '/notion-api';
  * Notion API Helper - Centralizes requests and avoids malformed URLs
  */
 const notionRequest = async (secret, endpoint, method = 'GET', body = null) => {
-    // Remove leading slash if present to avoid double slashes
-    const cleanEndpoint = endpoint.startsWith('/') ? endpoint.substring(1) : endpoint;
+    // Remove leading/trailing slashes and ensure /v1/ is handled by the proxy/rewrite
+    const cleanEndpoint = endpoint.replace(/^\//, '').replace(/\/$/, '');
     const url = `${API_BASE}/${cleanEndpoint}`;
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 12000); // 12 seconds timeout
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
 
     try {
         const options = {
@@ -27,7 +27,12 @@ const notionRequest = async (secret, endpoint, method = 'GET', body = null) => {
             }
         };
 
-        if (body) options.body = JSON.stringify(body);
+        // Notion POST/PATCH requests usually REQUIRE a body, even if empty {}
+        if (method === 'POST' || method === 'PATCH') {
+            options.body = JSON.stringify(body || {});
+        } else if (body) {
+            options.body = JSON.stringify(body);
+        }
 
         const response = await fetch(url, options);
         clearTimeout(timeoutId);
@@ -45,7 +50,7 @@ const notionRequest = async (secret, endpoint, method = 'GET', body = null) => {
     } catch (error) {
         clearTimeout(timeoutId);
         if (error.name === 'AbortError') {
-            throw new Error('A API do Notion demorou demais para responder (Timeout de 12s)');
+            throw new Error('Timeout: O Notion demorou demais para responder.');
         }
         throw error;
     }
@@ -65,26 +70,12 @@ export const extractNotionId = (input) => {
  */
 export const searchNotionDatabases = async (secret) => {
     try {
-        let allResults = [];
-        let hasMore = true;
-        let startCursor = undefined;
-
         console.log("Iniciando discovery no Notion...");
-
-        while (hasMore) {
-            const data = await notionRequest(secret, 'search', 'POST', {
-                start_cursor: startCursor,
-                page_size: 100
-            });
-
-            allResults = [...allResults, ...data.results];
-            hasMore = data.has_more;
-            startCursor = data.next_cursor;
-
-            if (allResults.length > 300) break;
-        }
-
-        return allResults;
+        // Usamos uma busca simples sem filtros para evitar erro 400 por parâmetros inválidos
+        const data = await notionRequest(secret, 'search', 'POST', {
+            page_size: 100
+        });
+        return data.results || [];
     } catch (error) {
         console.error("Discovery Fail: ", error);
         throw error;
@@ -92,25 +83,23 @@ export const searchNotionDatabases = async (secret) => {
 };
 
 /**
- * Find databases inside a specific page (Mother Page) - Deep Recursive Search
- */
-/**
  * Find databases inside a specific page (Mother Page) - Fast Recursive Search
  */
 export const findDatabasesOnPage = async (secret, blockId) => {
     try {
         const databases = [];
         const visited = new Set();
-        const MAX_DEPTH = 4; // Profundidade 4 para alcançar tabelas dentro de Colunas > Toggles > Grupos
+        const MAX_DEPTH = 3;
         let totalBlocksScanned = 0;
-        const MAX_TOTAL_BLOCKS = 100; // Limite maior para garantir que encontre em páginas complexas
+        const MAX_TOTAL_BLOCKS = 100;
 
         const scan = async (id, level) => {
-            if (visited.has(id) || level > MAX_DEPTH || totalBlocksScanned > MAX_TOTAL_BLOCKS) return;
+            if (!id || visited.has(id) || level > MAX_DEPTH || totalBlocksScanned > MAX_TOTAL_BLOCKS) return;
             visited.add(id);
 
             try {
                 const data = await notionRequest(secret, `blocks/${id}/children?page_size=100`);
+                if (!data.results) return;
 
                 for (const block of data.results) {
                     totalBlocksScanned++;
@@ -123,7 +112,6 @@ export const findDatabasesOnPage = async (secret, blockId) => {
                             object: 'database',
                             title: [{ plain_text: dbTitle }],
                             properties: {
-                                // Mock de propriedades para o auto-vínculo detectar que é uma tabela válida
                                 "Valor": { type: "number" },
                                 "Data": { type: "date" }
                             }
@@ -142,7 +130,7 @@ export const findDatabasesOnPage = async (secret, blockId) => {
                     }
                 }
             } catch (e) {
-                console.error(`Erro no scan do bloco ${id}:`, e);
+                console.warn(`Aviso no scan do bloco ${id}:`, e.message);
             }
         };
 
@@ -155,14 +143,14 @@ export const findDatabasesOnPage = async (secret, blockId) => {
 };
 
 /**
- * Fetch Database Metadata to check available properties
+ * Fetch Database Metadata
  */
 export const getNotionDatabaseInfo = async (secret, databaseId) => {
     return notionRequest(secret, `databases/${databaseId}`);
 };
 
 /**
- * Get workspace/bot info to verify connection
+ * Get workspace/bot info
  */
 export const getNotionWorkspaceInfo = async (secret) => {
     try {
@@ -178,7 +166,7 @@ export const getNotionWorkspaceInfo = async (secret) => {
 export const createNotionTransaction = async (secret, databaseId, tx) => {
     try {
         const dbInfo = await getNotionDatabaseInfo(secret, databaseId);
-        const properties = dbInfo.properties;
+        const properties = dbInfo.properties || {};
 
         const titleKey = Object.keys(properties).find(k => properties[k].type === 'title');
         const numberKey = Object.keys(properties).find(k => properties[k].type === 'number');
@@ -207,7 +195,7 @@ export const createNotionTransaction = async (secret, databaseId, tx) => {
 export const fetchNotionTransactions = async (secret, databaseId) => {
     try {
         const data = await notionRequest(secret, `databases/${databaseId}/query`, 'POST');
-        return mapNotionToZimbroo(data.results);
+        return mapNotionToZimbroo(data.results || []);
     } catch (error) {
         console.error("Fetch Error: ", error);
         throw error;
@@ -222,26 +210,20 @@ const mapNotionToZimbroo = (results) => {
         const props = row.properties;
         const mapped = {};
 
-        // 1. Description (Find TITLE property or 'Nome' or 'Descrição')
         const titleProp = Object.values(props).find(p => p.type === 'title');
         mapped.description = titleProp?.title[0]?.plain_text || 'Sem descrição';
 
-        // 2. Amount (Find NUMBER property)
         const amountProp = Object.entries(props).find(([name, p]) =>
             p.type === 'number' || name.toLowerCase().includes('valor') || name.toLowerCase().includes('amount')
         );
         mapped.amount = amountProp ? amountProp[1].number : 0;
 
-        // 3. Date (Find DATE property)
         const dateProp = Object.values(props).find(p => p.type === 'date');
         mapped.date = dateProp?.date?.start || new Date().toISOString().split('T')[0];
 
-        // 4. Category (Find SELECT property)
         const catProp = Object.values(props).find(p => p.type === 'select');
         mapped.category = catProp?.select?.name || 'Outros';
 
-        // 5. Type (Income vs Expense)
-        // heuristic: if it has 'gain', 'income', 'receita' in cat or a dedicated select
         const isRec = mapped.category.toLowerCase().includes('receita') || mapped.category.toLowerCase().includes('ganho');
         mapped.type = isRec ? 'income' : 'expense';
 
