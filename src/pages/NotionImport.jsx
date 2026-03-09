@@ -23,6 +23,7 @@ const NotionImport = () => {
     const [error, setError] = useState(null);
     const [progress, setProgress] = useState(0);
     const [syncStats, setSyncStats] = useState({ expenses: 0, incomes: 0 });
+    const [debugItems, setDebugItems] = useState([]); // Itens crus retornados pelo Notion
 
     const NOTION_CLIENT_ID = import.meta.env.VITE_NOTION_CLIENT_ID;
     const NOTION_REDIRECT_URI = import.meta.env.VITE_NOTION_REDIRECT_URI || (window.location.origin + '/notion-callback');
@@ -67,6 +68,7 @@ const NotionImport = () => {
         try {
             console.log("Iniciando descoberta automática...");
             const results = await searchNotionDatabases(notionToken);
+            setDebugItems(results); // Guarda para o debug do usuário
 
             // 1. Pega databases que apareceram direto na busca
             const directDbs = results.filter(item => item.object === 'database');
@@ -111,7 +113,8 @@ const NotionImport = () => {
             });
 
             if (uniqueDbs.length === 0) {
-                setError("Nenhuma tabela encontrada. Dica: Clique em 'Conectar Agora' e certifique-se de marcar os checkboxes das suas tabelas.");
+                const pagesFound = results.filter(r => r.object === 'page').length;
+                setError(`Encontramos ${results.length} itens autorizados (incluindo ${pagesFound} páginas), mas nenhuma base de dados dentro delas. Certifique-se de que as tabelas de Despesas/Receitas estão marcadas na autorização do Notion.`);
             }
         } catch (e) {
             console.error("Erro na descoberta automática:", e);
@@ -436,6 +439,26 @@ const NotionImport = () => {
                                 <button onClick={refreshDatabases} style={{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', padding: '10px 20px', borderRadius: '14px', fontSize: '0.9rem', fontWeight: '700', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', margin: '0 auto' }}>
                                     <RefreshCcw size={16} /> Tentar Novamente
                                 </button>
+                            </div>
+                        )}
+
+                        {/* Debug Panel for User */}
+                        {debugItems.length > 0 && foundDbs.length === 0 && (
+                            <div style={{ padding: '16px', borderRadius: '16px', background: 'rgba(0,0,0,0.03)', marginBottom: '32px', border: '1px dashed var(--border-color)' }}>
+                                <h4 style={{ margin: '0 0 10px 0', fontSize: '0.75rem', fontWeight: '800', opacity: 0.5 }}>DIAGNÓSTICO: O ZIMBROO ESTÁ VENDO ESTES ITENS:</h4>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                    {debugItems.map((item, idx) => (
+                                        <div key={idx} style={{ fontSize: '0.65rem', padding: '4px 8px', background: 'white', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
+                                            {item.object === 'page' ? '📄 ' : '📊 '}
+                                            {item.object === 'page'
+                                                ? (item.properties?.title?.title?.[0]?.plain_text || item.properties?.Name?.title?.[0]?.plain_text || 'Sem Título')
+                                                : (item.title?.[0]?.plain_text || 'Database')}
+                                        </div>
+                                    ))}
+                                </div>
+                                <p style={{ fontSize: '0.7rem', marginTop: '12px', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                                    Se suas tabelas não aparecem acima, você precisa clicar em "Excluir" e reconectar, marcando os checkbox de cada tabela individualmente.
+                                </p>
                             </div>
                         )}
 
