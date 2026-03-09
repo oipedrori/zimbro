@@ -65,13 +65,56 @@ const NotionImport = () => {
         setLoading(true);
         setError(null);
         try {
-            const dbs = await searchNotionDatabases(notionToken);
-            setFoundDbs(dbs || []);
-            if (!dbs || dbs.length === 0) {
-                setError("Nenhuma tabela encontrada automaticamente.");
+            console.log("Iniciando descoberta automática...");
+            const results = await searchNotionDatabases(notionToken);
+
+            // 1. Pega databases que apareceram direto na busca
+            const directDbs = results.filter(item => item.object === 'database');
+
+            // 2. Pega páginas autorizadas para varrer o que tem dentro (databases inline)
+            const pages = results.filter(item => item.object === 'page');
+
+            let allFound = [...directDbs];
+
+            if (pages.length > 0) {
+                console.log(`Páginas autorizadas encontradas: ${pages.length}. Varrendo conteúdo...`);
+                // Varre as páginas em paralelo (limite de concorrência sutil para não travar)
+                const pageScans = await Promise.all(
+                    pages.map(p => findDatabasesOnPage(notionToken, p.id).catch(() => []))
+                );
+                pageScans.forEach(nestedList => {
+                    allFound = [...allFound, ...nestedList];
+                });
+            }
+
+            // 3. Remove duplicatas (mesma database pode aparecer na busca e na página)
+            const uniqueDbs = Array.from(new Map(allFound.map(item => [item.id, item])).values());
+            console.log("Total de databases únicas descobertas:", uniqueDbs.length);
+
+            setFoundDbs(uniqueDbs);
+
+            // 4. Auto-vínculo inteligente por nome
+            uniqueDbs.forEach(db => {
+                const title = (db.title[0]?.plain_text || '').toLowerCase();
+                const cleanId = db.id.replace(/-/g, '');
+
+                if (title.includes('despesa') || title.includes('gastos') || title.includes('expense')) {
+                    if (!localStorage.getItem('zimbroo_notion_expense_db_id')) {
+                        assignDb(db.id, 'expense');
+                    }
+                } else if (title.includes('receita') || title.includes('ganho') || title.includes('income')) {
+                    if (!localStorage.getItem('zimbroo_notion_income_db_id')) {
+                        assignDb(db.id, 'income');
+                    }
+                }
+            });
+
+            if (uniqueDbs.length === 0) {
+                setError("Nenhuma tabela encontrada. Dica: Clique em 'Conectar Agora' e certifique-se de marcar os checkboxes das suas tabelas.");
             }
         } catch (e) {
-            setError("Erro ao buscar tabelas. Tente usar o link manual.");
+            console.error("Erro na descoberta automática:", e);
+            setError("Erro ao buscar tabelas. Tente recriar a conexão com o Notion.");
         } finally {
             setLoading(false);
         }

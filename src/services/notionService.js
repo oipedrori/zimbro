@@ -24,7 +24,7 @@ export const searchNotionDatabases = async (secret) => {
         let hasMore = true;
         let startCursor = undefined;
 
-        console.log("Iniciando busca global por databases no Notion...");
+        console.log("Iniciando busca global no Notion (Páginas e Bases)...");
 
         while (hasMore) {
             const response = await fetch(`${API_BASE}/search`, {
@@ -35,7 +35,6 @@ export const searchNotionDatabases = async (secret) => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    filter: { property: 'object', value: 'database' },
                     start_cursor: startCursor,
                     page_size: 100
                 })
@@ -52,11 +51,10 @@ export const searchNotionDatabases = async (secret) => {
             hasMore = data.has_more;
             startCursor = data.next_cursor;
 
-            // Limit to 5 pages to avoid infinite loops or massive hits
             if (allResults.length > 500) break;
         }
 
-        console.log(`Busca global concluída. Total: ${allResults.length} bases encontradas.`);
+        console.log(`Busca concluída. Total: ${allResults.length} itens encontrados.`);
         return allResults;
     } catch (error) {
         console.error("Search Fail: ", error);
