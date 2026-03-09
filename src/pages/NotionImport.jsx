@@ -25,7 +25,9 @@ const NotionImport = () => {
     const [syncStats, setSyncStats] = useState({ expenses: 0, incomes: 0 });
     const [debugItems, setDebugItems] = useState([]); // Itens crus retornados pelo Notion
     const [workspaceInfo, setWorkspaceInfo] = useState(null);
+    const [searchingBackground, setSearchingBackground] = useState(false);
 
+    // Check if connected on mount
     const NOTION_CLIENT_ID = import.meta.env.VITE_NOTION_CLIENT_ID;
     const NOTION_REDIRECT_URI = import.meta.env.VITE_NOTION_REDIRECT_URI || (window.location.origin + '/notion-callback');
 
@@ -76,55 +78,56 @@ const NotionImport = () => {
             const results = await searchNotionDatabases(notionToken);
             setDebugItems(results); // Guarda para o debug do usuário
 
-            // 1. Mostra logo o que veio na busca direta (mais rápido)
+            // 1. Mostra logo o que veio na busca direta (MUITO mais rápido)
             const directDbs = results.filter(item => item.object === 'database');
             setFoundDbs(directDbs);
 
-            // 2. Tenta buscar em cada página autorizada
-            const pages = results.filter(item => item.object === 'page');
-            let deepDbs = [];
+            // Já encerra o loading principal aqui para liberar a UI
+            setLoading(false);
 
+            // 2. Busca profunda em background (não trava mais o spinner)
+            const pages = results.filter(item => item.object === 'page');
             if (pages.length > 0) {
-                // Para não travar no celular, varremos apenas as primeiras páginas autorizadas
-                const topPages = pages.slice(0, 5);
+                setSearchingBackground(true);
+                const topPages = pages.slice(0, 3); // Apenas as 3 primeiras para ser ultra-rápido
                 for (const page of topPages) {
                     const nested = await findDatabasesOnPage(notionToken, page.id).catch(() => []);
                     if (nested.length > 0) {
-                        deepDbs = [...deepDbs, ...nested];
-                        // Atualiza a UI conforme descobre para não parecer travado
                         setFoundDbs(prev => {
                             const combined = [...prev, ...nested];
-                            return Array.from(new Map(combined.map(d => [d.id, d])).values());
+                            // Remove duplicatas
+                            const unique = Array.from(new Map(combined.map(d => [d.id, d])).values());
+
+                            // Auto-vínculo para as novas encontradas
+                            unique.forEach(db => {
+                                const title = (db.title[0]?.plain_text || '').toLowerCase();
+                                const isExpense = title.includes('despesa') || title.includes('gasto') || title.includes('expense') || title.includes('saída');
+                                const isIncome = title.includes('receita') || title.includes('ganho') || title.includes('income') || title.includes('entrada');
+                                if (isExpense && !localStorage.getItem('zimbroo_notion_expense_db_id')) assignDb(db.id, 'expense');
+                                if (isIncome && !localStorage.getItem('zimbroo_notion_income_db_id')) assignDb(db.id, 'income');
+                            });
+
+                            return unique;
                         });
                     }
                 }
+                setSearchingBackground(false);
             }
 
-            const allFound = [...directDbs, ...deepDbs];
-            const uniqueDbs = Array.from(new Map(allFound.map(item => [item.id, item])).values());
-            setFoundDbs(uniqueDbs);
+            // A verificação final de erro (vazio) só faz sentido se realmente nada for encontrado após tudo
+            // Mas para o usuário não ver erro "falso", só mostramos se realmente não houver nada após o scan rápido
+            if (directDbs.length === 0 && results.filter(r => r.object === 'page').length === 0) {
+                setError("Nenhum item autorizado encontrado. Clique em 'Excluir' e reconecte marcando os checklists.");
+            }
 
-            // 4. Auto-vínculo inteligente por nome e estrutura
-            uniqueDbs.forEach(db => {
+            // 4. Auto-vínculo para as bases diretas (as profundas já vincularam acima)
+            directDbs.forEach(db => {
                 const title = (db.title[0]?.plain_text || '').toLowerCase();
-                const props = db.properties || {};
-
                 const isExpense = title.includes('despesa') || title.includes('gasto') || title.includes('expense') || title.includes('saída');
                 const isIncome = title.includes('receita') || title.includes('ganho') || title.includes('income') || title.includes('entrada');
-
-                const hasValue = Object.values(props).some(p => p.type === 'number');
-
-                if (isExpense && hasValue) {
-                    if (!localStorage.getItem('zimbroo_notion_expense_db_id')) assignDb(db.id, 'expense');
-                } else if (isIncome && hasValue) {
-                    if (!localStorage.getItem('zimbroo_notion_income_db_id')) assignDb(db.id, 'income');
-                }
+                if (isExpense && !localStorage.getItem('zimbroo_notion_expense_db_id')) assignDb(db.id, 'expense');
+                if (isIncome && !localStorage.getItem('zimbroo_notion_income_db_id')) assignDb(db.id, 'income');
             });
-
-            if (uniqueDbs.length === 0) {
-                const pagesFound = results.filter(r => r.object === 'page').length;
-                setError(`Encontramos ${results.length} itens autorizados (incluindo ${pagesFound} páginas), mas nenhuma base de dados dentro delas. Certifique-se de que as tabelas de Despesas/Receitas estão marcadas na autorização do Notion.`);
-            }
         } catch (e) {
             console.error("Erro na descoberta automática:", e);
             setError(`Falha na API: ${e.message || 'Erro desconhecido'}. Tente excluir a conexão no botão vermelho acima e refazer.`);
@@ -436,6 +439,12 @@ const NotionImport = () => {
                                         </div>
                                     </div>
                                 ))}
+                                {searchingBackground && (
+                                    <div style={{ padding: '12px', background: 'var(--primary-light)', borderRadius: '12px', fontSize: '0.75rem', color: 'var(--primary-dark)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                                        <RefreshCw size={14} className="animate-spin" />
+                                        <span>Procurando tabelas dentro de suas páginas...</span>
+                                    </div>
+                                )}
                                 <button onClick={refreshDatabases} style={{ border: 'none', background: 'none', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--primary-color)', cursor: 'pointer', fontWeight: '700', fontSize: '0.8rem', marginTop: '8px' }}>
                                     <RefreshCcw size={14} className={loading ? 'animate-spin' : ''} /> Buscar mais tabelas
                                 </button>

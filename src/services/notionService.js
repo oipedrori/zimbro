@@ -81,59 +81,52 @@ export const searchNotionDatabases = async (secret) => {
 /**
  * Find databases inside a specific page (Mother Page) - Deep Recursive Search
  */
+/**
+ * Find databases inside a specific page (Mother Page) - Fast Recursive Search
+ */
 export const findDatabasesOnPage = async (secret, blockId) => {
     try {
         const databases = [];
         const visited = new Set();
-        const MAX_DEPTH = 3;
+        const MAX_DEPTH = 2; // Reduzido para profundidade 2 (Geralmente colunas > tabelas)
+        let totalBlocksScanned = 0;
+        const MAX_TOTAL_BLOCKS = 50; // Limite rigoroso de blocos por página
 
         const scan = async (id, level) => {
-            if (visited.has(id) || level > MAX_DEPTH) return;
+            if (visited.has(id) || level > MAX_DEPTH || totalBlocksScanned > MAX_TOTAL_BLOCKS) return;
             visited.add(id);
 
-            if (databases.length > 20) return;
+            try {
+                // Pega apenas a primeira página de filhos (geralmente as tabelas estão no topo)
+                const data = await notionRequest(secret, `blocks/${id}/children?page_size=50`);
 
-            let hasMore = true;
-            let startCursor = undefined;
+                for (const block of data.results) {
+                    totalBlocksScanned++;
+                    if (totalBlocksScanned > MAX_TOTAL_BLOCKS || databases.length > 10) break;
 
-            while (hasMore) {
-                try {
-                    const data = await notionRequest(secret, `blocks/${id}/children?page_size=100${startCursor ? `&start_cursor=${startCursor}` : ''}`);
-
-                    for (const block of data.results) {
-                        try {
-                            if (block.type === 'child_database') {
-                                const dbTitle = block.child_database?.title || 'Tabela sem nome';
-                                const simpleDb = {
-                                    id: block.id,
-                                    object: 'database',
-                                    title: [{ plain_text: dbTitle }],
-                                    properties: {} // Mock para não quebrar a UI, carregamos props no vincular se precisar
-                                };
-                                if (!databases.some(d => d.id === simpleDb.id)) {
-                                    databases.push(simpleDb);
-                                }
-                            }
-                            // Só entra em containers que podem ter tabelas (colunas, grupos, toggles)
-                            const isContainer = [
-                                'column_list', 'column', 'toggle', 'child_page',
-                                'synced_block', 'template', 'group'
-                            ].includes(block.type);
-
-                            if (isContainer && block.has_children && level < MAX_DEPTH) {
-                                await scan(block.id, level + 1);
-                            }
-                        } catch (e) {
-                            console.warn(`Erro processando bloco ${block.id}:`, e);
+                    if (block.type === 'child_database') {
+                        const dbTitle = block.child_database?.title || 'Tabela sem nome';
+                        const simpleDb = {
+                            id: block.id,
+                            object: 'database',
+                            title: [{ plain_text: dbTitle }],
+                            properties: {}
+                        };
+                        if (!databases.some(d => d.id === simpleDb.id)) {
+                            databases.push(simpleDb);
                         }
                     }
+                    // Container types to recurse
+                    const isContainer = [
+                        'column_list', 'column', 'toggle', 'synced_block', 'group'
+                    ].includes(block.type);
 
-                    hasMore = data.has_more;
-                    startCursor = data.next_cursor;
-                } catch (e) {
-                    console.error("Erro na varredura de filhos do bloco:", id, e);
-                    break;
+                    if (isContainer && block.has_children && level < MAX_DEPTH) {
+                        await scan(block.id, level + 1);
+                    }
                 }
+            } catch (e) {
+                console.error("Erro na varredura de filhos do bloco:", id, e);
             }
         };
 
