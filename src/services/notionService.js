@@ -3,14 +3,46 @@
  * Handles interaction with Notion API (proxied via Vite for dev)
  */
 
-const API_BASE = '/notion-api';
+const API_BASE = '/notion-api/v1';
+
+/**
+ * Notion API Helper - Centralizes requests and avoids malformed URLs
+ */
+const notionRequest = async (secret, endpoint, method = 'GET', body = null) => {
+    // Remove leading slash if present to avoid double slashes
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint.substring(1) : endpoint;
+    const url = `${API_BASE}/${cleanEndpoint}`;
+
+    const options = {
+        method,
+        headers: {
+            'Authorization': `Bearer ${secret}`,
+            'Notion-Version': '2022-06-28',
+            'Content-Type': 'application/json'
+        }
+    };
+
+    if (body) options.body = JSON.stringify(body);
+
+    const response = await fetch(url, options);
+
+    if (!response.ok) {
+        let errMsg = 'Erro na comunicação';
+        try {
+            const errData = await response.json();
+            errMsg = errData.message || errMsg;
+        } catch (e) { /* fallback to default */ }
+        throw new Error(`Erro API Notion (${response.status}): ${errMsg}`);
+    }
+
+    return response.json();
+};
 
 /**
  * Utility: Extract Notion ID from URL or string
  */
 export const extractNotionId = (input) => {
     if (!input) return '';
-    // Match 32 chars hex string from URL or raw
     const match = input.match(/([a-f0-9]{32})/);
     return match ? match[1] : input.trim();
 };
@@ -24,29 +56,14 @@ export const searchNotionDatabases = async (secret) => {
         let hasMore = true;
         let startCursor = undefined;
 
-        console.log("Iniciando discovery global no Notion...");
+        console.log("Iniciando discovery no Notion...");
 
         while (hasMore) {
-            const response = await fetch(`${API_BASE}/search`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${secret}`,
-                    'Notion-Version': '2022-06-28',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    start_cursor: startCursor,
-                    page_size: 100
-                    // Removemos query e sort para evitar qualquer filtro que oculte itens
-                })
+            const data = await notionRequest(secret, 'search', 'POST', {
+                start_cursor: startCursor,
+                page_size: 100
             });
 
-            if (!response.ok) {
-                const errData = await response.json();
-                throw new Error(`Erro API Notion (${response.status}): ${errData.message || 'Falha na comunicação'}`);
-            }
-
-            const data = await response.json();
             allResults = [...allResults, ...data.results];
             hasMore = data.has_more;
             startCursor = data.next_cursor;
@@ -62,38 +79,18 @@ export const searchNotionDatabases = async (secret) => {
 };
 
 /**
- * Get workspace/bot info to verify connection
- */
-export const getNotionWorkspaceInfo = async (secret) => {
-    try {
-        const response = await fetch(`${API_BASE}/users/me`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${secret}`,
-                'Notion-Version': '2022-06-28'
-            }
-        });
-        if (!response.ok) return null;
-        return await response.json();
-    } catch (e) {
-        return null;
-    }
-};
-
-/**
- * Find databases inside a specific page (Mother Page) - Recursive Search
+ * Find databases inside a specific page (Mother Page) - Deep Recursive Search
  */
 export const findDatabasesOnPage = async (secret, blockId) => {
     try {
         const databases = [];
         const visited = new Set();
-        const MAX_DEPTH = 3; // Profundidade segura para recursão
+        const MAX_DEPTH = 3;
 
         const scan = async (id, level) => {
             if (visited.has(id) || level > MAX_DEPTH) return;
             visited.add(id);
 
-            // Evita varredura infinita ou muito pesada
             if (databases.length > 20) return;
 
             let hasMore = true;
@@ -101,27 +98,16 @@ export const findDatabasesOnPage = async (secret, blockId) => {
 
             while (hasMore) {
                 try {
-                    const response = await fetch(`${API_BASE}/blocks/${id}/children?page_size=100${startCursor ? `&start_cursor=${startCursor}` : ''}`, {
-                        method: 'GET',
-                        headers: {
-                            'Authorization': `Bearer ${secret}`,
-                            'Notion-Version': '2022-06-28'
-                        }
-                    });
-
-                    if (!response.ok) break;
-                    const data = await response.json();
+                    const data = await notionRequest(secret, `blocks/${id}/children?page_size=100${startCursor ? `&start_cursor=${startCursor}` : ''}`);
 
                     for (const block of data.results) {
                         try {
-                            // 1. Encontrou database direta
                             if (block.type === 'child_database') {
                                 const db = await getNotionDatabaseInfo(secret, block.id);
                                 if (db && !databases.some(d => d.id === db.id)) {
                                     databases.push(db);
                                 }
                             }
-                            // 2. Encontrou sub-página ou bloco com filhos (colunas, grupos, toggles, synced blocks)
                             else if ((block.type === 'child_page' || block.has_children) && level < MAX_DEPTH) {
                                 await scan(block.id, level + 1);
                             }
@@ -151,25 +137,17 @@ export const findDatabasesOnPage = async (secret, blockId) => {
  * Fetch Database Metadata to check available properties
  */
 export const getNotionDatabaseInfo = async (secret, databaseId) => {
+    return notionRequest(secret, `databases/${databaseId}`);
+};
+
+/**
+ * Get workspace/bot info to verify connection
+ */
+export const getNotionWorkspaceInfo = async (secret) => {
     try {
-        const response = await fetch(`${API_BASE}/databases/${databaseId}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${secret}`,
-                'Notion-Version': '2022-06-28',
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            const err = await response.json();
-            throw new Error(err.message || 'Falha ao acessar o Notion');
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error("Notion API Error: ", error);
-        throw error;
+        return await notionRequest(secret, 'users/me');
+    } catch (e) {
+        return null;
     }
 };
 
@@ -178,56 +156,27 @@ export const getNotionDatabaseInfo = async (secret, databaseId) => {
  */
 export const createNotionTransaction = async (secret, databaseId, tx) => {
     try {
-        // 1. First, we need to know the property names of the database
         const dbInfo = await getNotionDatabaseInfo(secret, databaseId);
         const properties = dbInfo.properties;
 
-        // 2. Identify property names by type
         const titleKey = Object.keys(properties).find(k => properties[k].type === 'title');
         const numberKey = Object.keys(properties).find(k => properties[k].type === 'number');
         const dateKey = Object.keys(properties).find(k => properties[k].type === 'date');
         const selectKey = Object.keys(properties).find(k => properties[k].type === 'select');
 
-        // 3. Build the properties object for Notion
         const notionProps = {};
+        if (titleKey) notionProps[titleKey] = { title: [{ text: { content: tx.description } }] };
+        if (numberKey) notionProps[numberKey] = { number: Number(tx.amount) };
+        if (dateKey) notionProps[dateKey] = { date: { start: tx.date } };
+        if (selectKey) notionProps[selectKey] = { select: { name: tx.category || 'Zimbroo' } };
 
-        if (titleKey) {
-            notionProps[titleKey] = { title: [{ text: { content: tx.description } }] };
-        }
-        if (numberKey) {
-            notionProps[numberKey] = { number: Number(tx.amount) };
-        }
-        if (dateKey) {
-            notionProps[dateKey] = { date: { start: tx.date } };
-        }
-        if (selectKey) {
-            notionProps[selectKey] = { select: { name: tx.category || 'Zimbroo' } };
-        }
-
-        // 4. Send the request
-        const response = await fetch(`${API_BASE}/pages`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${secret}`,
-                'Notion-Version': '2022-06-28',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                parent: { database_id: databaseId },
-                properties: notionProps
-            })
+        return await notionRequest(secret, 'pages', 'POST', {
+            parent: { database_id: databaseId },
+            properties: notionProps
         });
-
-        if (!response.ok) {
-            const err = await response.json();
-            console.warn("Failed to sync to Notion:", err);
-            return null;
-        }
-
-        return await response.json();
     } catch (error) {
         console.error("Notion Sync Error:", error);
-        return null; // Don't crash the app if sync fails
+        return null;
     }
 };
 
@@ -236,21 +185,7 @@ export const createNotionTransaction = async (secret, databaseId, tx) => {
  */
 export const fetchNotionTransactions = async (secret, databaseId) => {
     try {
-        const response = await fetch(`${API_BASE}/databases/${databaseId}/query`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${secret}`,
-                'Notion-Version': '2022-06-28',
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            const err = await response.json();
-            throw new Error(err.message || 'Falha na sincronização');
-        }
-
-        const data = await response.json();
+        const data = await notionRequest(secret, `databases/${databaseId}/query`, 'POST');
         return mapNotionToZimbroo(data.results);
     } catch (error) {
         console.error("Fetch Error: ", error);
