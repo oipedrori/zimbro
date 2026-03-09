@@ -46,36 +46,48 @@ export const searchNotionDatabases = async (secret) => {
 };
 
 /**
- * Find databases inside a specific page (Mother Page)
+ * Find databases inside a specific page (Mother Page) - Recursive Search
  */
-export const findDatabasesOnPage = async (secret, pageId) => {
+export const findDatabasesOnPage = async (secret, blockId) => {
     try {
-        // 1. Get child blocks
-        const response = await fetch(`${API_BASE}/blocks/${pageId}/children`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${secret}`,
-                'Notion-Version': '2022-06-28'
-            }
-        });
-
-        if (!response.ok) return [];
-        const data = await response.json();
-
-        // 2. Filter for child_database type
-        const dbBlocks = data.results.filter(b => b.type === 'child_database');
-
-        // 3. For each block, fetch full database metadata
         const databases = [];
-        for (const block of dbBlocks) {
-            try {
-                const db = await getNotionDatabaseInfo(secret, block.id);
-                databases.push(db);
-            } catch (e) { console.error(e); }
-        }
+        const visited = new Set();
+
+        const scan = async (id) => {
+            if (visited.has(id)) return;
+            visited.add(id);
+
+            const response = await fetch(`${API_BASE}/blocks/${id}/children`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${secret}`,
+                    'Notion-Version': '2022-06-28'
+                }
+            });
+
+            if (!response.ok) return;
+            const data = await response.json();
+
+            for (const block of data.results) {
+                // Se for uma database, adicionamos
+                if (block.type === 'child_database') {
+                    try {
+                        const db = await getNotionDatabaseInfo(secret, block.id);
+                        databases.push(db);
+                    } catch (e) { console.error(e); }
+                }
+                // Se for um bloco que pode conter outros blocos (colunas, grupos, toggles, etc)
+                // e não for uma página (para não entrar em sub-páginas sem querer)
+                else if (block.has_children && block.type !== 'child_page') {
+                    await scan(block.id);
+                }
+            }
+        };
+
+        await scan(blockId);
         return databases;
     } catch (error) {
-        console.error("FindChildren Error: ", error);
+        console.error("Deep Scan Error: ", error);
         return [];
     }
 };
