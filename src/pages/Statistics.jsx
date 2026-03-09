@@ -179,8 +179,8 @@ const Statistics = () => {
                                 const category = CATEGORIAS_DESPESA.find(c => c.id === catId) || { label: catId, color: '#999', icon: '📌' };
                                 const pct = (amount / totalExpenses) * 100;
                                 return (
-                                    <div key={catId} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-main)', background: 'var(--surface-color)', padding: '4px 10px', borderRadius: '20px', border: '1px solid var(--glass-border)' }}>
-                                        <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: category.color }}></div>
+                                    <div key={catId} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem', color: 'var(--text-main)', background: 'var(--bg-color)', padding: '6px 12px', borderRadius: '20px', border: `1px solid ${category.color}40`, boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
+                                        <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: category.color }}></div>
                                         <span>{category.icon} {category.label}</span>
                                         <span style={{ fontWeight: '600', opacity: 0.8 }}>({pct.toFixed(0)}%)</span>
                                     </div>

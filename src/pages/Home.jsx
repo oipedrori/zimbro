@@ -7,7 +7,7 @@ import { CATEGORIAS_DESPESA, CATEGORIAS_RECEITA } from '../utils/categories';
 import { useI18n } from '../contexts/I18nContext';
 import TransactionModal from '../components/TransactionModal';
 import SwipeableItem from '../components/SwipeableItem';
-import { Plus, ChevronLeft, ChevronRight, User, MousePointer2, X } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, User, Hand, X } from 'lucide-react';
 import { Link, useOutletContext } from 'react-router-dom';
 import { getYearlyStats } from '../services/transactionService';
 
@@ -199,11 +199,11 @@ const Home = () => {
                 </header>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 10px', marginBottom: '8px' }}>
-                    <button onClick={prevMonth}><ChevronLeft size={24} color="var(--primary-color)" /></button>
+                    <button onClick={prevMonth}><ChevronLeft size={24} color="var(--text-main)" /></button>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <span style={{ fontWeight: '600', color: 'var(--primary-color)', fontSize: '1.1rem' }}>{formattedMonthLabel}</span>
+                        <span style={{ fontWeight: '600', color: 'var(--text-main)', fontSize: '1.2rem', textTransform: 'capitalize' }}>{formattedMonthLabel}</span>
                     </div>
-                    <button onClick={nextMonth}><ChevronRight size={24} color="var(--primary-color)" /></button>
+                    <button onClick={nextMonth}><ChevronRight size={24} color="var(--text-main)" /></button>
                 </div>
 
                 <section
@@ -219,7 +219,7 @@ const Home = () => {
                             <h2 style={{ fontSize: 'clamp(1.8rem, 8vw, 2.5rem)', marginBottom: '24px', fontWeight: '700', letterSpacing: '-1px', wordBreak: 'break-word' }}>{formatCurrency(balance)}</h2>
                         </div>
                         <div style={{ background: 'rgba(255,255,255,0.2)', padding: '6px', borderRadius: '50%', display: 'flex' }}>
-                            <MousePointer2 size={16} />
+                            <Hand size={16} />
                         </div>
                     </div>
 

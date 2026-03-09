@@ -92,8 +92,6 @@ export const AuthProvider = ({ children }) => {
                 fontFamily: 'sans-serif'
             }}>
                 <div className="loader" style={{ marginBottom: '20px' }}></div>
-                <p>Zimbro App</p>
-                <p style={{ fontSize: '0.8rem', opacity: 0.7 }}>Iniciando serviços...</p>
             </div>
         );
     }
