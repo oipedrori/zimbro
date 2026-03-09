@@ -8,12 +8,12 @@
   --primary-darkest: #0E2210;
   --primary-darker: #1B4520;
   --primary-dark: #2D7D39;
-  --primary-color: #4BB45A;
-  /* Main brand green */
+  --primary-color: #1B4520;
+  --highlight-color: #4BB45A;
 
   --primary-light: #e6f7e9;
-  --primary-gradient: linear-gradient(135deg, #4BB45A 0%, #2D7D39 100%);
-  --brand-dark-gradient: linear-gradient(135deg, var(--primary-darker) 0%, var(--primary-darkest) 100%);
+  --primary-gradient: linear-gradient(135deg, var(--primary-darker) 0%, var(--primary-darkest) 100%);
+  --highlight-gradient: linear-gradient(135deg, var(--highlight-color) 0%, var(--primary-dark) 100%);
   --secondary-gradient: linear-gradient(180deg, var(--bg-color) 0%, #d4f0db 100%);
 
   --accent-color: var(--primary-dark);

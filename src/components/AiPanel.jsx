@@ -419,7 +419,7 @@ const AiPanel = ({ isActive, onClose, onOpenManualModal, onListeningChange }) =>
         .mystical-aura {
           position: absolute;
           top: -15px; left: -15px; right: -15px; bottom: -15px;
-          background: #4BB45A;
+          background: var(--highlight-color);
           border-radius: 50%;
           z-index: -1;
           filter: blur(25px);
@@ -448,7 +448,7 @@ const AiPanel = ({ isActive, onClose, onOpenManualModal, onListeningChange }) =>
           height: 68px;
           border-radius: 50%;
           border: none;
-          background: var(--primary-gradient);
+          background: var(--highlight-gradient);
           display: flex;
           align-items: center;
           justify-content: center;

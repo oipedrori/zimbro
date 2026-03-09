@@ -93,7 +93,7 @@ const Home = () => {
     const isNegative = balance < 0;
     const cardGradient = isNegative
         ? 'linear-gradient(135deg, #ef4444 0%, #991b1b 100%)'
-        : 'var(--brand-dark-gradient)';
+        : 'var(--primary-gradient)';
 
     return (
         <>
