@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ChevronLeft, Database, ArrowRight, CheckCircle2, AlertCircle, FileText, Loader2, Link, Lock, TrendingUp, TrendingDown, RefreshCcw } from 'lucide-react';
+import { ChevronLeft, Database, ArrowRight, CheckCircle2, AlertCircle, FileText, Loader2, Link, Lock, TrendingUp, TrendingDown, RefreshCcw, Trash2 } from 'lucide-react';
 import { useI18n } from '../contexts/I18nContext';
 import { getNotionDatabaseInfo, fetchNotionTransactions, searchNotionDatabases, extractNotionId } from '../services/notionService';
 import { addTransaction } from '../services/transactionService';
@@ -93,6 +93,20 @@ const NotionImport = () => {
         }
     };
 
+    const handleDisconnect = () => {
+        if (window.confirm("Deseja realmente excluir a integração com o Notion? Isso removerá o acesso, mas seus dados já importados no Zimbroo continuarão aqui.")) {
+            localStorage.removeItem('zimbroo_notion_token');
+            localStorage.removeItem('zimbroo_notion_expense_db_id');
+            localStorage.removeItem('zimbroo_notion_income_db_id');
+            setNotionToken('');
+            setExpenseDbId('');
+            setIncomeDbId('');
+            setStep(1);
+            setFoundDbs([]);
+            setSearchParams({});
+        }
+    };
+
     const startSync = async () => {
         if (!expenseDbId && !incomeDbId) {
             setError("Selecione pelo menos uma base para importar.");
@@ -148,7 +162,17 @@ const NotionImport = () => {
                 >
                     <ChevronLeft size={20} />
                 </button>
-                <h1 style={{ fontSize: '1.1rem', color: 'var(--text-main)', fontWeight: '600' }}>Integração Notion</h1>
+                <h1 style={{ fontSize: '1.1rem', color: 'var(--text-main)', fontWeight: '600', flex: 1 }}>Integração Notion</h1>
+                {notionToken && (
+                    <button
+                        onClick={handleDisconnect}
+                        title="Desconectar Integração"
+                        style={{ background: 'rgba(239, 68, 68, 0.1)', border: 'none', borderRadius: '12px', padding: '10px', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+                    >
+                        <Trash2 size={18} />
+                        <span style={{ fontSize: '0.85rem', fontWeight: '700' }}>Desconectar</span>
+                    </button>
+                )}
             </header>
 
             <main>
