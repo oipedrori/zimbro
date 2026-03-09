@@ -22,9 +22,17 @@ const Onboarding = () => {
         if (showDocs) {
             setLoadingDoc(true);
             fetch(`/${showDocs}_${locale}.md`)
-                .then(res => res.text())
+                .then(res => {
+                    if (!res.ok) throw new Error('File not found');
+                    return res.text();
+                })
                 .then(text => {
                     setDocContent(text);
+                    setLoadingDoc(false);
+                })
+                .catch(err => {
+                    console.error("Erro ao carregar documento:", err);
+                    setDocContent("Erro ao carregar o conteúdo. Por favor, tente novamente mais tarde.");
                     setLoadingDoc(false);
                 });
         }
@@ -146,9 +154,7 @@ const Onboarding = () => {
 
 
 
-            {/* Áreas Invisíveis de Toque (Laterais) */}
-            <div style={{ position: 'absolute', top: 0, bottom: '100px', left: 0, width: '35%', zIndex: 5, cursor: 'pointer' }} onClick={handleTouchLeft} />
-            <div style={{ position: 'absolute', top: 0, bottom: '100px', right: 0, width: '65%', zIndex: 5, cursor: 'pointer' }} onClick={handleTouchRight} />
+
 
             {/* Conteúdo Dinâmico do Story com Fade */}
             <div
@@ -188,6 +194,16 @@ const Onboarding = () => {
                 <p style={{ fontSize: '1.2rem', opacity: 0.9, lineHeight: 1.5, maxWidth: '85%' }}>
                     {stories[currentStory].desc}
                 </p>
+
+                {/* Áreas Invisíveis de Toque (Laterais) - Movidas para dentro do container de story */}
+                <div
+                    style={{ position: 'absolute', top: 0, bottom: '150px', left: 0, width: '30%', zIndex: 1, cursor: 'pointer', pointerEvents: 'auto' }}
+                    onClick={(e) => { e.stopPropagation(); handleTouchLeft(); }}
+                />
+                <div
+                    style={{ position: 'absolute', top: 0, bottom: '150px', right: 0, width: '70%', zIndex: 1, cursor: 'pointer', pointerEvents: 'auto' }}
+                    onClick={(e) => { e.stopPropagation(); handleTouchRight(); }}
+                />
             </div>
 
             {/* Botão Base Fixado */}
@@ -211,7 +227,8 @@ const Onboarding = () => {
                 {/* Termos e Consentimento */}
                 <div style={{
                     display: 'flex', alignItems: 'flex-start', gap: '12px',
-                    marginBottom: '24px', textAlign: 'left', padding: '0 4px'
+                    marginBottom: '24px', textAlign: 'left', padding: '0 4px',
+                    position: 'relative', zIndex: 20 // Garante que esteja acima das áreas de toque
                 }}>
                     <input
                         type="checkbox"
@@ -219,26 +236,36 @@ const Onboarding = () => {
                         checked={acceptedTerms}
                         onChange={(e) => setAcceptedTerms(e.target.checked)}
                         style={{
-                            width: '20px', height: '20px', marginTop: '2px', cursor: 'pointer',
-                            accentColor: 'white'
+                            width: '24px', height: '24px', marginTop: '2px', cursor: 'pointer',
+                            accentColor: 'white', flexShrink: 0
                         }}
                     />
-                    <label htmlFor="terms" style={{ fontSize: '0.85rem', lineHeight: 1.4, opacity: 0.9 }}>
+                    <div style={{ fontSize: '0.85rem', lineHeight: 1.4, opacity: 0.9 }}>
                         {t('ob_terms_prefix', { defaultValue: 'Eu li e aceito os ' })}
-                        <span
-                            onClick={(e) => { e.preventDefault(); setShowDocs('terms'); }}
-                            style={{ textDecoration: 'underline', fontWeight: '700', cursor: 'pointer' }}
+                        <button
+                            type="button"
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowDocs('terms'); }}
+                            style={{
+                                background: 'transparent', border: 'none', padding: 0,
+                                textDecoration: 'underline', fontWeight: '700', cursor: 'pointer', color: 'white',
+                                fontSize: 'inherit', display: 'inline'
+                            }}
                         >
                             {t('ob_terms_label', { defaultValue: 'Termos de Uso' })}
-                        </span>
+                        </button>
                         {t('ob_terms_and', { defaultValue: ' e a ' })}
-                        <span
-                            onClick={(e) => { e.preventDefault(); setShowDocs('privacy'); }}
-                            style={{ textDecoration: 'underline', fontWeight: '700', cursor: 'pointer' }}
+                        <button
+                            type="button"
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowDocs('privacy'); }}
+                            style={{
+                                background: 'transparent', border: 'none', padding: 0,
+                                textDecoration: 'underline', fontWeight: '700', cursor: 'pointer', color: 'white',
+                                fontSize: 'inherit', display: 'inline'
+                            }}
                         >
                             {t('ob_privacy_label', { defaultValue: 'Política de Privacidade' })}
-                        </span>.
-                    </label>
+                        </button>.
+                    </div>
                 </div>
 
                 <button

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Database, Search, ArrowRight, CheckCircle2, AlertCircle, Key, FileText, Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { ChevronLeft, Database, ArrowRight, CheckCircle2, AlertCircle, FileText, Loader2, Link, Lock } from 'lucide-react';
 import { useI18n } from '../contexts/I18nContext';
 import { getNotionDatabaseInfo, fetchNotionTransactions } from '../services/notionService';
 import { addTransaction } from '../services/transactionService';
@@ -10,62 +10,92 @@ const NotionImport = () => {
     const navigate = useNavigate();
     const { currentUser } = useAuth();
     const { t } = useI18n();
-    const [step, setStep] = useState(1); // 1: Info, 2: Secret, 3: DB ID, 4: Sinc, 5: Success
-    const [notionSecret, setNotionSecret] = useState('');
-    const [notionDbId, setNotionDbId] = useState('');
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    const [notionToken, setNotionToken] = useState(localStorage.getItem('zimbroo_notion_token') || '');
+    const [notionDbId, setNotionDbId] = useState(localStorage.getItem('zimbroo_notion_db_id') || '');
+    const [step, setStep] = useState(notionToken ? 2 : 1); // 1: OAuth, 2: DB ID, 3: Sinc, 4: Success
     const [dbMetadata, setDbMetadata] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [progress, setProgress] = useState(0);
 
-    const checkToken = async () => {
+    // Notion OAuth Config (Usando variáveis de ambiente do Vite)
+    const NOTION_CLIENT_ID = import.meta.env.VITE_NOTION_CLIENT_ID;
+    const NOTION_REDIRECT_URI = import.meta.env.VITE_NOTION_REDIRECT_URI || (window.location.origin + '/notion-callback');
+
+    useEffect(() => {
+        const code = searchParams.get('code');
+        if (code && !notionToken) {
+            handleExchangeCode(code);
+        }
+    }, [searchParams]);
+
+    const handleExchangeCode = async (code) => {
         setLoading(true);
         setError(null);
         try {
-            // Notion API is proxied via /notion-api/
-            // Test connection by fetching db info
-            if (!notionSecret.startsWith('secret_')) {
-                throw new Error('O Token deve começar com secret_');
+            const response = await fetch('/api/notion-token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code })
+            });
+            const data = await response.json();
+            if (data.access_token) {
+                setNotionToken(data.access_token);
+                localStorage.setItem('zimbroo_notion_token', data.access_token);
+                setStep(2); // Vai para o passo do Banco de Dados
+                setSearchParams({}); // Limpa a URL
+            } else {
+                throw new Error(data.error || 'Falha na conexão com o Notion');
             }
-            setStep(3);
         } catch (err) {
-            setError(err.message);
+            console.error(err);
+            setError("Erro ao conectar com o Notion. Verifique as configurações de Redirect URI.");
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleStartOAuth = () => {
+        if (!NOTION_CLIENT_ID) {
+            alert("Erro: Client ID do Notion não configurado nas variáveis de ambiente.");
+            return;
+        }
+        const authUrl = `https://api.notion.com/v1/oauth/authorize?owner=user&client_id=${NOTION_CLIENT_ID}&redirect_uri=${encodeURIComponent(NOTION_REDIRECT_URI)}&response_type=code`;
+        window.location.href = authUrl;
     };
 
     const confirmDb = async () => {
         setLoading(true);
         setError(null);
         try {
-            const data = await getNotionDatabaseInfo(notionSecret, notionDbId);
+            const data = await getNotionDatabaseInfo(notionToken, notionDbId);
             setDbMetadata(data);
-            setStep(4);
+            setStep(3);
+            localStorage.setItem('zimbroo_notion_db_id', notionDbId);
         } catch (err) {
-            setError('Banco de Dados não encontrado ou não compartilhado.');
+            setError('Banco de Dados não encontrado. Certifique-se de que deu acesso a ele no Notion.');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleImport = async () => {
+    const startSync = async () => {
         setLoading(true);
         setError(null);
         try {
-            const txs = await fetchNotionTransactions(notionSecret, notionDbId);
+            const txs = await fetchNotionTransactions(notionToken, notionDbId);
             if (txs.length === 0) {
                 throw new Error('Nenhuma transação encontrada nesta base.');
             }
 
-            // Sync with Firebase
             for (let i = 0; i < txs.length; i++) {
-                const tx = txs[i];
-                await addTransaction(currentUser.uid, tx);
+                await addTransaction(currentUser.uid, txs[i]);
                 setProgress(Math.round(((i + 1) / txs.length) * 100));
             }
 
-            setStep(5);
+            setStep(4);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -74,38 +104,27 @@ const NotionImport = () => {
     };
 
     return (
-        <div className="page-container animate-fade-in" style={{ paddingBottom: '40px', position: 'relative', overflow: 'hidden', minHeight: '100dvh' }}>
-            <div className="notion-aura"></div>
-
+        <div style={{ padding: '24px', maxWidth: '600px', margin: '0 auto', minHeight: '100vh' }}>
             {/* Header */}
-            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', marginBottom: '32px', position: 'relative', zIndex: 2 }}>
-                <button onClick={() => navigate(-1)} style={{ padding: '8px', marginLeft: '-8px' }}>
-                    <ChevronLeft size={24} color="var(--text-main)" />
+            <header style={{ display: 'flex', alignItems: 'center', marginBottom: '40px', gap: '16px' }}>
+                <button
+                    onClick={() => navigate(-1)}
+                    style={{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '10px', color: 'var(--text-main)', cursor: 'pointer' }}
+                >
+                    <ChevronLeft size={20} />
                 </button>
                 <h1 style={{ fontSize: '1.1rem', color: 'var(--text-main)', fontWeight: '600' }}>Integração Notion</h1>
-                <div style={{ width: '40px' }}></div>
             </header>
 
-            <div style={{ position: 'relative', zIndex: 2, maxWidth: '500px', margin: '0 auto' }}>
-                {error && (
-                    <div className="animate-fade-in" style={{
-                        background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444',
-                        padding: '16px', borderRadius: '16px', marginBottom: '24px',
-                        display: 'flex', gap: '12px', alignItems: 'center'
-                    }}>
-                        <AlertCircle size={20} />
-                        <span style={{ fontSize: '0.9rem', fontWeight: '600' }}>{error}</span>
-                    </div>
-                )}
-
+            <main>
                 {step === 1 && (
-                    <div className="animate-fade-in">
+                    <div className="animate-fade-in" style={{ textAlign: 'center' }}>
                         <div style={{
-                            width: '70px', height: '70px', background: '#000', borderRadius: '18px',
-                            display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '24px',
-                            boxShadow: '0 10px 25px rgba(0,0,0,0.2)'
+                            width: '80px', height: '80px', borderRadius: '24px', background: 'var(--primary-color)',
+                            display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto 24px',
+                            boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
                         }}>
-                            <Database size={32} color="white" />
+                            <Database size={40} color="white" />
                         </div>
 
                         <h2 style={{ fontSize: '1.8rem', fontWeight: '800', marginBottom: '16px', color: 'var(--text-main)', lineHeight: 1.2 }}>
@@ -116,190 +135,146 @@ const NotionImport = () => {
                             Sincronize automaticamente seus gastos do Notion com a inteligência do Zimbroo.
                         </p>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '40px' }}>
-                            {[
-                                { title: 'Importação Direta', desc: 'Sincronização via API oficial do Notion.' },
-                                { title: 'Seguro e Privado', desc: 'Seus tokens ficam salvos apenas localmente.' },
-                                { title: 'Mapeamento Inteligente', desc: 'Nome, Valor, Data e Categoria automáticos.' }
-                            ].map((item, i) => (
-                                <div key={i} style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
-                                    <div style={{ marginTop: '4px' }}><CheckCircle2 size={18} color="var(--primary-color)" /></div>
-                                    <div>
-                                        <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: '700', color: 'var(--text-main)' }}>{item.title}</h4>
-                                        <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>{item.desc}</p>
-                                    </div>
+                        <div style={{ background: 'var(--card-bg)', padding: '32px', borderRadius: '24px', border: '1px solid var(--border-color)', position: 'relative', overflow: 'hidden', textAlign: 'left' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
+                                <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                    <Lock size={20} color="var(--text-main)" />
                                 </div>
-                            ))}
-                        </div>
+                                <div>
+                                    <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700' }}>Autenticação Segura</h3>
+                                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>Conecta via API Oficial do Notion</p>
+                                </div>
+                            </div>
 
-                        <button
-                            onClick={() => setStep(2)}
-                            style={{
-                                width: '100%', padding: '18px', borderRadius: '18px',
-                                background: 'var(--primary-darker)', color: 'white',
-                                fontWeight: '700', fontSize: '1rem', border: 'none',
-                                display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px'
-                            }}
-                        >
-                            Começar Agora <ArrowRight size={20} />
-                        </button>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '32px', lineHeight: 1.5 }}>
+                                Ao clicar abaixo, você será redirecionado para o Notion para escolher quais páginas o <b>Zimbroo</b> poderá acessar. É simples e totalmente seguro.
+                            </p>
+
+                            <button
+                                onClick={handleStartOAuth}
+                                disabled={loading}
+                                style={{
+                                    width: '100%', padding: '18px', backgroundColor: 'black', color: 'white',
+                                    borderRadius: '16px', border: 'none', display: 'flex', alignItems: 'center',
+                                    justifyContent: 'center', gap: '12px', cursor: 'pointer', transition: 'transform 0.2s',
+                                    fontWeight: '700', fontSize: '1rem',
+                                    boxShadow: '0 10px 20px rgba(0,0,0,0.1)'
+                                }}
+                            >
+                                {loading ? 'Carregando...' : (
+                                    <>
+                                        <img src="https://www.notion.so/images/favicon.ico" style={{ width: '20px', height: '20px' }} alt="" />
+                                        Conectar com Notion
+                                    </>
+                                )}
+                            </button>
+                        </div>
                     </div>
                 )}
 
                 {step === 2 && (
                     <div className="animate-fade-in">
                         <h2 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '12px', color: 'var(--text-main)' }}>
-                            Token de Integração
-                        </h2>
-                        <p style={{ color: 'var(--text-muted)', marginBottom: '32px', fontSize: '0.95rem' }}>
-                            Crie uma integração no <b>developers.notion.com</b> e cole o "Internal Integration Secret" abaixo.
-                        </p>
-
-                        <div style={{ position: 'relative', marginBottom: '32px' }}>
-                            <div style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>
-                                <Key size={20} />
-                            </div>
-                            <input
-                                type="password"
-                                placeholder="secret_..."
-                                value={notionSecret}
-                                onChange={(e) => setNotionSecret(e.target.value)}
-                                style={{
-                                    width: '100%', padding: '18px 18px 18px 50px', borderRadius: '18px',
-                                    background: 'var(--surface-color)', border: '1px solid var(--glass-border)',
-                                    color: 'var(--text-main)', fontSize: '1rem', outline: 'none'
-                                }}
-                            />
-                        </div>
-
-                        <button
-                            onClick={checkToken}
-                            disabled={!notionSecret || loading}
-                            style={{
-                                width: '100%', padding: '18px', borderRadius: '18px',
-                                background: 'var(--primary-color)', color: 'white',
-                                fontWeight: '700', fontSize: '1rem', opacity: !notionSecret ? 0.6 : 1
-                            }}
-                        >
-                            Confirmar Token
-                        </button>
-                    </div>
-                )}
-
-                {step === 3 && (
-                    <div className="animate-fade-in">
-                        <h2 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '12px', color: 'var(--text-main)' }}>
                             ID do Banco de Dados
                         </h2>
                         <p style={{ color: 'var(--text-muted)', marginBottom: '32px', fontSize: '0.95rem' }}>
-                            Abra sua base no navegador. O ID é a string alfanumérica entre o último / e o ?.
+                            Cole o ID da base de dados financeira que você quer importar.
                         </p>
 
-                        <div style={{ position: 'relative', marginBottom: '32px' }}>
-                            <div style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>
-                                <FileText size={20} />
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '32px' }}>
+                            <div style={{ position: 'relative' }}>
+                                <div style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>
+                                    <Link size={20} />
+                                </div>
+                                <input
+                                    type="text"
+                                    placeholder="Database ID (32 caracteres)"
+                                    value={notionDbId}
+                                    onChange={(e) => setNotionDbId(e.target.value)}
+                                    style={{
+                                        width: '100%', padding: '18px 18px 18px 50px', borderRadius: '18px',
+                                        background: 'var(--surface-color)', border: '1px solid var(--glass-border)',
+                                        color: 'var(--text-main)', fontSize: '1rem', outline: 'none'
+                                    }}
+                                />
                             </div>
-                            <input
-                                type="text"
-                                placeholder="32 caracteres de ID..."
-                                value={notionDbId}
-                                onChange={(e) => setNotionDbId(e.target.value)}
-                                style={{
-                                    width: '100%', padding: '18px 18px 18px 50px', borderRadius: '18px',
-                                    background: 'var(--surface-color)', border: '1px solid var(--glass-border)',
-                                    color: 'var(--text-main)', fontSize: '1rem', outline: 'none'
-                                }}
-                            />
                         </div>
 
-                        <div style={{ background: 'rgba(234, 179, 8, 0.1)', padding: '16px', borderRadius: '16px', display: 'flex', gap: '12px', marginBottom: '40px' }}>
-                            <AlertCircle size={20} color="#ca8a04" style={{ flexShrink: 0 }} />
-                            <p style={{ margin: 0, fontSize: '0.85rem', color: '#854d0e', lineHeight: 1.4 }}>
-                                Lembre-se de clicar em <b>"..." (Menu) &rarr; Connections &rarr; Add Connection</b> e selecionar sua integração no Notion.
-                            </p>
-                        </div>
+                        {error && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#ef4444', marginBottom: '24px', fontSize: '0.9rem', background: 'rgba(239, 68, 68, 0.1)', padding: '12px', borderRadius: '12px' }}>
+                                <AlertCircle size={18} />
+                                <span>{error}</span>
+                            </div>
+                        )}
 
                         <button
                             onClick={confirmDb}
                             disabled={!notionDbId || loading}
                             style={{
                                 width: '100%', padding: '18px', borderRadius: '18px',
-                                background: loading ? 'var(--text-muted)' : 'var(--primary-color)',
-                                color: 'white', fontWeight: '700', fontSize: '1rem', opacity: !notionDbId ? 0.6 : 1
+                                background: 'var(--primary-color)', color: 'white',
+                                fontWeight: '700', fontSize: '1rem', border: 'none', opacity: !notionDbId ? 0.6 : 1
                             }}
                         >
-                            {loading ? <Loader2 className="animate-spin" /> : 'Verificar Banco de Dados'}
+                            {loading ? 'Verificando...' : 'Próximo Passo'}
                         </button>
                     </div>
                 )}
 
-                {step === 4 && dbMetadata && (
+                {step === 3 && (
                     <div className="animate-fade-in" style={{ textAlign: 'center' }}>
                         <div style={{
-                            width: '80px', height: '80px', background: 'var(--primary-light)', borderRadius: '50%',
-                            display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto 24px',
-                            color: 'var(--primary-color)'
+                            width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(34, 197, 94, 0.1)',
+                            display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto 24px'
                         }}>
-                            <CheckCircle2 size={40} />
+                            <CheckCircle2 size={32} color="#22c55e" />
                         </div>
-                        <h2 style={{ fontSize: '1.8rem', fontWeight: '800', marginBottom: '12px', color: 'var(--text-main)' }}>
-                            {dbMetadata.title[0]?.plain_text || 'Base Encontrada!'}
+                        <h2 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '8px', color: 'var(--text-main)' }}>
+                            {dbMetadata?.title[0]?.plain_text || 'Base Conectada!'}
                         </h2>
                         <p style={{ color: 'var(--text-muted)', marginBottom: '40px' }}>
                             Pronto para importar suas transações para o Zimbroo.
                         </p>
 
-                        {loading ? (
-                            <div style={{ width: '100%', marginBottom: '40px' }}>
-                                <div style={{ height: '8px', background: 'var(--glass-border)', borderRadius: '4px', overflow: 'hidden', marginBottom: '10px' }}>
-                                    <div style={{ height: '100%', width: `${progress}%`, background: 'var(--primary-color)', transition: 'width 0.3s' }}></div>
-                                </div>
-                                <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Sincronizando... {progress}%</span>
-                            </div>
-                        ) : (
-                            <button
-                                onClick={handleImport}
-                                style={{
-                                    width: '100%', padding: '18px', borderRadius: '18px',
-                                    background: 'var(--primary-darker)', color: 'white',
-                                    fontWeight: '700', fontSize: '1.2rem', border: 'none'
-                                }}
-                            >
-                                Importar Tudo
-                            </button>
-                        )}
+                        <button
+                            onClick={startSync}
+                            disabled={loading}
+                            style={{
+                                width: '100%', padding: '20px', borderRadius: '20px',
+                                background: 'var(--primary-color)', color: 'white',
+                                fontWeight: '700', fontSize: '1.1rem', border: 'none',
+                                display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px'
+                            }}
+                        >
+                            {loading ? `Sincronizando ${progress}%...` : 'Iniciar Sincronização'}
+                        </button>
                     </div>
                 )}
 
-                {step === 5 && (
-                    <div className="animate-fade-in" style={{ textAlign: 'center' }}>
-                        <div style={{
-                            width: '80px', height: '80px', background: 'var(--primary-color)', borderRadius: '50%',
-                            display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto 24px',
-                            color: 'white'
-                        }}>
-                            <CheckCircle2 size={40} />
+                {step === 4 && (
+                    <div className="animate-fade-in" style={{ textAlign: 'center', padding: '40px 0' }}>
+                        <div style={{ marginBottom: '32px' }}>
+                            <CheckCircle2 size={80} color="#22c55e" style={{ margin: '0 auto' }} />
                         </div>
-                        <h2 style={{ fontSize: '1.8rem', fontWeight: '800', marginBottom: '16px', color: 'var(--text-main)' }}>
-                            Sucesso!
+                        <h2 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '16px', color: 'var(--text-main)' }}>
+                            Importação Concluída!
                         </h2>
-                        <p style={{ color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: '40px' }}>
-                            Sua base do Notion foi sincronizada. Seu dashboard está atualizado com os novos dados.
+                        <p style={{ color: 'var(--text-muted)', marginBottom: '40px', fontSize: '1.1rem' }}>
+                            Sua base do Notion foi sincronizada com sucesso.
                         </p>
-
                         <button
                             onClick={() => navigate('/')}
                             style={{
                                 width: '100%', padding: '18px', borderRadius: '18px',
-                                background: 'black', color: 'white',
-                                fontWeight: '700', fontSize: '1.1rem', border: 'none'
+                                background: 'var(--primary-darker)', color: 'white',
+                                fontWeight: '700', fontSize: '1rem', border: 'none'
                             }}
                         >
-                            Ver Meus Gastos
+                            Ver meu Dashboard
                         </button>
                     </div>
                 )}
-            </div>
+            </main>
         </div>
     );
 };
