@@ -13,6 +13,7 @@
 
   --primary-light: #e6f7e9;
   --primary-gradient: linear-gradient(135deg, #4BB45A 0%, #2D7D39 100%);
+  --brand-dark-gradient: linear-gradient(135deg, var(--primary-darker) 0%, var(--primary-darkest) 100%);
   --secondary-gradient: linear-gradient(180deg, var(--bg-color) 0%, #d4f0db 100%);
 
   --accent-color: var(--primary-dark);

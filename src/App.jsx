@@ -43,7 +43,7 @@ const AppRoutes = () => {
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        background: '#0E2210',
+        background: '#1B4520',
         color: 'white',
         zIndex: 9999,
         position: 'fixed',

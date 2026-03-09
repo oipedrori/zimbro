@@ -78,7 +78,7 @@ const Onboarding = () => {
             display: 'flex',
             flexDirection: 'column',
             height: '100dvh',
-            backgroundColor: 'var(--primary-darkest)',
+            backgroundColor: 'var(--primary-darker)',
             color: 'white',
             position: 'relative',
             overflow: 'hidden'
@@ -233,7 +233,7 @@ const Onboarding = () => {
                 .onboarding-bg {
                     position: absolute;
                     top: 0; left: 0; right: 0; bottom: 0;
-                    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+                    background: linear-gradient(135deg, var(--primary-darker) 0%, var(--primary-darkest) 100%);
                     background-size: 200% 200%;
                     animation: gradientAnim 15s ease infinite;
                     z-index: 0;

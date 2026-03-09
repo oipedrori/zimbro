@@ -87,7 +87,7 @@ export const AuthProvider = ({ children }) => {
                 flexDirection: 'column',
                 justifyContent: 'center',
                 alignItems: 'center',
-                background: 'var(--primary-darkest)',
+                background: 'var(--primary-darker)',
                 color: 'white',
                 fontFamily: 'sans-serif'
             }}>
