@@ -11,6 +11,7 @@ const Onboarding = () => {
     const { t, locale, changeLocale } = useI18n();
     const navigate = useNavigate();
     const [isLoggingIn, setIsLoggingIn] = useState(false);
+    const [loginError, setLoginError] = useState(null);
     const [currentStory, setCurrentStory] = useState(0);
 
     const stories = [
@@ -42,13 +43,17 @@ const Onboarding = () => {
 
     const handleLogin = async () => {
         setIsLoggingIn(true);
+        setLoginError(null);
         try {
             await loginWithGoogle();
             // Com signInWithPopup, a página não é recarregada.
             // O componente App.jsx cuidará de redirecionar para '/' assim que o AuthProvider atualizar o currentUser.
         } catch (error) {
-            console.error("Falha ao fazer login", error);
+            console.error("Falha ao fazer login:", error);
+            const errorMsg = error.message || error.code || "Erro desconhecido";
             setIsLoggingIn(false);
+            setLoginError(`Falha na autenticação: ${errorMsg}. \nSe for 'unauthorized domain', adicione o domínio do seu app no Firebase Console.`);
+            alert(`Erro no Login: ${errorMsg}\n Verifique se o domínio está listado no Firebase Authentication.`);
         }
     };
 
@@ -190,6 +195,15 @@ const Onboarding = () => {
                 background: 'transparent',
                 paddingBottom: 'calc(env(safe-area-inset-bottom, 20px) + 20px)'
             }}>
+                {loginError && (
+                    <div style={{
+                        background: 'rgba(239, 68, 68, 0.9)', color: 'white', padding: '12px',
+                        borderRadius: '8px', marginBottom: '16px', fontSize: '0.9rem', textAlign: 'center',
+                        backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.2)'
+                    }}>
+                        {loginError}
+                    </div>
+                )}
                 <button
                     onClick={handleLogin}
                     disabled={isLoggingIn}
