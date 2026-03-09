@@ -125,12 +125,12 @@ const Home = () => {
                 }}>
                     <style>{`
                         @keyframes flipZoomIn {
-                            0% { transform: scale(0.4) rotateX(90deg) translateY(50vh); opacity: 0; border-radius: 40px; }
-                            100% { transform: scale(1) rotateX(0deg) translateY(0); opacity: 1; border-radius: 0; }
+                            0% { transform: perspective(1200px) rotateY(90deg) scale(0.5); opacity: 0; border-radius: 50px; }
+                            100% { transform: perspective(1200px) rotateY(0deg) scale(1); opacity: 1; border-radius: 0; }
                         }
                         @keyframes flipZoomOut {
-                            0% { transform: scale(1) rotateX(0deg); opacity: 1; border-radius: 0; }
-                            100% { transform: scale(0.4) rotateX(90deg) translateY(50vh); opacity: 0; border-radius: 40px; }
+                            0% { transform: perspective(1200px) rotateY(0deg) scale(1); opacity: 1; border-radius: 0; }
+                            100% { transform: perspective(1200px) rotateY(-90deg) scale(0.5); opacity: 0; border-radius: 50px; }
                         }
                     `}</style>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
