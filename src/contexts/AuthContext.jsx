@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { auth, googleProvider } from '../config/firebase';
-import { signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from 'firebase/auth';
+import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
 
 const AuthContext = createContext();
 
@@ -13,21 +13,13 @@ export const AuthProvider = ({ children }) => {
     // Login com Google
     const loginWithGoogle = async () => {
         try {
-            await signInWithRedirect(auth, googleProvider);
-            // Em mobile/PWA a página vai recarregar;
-            // a captura do login será tratada pelo onAuthStateChanged na inicialização.
+            const result = await signInWithPopup(auth, googleProvider);
+            return result.user;
         } catch (error) {
             console.error("Erro no login com Google:", error);
             throw error;
         }
     };
-
-    // Tentar pegar os erros de redirecionamento, se houver:
-    useEffect(() => {
-        getRedirectResult(auth).catch((error) => {
-            console.error("Erro no retorno de redirecionamento do Auth:", error);
-        });
-    }, []);
 
     // Logout
     const logout = async () => {
