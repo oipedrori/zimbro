@@ -33,11 +33,11 @@
     right: 0;
     height: 12%;
     /* Covers bottom 12% of screen */
-    background: linear-gradient(to top, var(--bg-color) 20%, transparent 100%);
+    background: transparent;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    mask-image: linear-gradient(to top, black 40%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to top, black 40%, transparent 100%);
+    mask-image: linear-gradient(to top, black 30%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to top, black 30%, transparent 100%);
     pointer-events: none;
     z-index: 45;
     /* Below the nav but above content */
