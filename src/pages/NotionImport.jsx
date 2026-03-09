@@ -47,11 +47,9 @@ const NotionImport = () => {
             if (data.access_token) {
                 setNotionToken(data.access_token);
                 localStorage.setItem('zimbroo_notion_token', data.access_token);
+                // Remove o code da URL imediatamente
                 setSearchParams({});
-
-                // Busca inicial
-                const dbs = await searchNotionDatabases(data.access_token);
-                setFoundDbs(dbs || []);
+                // Muda de passo imediatamente para o usuário ver progresso
                 setStep(2);
             } else {
                 throw new Error(data.error || 'Falha na conexão com o Notion');
@@ -80,10 +78,10 @@ const NotionImport = () => {
     };
 
     useEffect(() => {
-        if (notionToken && step === 2 && foundDbs.length === 0) {
+        if (notionToken && step === 2 && foundDbs.length === 0 && !loading && !error) {
             refreshDatabases();
         }
-    }, [notionToken, step]);
+    }, [notionToken, step, foundDbs.length]);
 
     const assignDb = (id, role) => {
         const cleanId = id.replace(/-/g, '');
@@ -312,12 +310,28 @@ const NotionImport = () => {
                         </div>
 
                         {/* Automatic Localized Lists */}
-                        {foundDbs.length > 0 ? (
+                        {/* Discovery Status & Feedback */}
+                        {loading && !foundDbs.length && !error && (
+                            <div style={{ textAlign: 'center', padding: '40px', opacity: 0.6 }}>
+                                <Loader2 size={32} className="animate-spin" style={{ margin: '0 auto 12px' }} />
+                                <p>Buscando no Notion...</p>
+                            </div>
+                        )}
+
+                        {error && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#ef4444', marginBottom: '24px', fontSize: '0.85rem', background: 'rgba(239, 68, 68, 0.05)', padding: '16px', borderRadius: '16px' }}>
+                                <AlertCircle size={18} />
+                                <span>{error}</span>
+                            </div>
+                        )}
+
+                        {/* Automatic Localized Lists */}
+                        {foundDbs.length > 0 && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>
                                 <label style={{ fontSize: '0.85rem', fontWeight: '700', opacity: 0.6, display: 'flex', justifyContent: 'space-between' }}>
                                     TABELAS ENCONTRADAS
                                     <button onClick={refreshDatabases} style={{ border: 'none', background: 'none', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--primary-color)', cursor: 'pointer', fontWeight: '700' }}>
-                                        <RefreshCcw size={12} className={loading ? 'animate-spin' : ''} /> Recarregar
+                                        <RefreshCcw size={12} className={loading && !manualUrl ? 'animate-spin' : ''} /> Recarregar
                                     </button>
                                 </label>
                                 {foundDbs.map(db => (
@@ -364,28 +378,21 @@ const NotionImport = () => {
                                     </div>
                                 ))}
                             </div>
-                        ) : (
-                            !loading && (
-                                <div style={{ background: 'var(--surface-color)', padding: '24px', borderRadius: '24px', marginBottom: '32px', textAlign: 'center' }}>
-                                    <AlertCircle size={32} color="var(--text-muted)" style={{ margin: '0 auto 12px', opacity: 0.5 }} />
-                                    <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '16px' }}>Nenhuma tabela encontrada automaticamente.</p>
-                                    <button onClick={refreshDatabases} style={{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', padding: '10px 20px', borderRadius: '14px', fontSize: '0.9rem', fontWeight: '700', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', margin: '0 auto' }}>
-                                        <RefreshCcw size={16} /> Tentar Novamente
-                                    </button>
-                                </div>
-                            )
                         )}
 
-                        {loading && !foundDbs.length && (
-                            <div style={{ textAlign: 'center', padding: '40px', opacity: 0.6 }}>
-                                <Loader2 size={32} className="animate-spin" style={{ margin: '0 auto 12px' }} />
-                                <p>Buscando no Notion...</p>
+                        {!loading && foundDbs.length === 0 && !error && (
+                            <div style={{ background: 'var(--surface-color)', padding: '24px', borderRadius: '24px', marginBottom: '32px', textAlign: 'center' }}>
+                                <AlertCircle size={32} color="var(--text-muted)" style={{ margin: '0 auto 12px', opacity: 0.5 }} />
+                                <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '16px' }}>Nenhuma tabela encontrada automaticamente.</p>
+                                <button onClick={refreshDatabases} style={{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', padding: '10px 20px', borderRadius: '14px', fontSize: '0.9rem', fontWeight: '700', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', margin: '0 auto' }}>
+                                    <RefreshCcw size={16} /> Tentar Novamente
+                                </button>
                             </div>
                         )}
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '32px' }}>
                             <label style={{ fontSize: '0.85rem', fontWeight: '700', opacity: 0.6, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <Link size={14} /> ADICIONAR COM LINK (BACKUP)
+                                <Link size={14} /> ADICIONAR COM LINK (PÁGINA OU TABELA)
                             </label>
                             <div style={{ display: 'flex', gap: '8px' }}>
                                 <input
@@ -401,19 +408,14 @@ const NotionImport = () => {
                                 />
                                 <button
                                     onClick={handleManualLink}
-                                    style={{ padding: '0 20px', borderRadius: '16px', background: 'var(--primary-color)', color: 'white', border: 'none', fontWeight: '700' }}
+                                    disabled={loading}
+                                    style={{ padding: '0 20px', borderRadius: '16px', background: 'var(--primary-color)', color: 'white', border: 'none', fontWeight: '700', opacity: loading ? 0.6 : 1 }}
                                 >
                                     Vincular
                                 </button>
                             </div>
                         </div>
 
-                        {error && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#ef4444', marginBottom: '24px', fontSize: '0.85rem', background: 'rgba(239, 68, 68, 0.05)', padding: '16px', borderRadius: '16px' }}>
-                                <AlertCircle size={18} />
-                                <span>{error}</span>
-                            </div>
-                        )}
 
                         {/* Tips */}
                         <div style={{ background: 'rgba(59, 130, 246, 0.05)', padding: '16px', borderRadius: '20px', marginBottom: '32px', display: 'flex', gap: '12px' }}>
