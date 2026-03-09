@@ -108,7 +108,13 @@ export const findDatabasesOnPage = async (secret, blockId) => {
                                     databases.push(db);
                                 }
                             }
-                            else if ((block.type === 'child_page' || block.has_children) && level < MAX_DEPTH) {
+                            // Só entra em containers que podem ter tabelas (colunas, grupos, toggles)
+                            const isContainer = [
+                                'column_list', 'column', 'toggle', 'child_page',
+                                'synced_block', 'template', 'group'
+                            ].includes(block.type);
+
+                            if (isContainer && block.has_children && level < MAX_DEPTH) {
                                 await scan(block.id, level + 1);
                             }
                         } catch (e) {

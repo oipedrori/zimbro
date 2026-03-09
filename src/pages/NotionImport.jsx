@@ -76,29 +76,32 @@ const NotionImport = () => {
             const results = await searchNotionDatabases(notionToken);
             setDebugItems(results); // Guarda para o debug do usuário
 
-            // 1. Pega databases que apareceram direto na busca
+            // 1. Mostra logo o que veio na busca direta (mais rápido)
             const directDbs = results.filter(item => item.object === 'database');
+            setFoundDbs(directDbs);
 
-            // 2. Pega páginas autorizadas para varrer o que tem dentro (databases inline)
+            // 2. Tenta buscar em cada página autorizada
             const pages = results.filter(item => item.object === 'page');
-
-            let allFound = [...directDbs];
+            let deepDbs = [];
 
             if (pages.length > 0) {
-                console.log(`Páginas autorizadas encontradas: ${pages.length}. Varrendo conteúdo...`);
-                // Varre as páginas em paralelo (limite de concorrência sutil para não travar)
-                const pageScans = await Promise.all(
-                    pages.map(p => findDatabasesOnPage(notionToken, p.id).catch(() => []))
-                );
-                pageScans.forEach(nestedList => {
-                    allFound = [...allFound, ...nestedList];
-                });
+                // Para não travar no celular, varremos apenas as primeiras páginas autorizadas
+                const topPages = pages.slice(0, 5);
+                for (const page of topPages) {
+                    const nested = await findDatabasesOnPage(notionToken, page.id).catch(() => []);
+                    if (nested.length > 0) {
+                        deepDbs = [...deepDbs, ...nested];
+                        // Atualiza a UI conforme descobre para não parecer travado
+                        setFoundDbs(prev => {
+                            const combined = [...prev, ...nested];
+                            return Array.from(new Map(combined.map(d => [d.id, d])).values());
+                        });
+                    }
+                }
             }
 
-            // 3. Remove duplicatas (mesma database pode aparecer na busca e na página)
+            const allFound = [...directDbs, ...deepDbs];
             const uniqueDbs = Array.from(new Map(allFound.map(item => [item.id, item])).values());
-            console.log("Total de databases únicas descobertas:", uniqueDbs.length);
-
             setFoundDbs(uniqueDbs);
 
             // 4. Auto-vínculo inteligente por nome e estrutura
