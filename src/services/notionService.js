@@ -35,6 +35,11 @@ export const searchNotionDatabases = async (secret) => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
+                    query: "", // Força o Notion a retornar itens mesmo sem filtro
+                    sort: {
+                        direction: 'descending',
+                        timestamp: 'last_edited_time'
+                    },
                     start_cursor: startCursor,
                     page_size: 100
                 })

@@ -125,7 +125,7 @@ const NotionImport = () => {
     };
 
     useEffect(() => {
-        if (notionToken && step === 2 && foundDbs.length === 0 && !loading && !error) {
+        if (notionToken && step === 2 && foundDbs.length === 0 && !loading) {
             refreshDatabases();
         }
     }, [notionToken, step, foundDbs.length]);
@@ -380,15 +380,13 @@ const NotionImport = () => {
                         {/* Automatic Localized Lists */}
                         {foundDbs.length > 0 && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>
-                                <label style={{ fontSize: '0.85rem', fontWeight: '700', opacity: 0.6, display: 'flex', justifyContent: 'space-between' }}>
-                                    TABELAS ENCONTRADAS
-                                    <button onClick={refreshDatabases} style={{ border: 'none', background: 'none', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--primary-color)', cursor: 'pointer', fontWeight: '700' }}>
-                                        <RefreshCcw size={12} className={loading && !manualUrl ? 'animate-spin' : ''} /> Recarregar
-                                    </button>
+                                <label style={{ fontSize: '0.85rem', fontWeight: '700', opacity: 0.6, display: 'flex', justifySelf: 'start', marginBottom: '4px' }}>
+                                    TABELAS FINANCEIRAS ENCONTRADAS
                                 </label>
                                 {foundDbs.map(db => (
                                     <div
                                         key={db.id}
+                                        className="animate-fade-in"
                                         style={{
                                             display: 'flex', alignItems: 'center', gap: '12px', padding: '14px',
                                             background: 'var(--card-bg)', border: '1px solid var(--border-color)',
@@ -412,7 +410,7 @@ const NotionImport = () => {
                                                         border: 'none', cursor: 'pointer'
                                                     }}
                                                 >
-                                                    É GASTO
+                                                    {expenseDbId === db.id.replace(/-/g, '') ? '✓ GASTOS' : 'É GASTO'}
                                                 </button>
                                                 <button
                                                     onClick={() => assignDb(db.id, 'income')}
@@ -423,12 +421,15 @@ const NotionImport = () => {
                                                         border: 'none', cursor: 'pointer'
                                                     }}
                                                 >
-                                                    É GANHO
+                                                    {incomeDbId === db.id.replace(/-/g, '') ? '✓ GANHO' : 'É GANHO'}
                                                 </button>
                                             </div>
                                         </div>
                                     </div>
                                 ))}
+                                <button onClick={refreshDatabases} style={{ border: 'none', background: 'none', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--primary-color)', cursor: 'pointer', fontWeight: '700', fontSize: '0.8rem', marginTop: '8px' }}>
+                                    <RefreshCcw size={14} className={loading ? 'animate-spin' : ''} /> Buscar mais tabelas
+                                </button>
                             </div>
                         )}
 
