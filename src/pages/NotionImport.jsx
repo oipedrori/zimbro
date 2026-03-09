@@ -137,8 +137,8 @@ const NotionImport = () => {
 
                         <div style={{ background: 'var(--card-bg)', padding: '32px', borderRadius: '24px', border: '1px solid var(--border-color)', position: 'relative', overflow: 'hidden', textAlign: 'left' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
-                                <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                    <Lock size={20} color="var(--text-main)" />
+                                <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center', border: '1px solid var(--border-color)' }}>
+                                    <img src="/notion_logo.png" style={{ width: '28px', height: '28px', objectFit: 'contain' }} alt="Notion" />
                                 </div>
                                 <div>
                                     <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700' }}>Autenticação Segura</h3>
@@ -163,7 +163,7 @@ const NotionImport = () => {
                             >
                                 {loading ? 'Carregando...' : (
                                     <>
-                                        <img src="https://www.notion.so/images/favicon.ico" style={{ width: '20px', height: '20px' }} alt="" />
+                                        <img src="/notion_logo.png" style={{ width: '22px', height: '22px', objectFit: 'contain' }} alt="" />
                                         Conectar com Notion
                                     </>
                                 )}

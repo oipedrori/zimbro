@@ -143,25 +143,24 @@ const Profile = () => {
                             ))}
                         </div>
                     </div>
-                </div>
-
-                {/* Notion Import Button */}
-                <div
-                    onClick={() => navigate('/notion-import')}
-                    style={{
-                        marginTop: '24px',
-                        background: '#000', padding: '18px 20px', borderRadius: '24px',
-                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                        color: 'white', cursor: 'pointer', boxShadow: '0 8px 15px rgba(0,0,0,0.1)'
-                    }}
-                >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                        <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(255,255,255,0.15)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                            <Database size={20} color="white" />
+                    {/* Notion Import Button */}
+                    <div
+                        onClick={() => navigate('/notion-import')}
+                        style={{
+                            background: '#000', padding: '18px 20px', borderRadius: '24px',
+                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                            color: 'white', cursor: 'pointer', boxShadow: '0 8px 15px rgba(0,0,0,0.1)',
+                            width: '100%'
+                        }}
+                    >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center', border: 'none' }}>
+                                <img src="/notion_logo.png" style={{ width: '22px', height: '22px', objectFit: 'contain' }} alt="Notion" />
+                            </div>
+                            <span style={{ fontWeight: '600', fontSize: '1rem' }}>Sincronizar com Notion</span>
                         </div>
-                        <span style={{ fontWeight: '600', fontSize: '1rem' }}>Sincronizar com Notion</span>
+                        <ArrowRight size={20} opacity={0.6} />
                     </div>
-                    <ArrowRight size={20} opacity={0.6} />
                 </div>
             </div>
 
