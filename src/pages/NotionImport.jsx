@@ -124,7 +124,7 @@ const NotionImport = () => {
             }
         } catch (e) {
             console.error("Erro na descoberta automática:", e);
-            setError("Erro ao buscar tabelas. Tente recriar a conexão com o Notion.");
+            setError(`Falha na API: ${e.message || 'Erro desconhecido'}. Tente excluir a conexão no botão vermelho acima e refazer.`);
         } finally {
             setLoading(false);
         }
