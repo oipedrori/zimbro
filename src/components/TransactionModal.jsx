@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTransactions } from '../hooks/useTransactions';
 import { CATEGORIAS_DESPESA, CATEGORIAS_RECEITA } from '../utils/categories';
 import { format } from 'date-fns';
-import { useI18n } from '../contexts/I18nContext';
+import LoadingDots from './LoadingDots';
 
 const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialData = null, onSuccess }) => {
     const { addTx, updateTx } = useTransactions(format(new Date(), 'yyyy-MM'));
@@ -194,10 +194,11 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
                         type="submit" disabled={loading}
                         style={{
                             marginTop: '10px', width: '100%', padding: '16px', background: 'var(--primary-gradient)',
-                            color: 'white', borderRadius: 'var(--border-radius-lg)', fontWeight: 'bold', fontSize: '1.1rem'
+                            color: 'white', borderRadius: 'var(--border-radius-lg)', fontWeight: 'bold', fontSize: '1.1rem',
+                            display: 'flex', justifyContent: 'center', alignItems: 'center', height: '56px'
                         }}
                     >
-                        {loading ? t('saving') : initialData ? t('save') : t('add')}
+                        {loading ? <LoadingDots style={{ color: 'white' }} /> : (initialData ? t('save') : t('add'))}
                     </button>
 
                     {initialData && (

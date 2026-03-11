@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import LoadingDots from '../components/LoadingDots';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ChevronLeft, Database, ArrowRight, CheckCircle2, AlertCircle, FileText, Loader2, Link, Lock, TrendingUp, TrendingDown, RefreshCcw, Trash2, HelpCircle } from 'lucide-react';
 import { useI18n } from '../contexts/I18nContext';
@@ -330,7 +331,7 @@ const NotionImport = () => {
                                 }}
                             >
                                 <img src="/notion_logo.png" style={{ width: '22px', height: '22px' }} alt="" />
-                                {loading ? 'Carregando...' : 'Conectar Agora'}
+                                {loading ? <LoadingDots style={{ color: 'white' }} /> : 'Conectar Agora'}
                             </button>
                         </div>
                     </div>
@@ -372,7 +373,7 @@ const NotionImport = () => {
                         {loading && !foundDbs.length && !error && (
                             <div style={{ textAlign: 'center', padding: '40px', opacity: 0.6 }}>
                                 <Loader2 size={32} className="animate-spin" style={{ margin: '0 auto 12px' }} />
-                                <p>Buscando no Notion...</p>
+                                <LoadingDots />
                             </div>
                         )}
 

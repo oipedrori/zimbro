@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { Plus, Mic, X } from 'lucide-react';
+import { Plus, Mic, X, Edit2 } from 'lucide-react';
 import AiPanel from './AiPanel';
 import DynamicIslandHint from './DynamicIslandHint';
 import TransactionModal from './TransactionModal';
@@ -13,6 +13,7 @@ import './Layout.css';
 
 const Layout = () => {
     const [isAiActive, setIsAiActive] = useState(false);
+    const [isTextMode, setIsTextMode] = useState(false);
     const [isListening, setIsListening] = useState(false);
     const [isManualModalOpen, setIsManualModalOpen] = useState(false);
     const [showAiInsight, setShowAiInsight] = useState(true);
@@ -46,8 +47,14 @@ const Layout = () => {
         }
     }, [location.hash]);
 
-    const handleAiClick = () => {
-        setIsAiActive(!isAiActive);
+    const handleAiClick = (mode = 'voice') => {
+        setIsTextMode(mode === 'text');
+        setIsAiActive(true);
+    };
+
+    const handleCloseAi = () => {
+        setIsAiActive(false);
+        setIsTextMode(false);
     };
 
     return (
@@ -66,7 +73,8 @@ const Layout = () => {
             {/* Camada do Painel de IA */}
             <AiPanel
                 isActive={isAiActive}
-                onClose={() => setIsAiActive(false)}
+                isTextMode={isTextMode}
+                onClose={handleCloseAi}
                 onOpenManualModal={() => setIsManualModalOpen(true)}
                 onListeningChange={setIsListening}
             />
@@ -91,14 +99,33 @@ const Layout = () => {
                             />
                         </div>
                     )}
-                    <div className="nav-center-item">
-                        <button
-                            className={`ai-mic-btn ${isAiActive ? 'active' : ''} ${isListening ? 'listening' : ''}`}
-                            onClick={handleAiClick}
-                            aria-label={t('ai_mic_label')}
+                    
+                    <div className="nav-items-wrapper">
+                        <button 
+                            className="nav-side-btn" 
+                            onClick={() => setIsManualModalOpen(true)}
+                            aria-label={t('add_transaction')}
                         >
-                            <div className="mystical-aura"></div>
-                            <img src="/Z.png" alt="Zimbroo" />
+                            <Plus size={24} />
+                        </button>
+
+                        <div className="nav-center-item">
+                            <button
+                                className={`ai-mic-btn ${isListening ? 'listening' : ''}`}
+                                onClick={() => handleAiClick('voice')}
+                                aria-label={t('ai_mic_label')}
+                            >
+                                <div className="mystical-aura"></div>
+                                <img src="/Z.png" alt="Zimbroo" />
+                            </button>
+                        </div>
+
+                        <button 
+                            className="nav-side-btn" 
+                            onClick={() => handleAiClick('text')}
+                            aria-label={t('type_text')}
+                        >
+                            <Edit2 size={24} />
                         </button>
                     </div>
                 </nav>
@@ -110,7 +137,7 @@ const Layout = () => {
                     <div className="nav-center-item">
                         <button
                             className={`ai-mic-btn active ${isListening ? 'listening' : ''}`}
-                            onClick={handleAiClick}
+                            onClick={handleCloseAi}
                         >
                             <div className="mystical-aura"></div>
                             <X size={32} color="#ffffff" strokeWidth={2.5} />

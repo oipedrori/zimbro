@@ -11,6 +11,7 @@ import Onboarding from './pages/Onboarding';
 import Profile from './pages/Profile';
 import NotionImport from './pages/NotionImport';
 import InstallPrompt from './components/InstallPrompt';
+import LoadingDots from './components/LoadingDots';
 import './index.css';
 
 const PrivateRoute = ({ children }) => {
@@ -19,7 +20,7 @@ const PrivateRoute = ({ children }) => {
   if (loading) {
     return (
       <div style={{ height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'var(--bg-color)', color: 'var(--primary-color)' }}>
-        Carregando...
+        <LoadingDots />
       </div>
     );
   }

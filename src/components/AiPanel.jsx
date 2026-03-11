@@ -5,6 +5,7 @@ import { useTransactions } from '../hooks/useTransactions';
 import { format } from 'date-fns';
 import { useI18n } from '../contexts/I18nContext';
 import { useAuth } from '../contexts/AuthContext';
+import LoadingDots from './LoadingDots';
 
 const AI_SUGGESTIONS = [
     "Gastei 50 reais no mercado",
@@ -59,7 +60,7 @@ const AI_SUGGESTIONS = [
     "Faça um balanço da minha conta"
 ];
 
-const AiPanel = ({ isActive, onClose, onOpenManualModal, onListeningChange }) => {
+const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onListeningChange }) => {
     const [isListening, setIsListening] = useState(false);
     const { currentUser } = useAuth();
 
@@ -141,12 +142,19 @@ const AiPanel = ({ isActive, onClose, onOpenManualModal, onListeningChange }) =>
             setTranscript('');
             transcriptRef.current = '';
             setAiMessage('');
-            setIsManualTextMode(false);
+            setIsManualTextMode(isTextMode);
             setManualText('');
             setConversationContext(null);
 
-            // Try starting automatically
-            if (recognitionRef.current) {
+            // Se for modo texto, foca o input
+            if (isTextMode) {
+                setTimeout(() => {
+                    if (inputRef.current) inputRef.current.focus();
+                }, 100);
+            }
+
+            // Try starting mic only if NOT in text mode
+            if (recognitionRef.current && !isTextMode) {
                 try {
                     recognitionRef.current.start();
                 } catch (e) {
@@ -161,7 +169,7 @@ const AiPanel = ({ isActive, onClose, onOpenManualModal, onListeningChange }) =>
             if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
             setIsListening(false);
         }
-    }, [isActive]);
+    }, [isActive, isTextMode]); // Add isTextMode dependency
 
     // Lógica das frases flutuantes (Refinada: uma por vez com cross-fade)
     useEffect(() => {
@@ -211,7 +219,8 @@ const AiPanel = ({ isActive, onClose, onOpenManualModal, onListeningChange }) =>
             setIsProcessing(true);
             if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
 
-            setAiMessage(t('ai_status_thinking', { defaultValue: 'Analisando...' }));
+            setAiMessage(''); // Clear message to show dots
+
 
             try {
                 const result = await analyzeTextWithGemini(textToProcess, transactions, conversationContext, locale);
@@ -331,6 +340,10 @@ const AiPanel = ({ isActive, onClose, onOpenManualModal, onListeningChange }) =>
             <div className="ai-minimal-content">
                 {/* Texto de Status no Topo - Só renderiza conteúdo se isActive (evita flash de texto na saída) */}
                 <div className="ai-status-text" style={{ opacity: isActive ? 1 : 0, transition: 'opacity 0.2s' }}>
+                    {isProcessing && (
+                       <div style={{ marginBottom: '20px' }}><LoadingDots style={{ color: 'white' }} /></div>
+                    )}
+                    
                     {aiMessage && (
                         <p className="ai-system-message animate-fade-in" style={{ marginBottom: (!isProcessing && conversationContext) ? '20px' : '0' }}>
                             {aiMessage}
@@ -390,33 +403,7 @@ const AiPanel = ({ isActive, onClose, onOpenManualModal, onListeningChange }) =>
                 </div>
             </div>
 
-            {/* Float Write Input Chip */}
-            {isActive && !isManualTextMode && (
-                <button
-                    onClick={toggleTextMode}
-                    className="animate-fade-in"
-                    style={{
-                        position: 'absolute',
-                        bottom: '120px',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        width: '48px',
-                        height: '48px',
-                        borderRadius: '50%',
-                        background: 'rgba(255, 255, 255, 0.2)',
-                        border: '1px solid rgba(255, 255, 255, 0.4)',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        color: 'white',
-                        backdropFilter: 'blur(10px)',
-                        cursor: 'pointer',
-                        zIndex: 2002
-                    }}
-                >
-                    <Edit2 size={24} />
-                </button>
-            )}
+
 
             <style>{`
         .ai-overlay {

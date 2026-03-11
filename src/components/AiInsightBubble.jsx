@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import LoadingDots from './LoadingDots';
 import './AiInsightBubble.css';
 
 const AiInsightBubble = ({ preFetchedMessage, onClose }) => {
@@ -39,9 +40,7 @@ const AiInsightBubble = ({ preFetchedMessage, onClose }) => {
         <div className={`ai-insight-bubble ${isVisible ? 'visible' : 'hidden'}`} onClick={(e) => { e.stopPropagation(); handleDismiss(); }}>
             <div className="bubble-content">
                 {isLoading ? (
-                    <div className="typing-indicator">
-                        <span></span><span></span><span></span>
-                    </div>
+                    <LoadingDots />
                 ) : (
                     preFetchedMessage
                 )}

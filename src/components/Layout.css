@@ -58,6 +58,36 @@
     padding-bottom: env(safe-area-inset-bottom, 10px);
 }
 
+.nav-items-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    width: 100%;
+    pointer-events: none;
+}
+
+.nav-side-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--surface-color);
+    border: 1px solid var(--glass-border);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--primary-color);
+    box-shadow: var(--shadow-md);
+    pointer-events: auto;
+    transition: transform 0.2s ease;
+    cursor: pointer;
+}
+
+.nav-side-btn:active {
+    transform: scale(0.9);
+}
+
+
 body.hide-ai-btn .bottom-nav {
     transform: translateY(150px);
     opacity: 0;

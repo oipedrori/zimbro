@@ -7,6 +7,7 @@ import { CATEGORIAS_DESPESA, CATEGORIAS_RECEITA } from '../utils/categories';
 import { useI18n } from '../contexts/I18nContext';
 import TransactionModal from '../components/TransactionModal';
 import SwipeableItem from '../components/SwipeableItem';
+import LoadingDots from '../components/LoadingDots';
 import { Plus, ChevronLeft, ChevronRight, User, Pointer, X } from 'lucide-react';
 import { Link, useOutletContext } from 'react-router-dom';
 import { getYearlyStats } from '../services/transactionService';
@@ -394,7 +395,9 @@ const Home = () => {
                     </div>
 
                     {loading ? (
-                        <p style={{ textAlign: 'center', color: 'var(--text-muted)' }}>...</p>
+                        <div style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
+                            <LoadingDots />
+                        </div>
                     ) : filteredTransactions.length === 0 ? (
                         <div className="glass-panel" style={{ padding: '30px', textAlign: 'center' }}>
                             <p style={{ color: 'var(--text-muted)' }}>{t('no_transactions')}</p>

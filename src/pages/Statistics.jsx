@@ -8,6 +8,7 @@ import { CATEGORIAS_DESPESA } from '../utils/categories';
 import { getYearlyStats } from '../services/transactionService';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
+import LoadingDots from '../components/LoadingDots';
 
 const Statistics = () => {
     const navigate = useNavigate();
@@ -76,7 +77,9 @@ const Statistics = () => {
                 <h3 style={{ fontSize: '1rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '24px' }}>{t('monthly_balances_current_year', { defaultValue: 'Saldos Mensais (ano vigente)' })} ({currentYear})</h3>
 
                 {loadingYearly ? (
-                    <p style={{ textAlign: 'center', color: 'var(--text-muted)' }}>{t('loading_data', { defaultValue: 'Carregando dados...' })}</p>
+                    <div style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
+                        <LoadingDots />
+                    </div>
                 ) : (
                     <div style={{ position: 'relative', height: '180px', paddingBottom: '20px', borderBottom: '1px solid var(--glass-border)' }}>
                         {/* Linha Zero Central */}
