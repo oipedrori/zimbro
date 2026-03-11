@@ -53,8 +53,8 @@ const Profile = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
                     {/* Theme Toggle */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-color)', padding: '18px 20px', borderRadius: '24px', border: '1px solid var(--glass-border)', boxShadow: '0 4px 15px rgba(0,0,0,0.03)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', color: 'var(--primary-color)' }}>
-                            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'var(--primary-light)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'var(--primary-light)', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--primary-darker)' }}>
                                 <Moon size={20} />
                             </div>
                             <span style={{ fontWeight: '600', fontSize: '1rem', color: 'var(--text-main)' }}>{t('theme')}</span>
@@ -62,7 +62,7 @@ const Profile = () => {
                         <select
                             value={theme}
                             onChange={(e) => setTheme(e.target.value)}
-                            style={{ background: 'transparent', border: 'none', fontWeight: '600', color: 'var(--primary-color)', fontSize: '0.9rem', outline: 'none', cursor: 'pointer', textAlign: 'right' }}
+                            style={{ background: 'transparent', border: 'none', fontWeight: '600', color: 'var(--highlight-color)', fontSize: '0.9rem', outline: 'none', cursor: 'pointer', textAlign: 'right' }}
                         >
                             <option value="system">Auto</option>
                             <option value="light">Claro</option>
@@ -72,8 +72,8 @@ const Profile = () => {
 
                     {/* Language Selection Chips */}
                     <div style={{ background: 'var(--surface-color)', padding: '20px', borderRadius: '24px', border: '1px solid var(--glass-border)', boxShadow: '0 4px 15px rgba(0,0,0,0.03)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', color: 'var(--primary-color)', marginBottom: '16px' }}>
-                            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'var(--primary-light)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '16px' }}>
+                            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'var(--primary-light)', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--primary-darker)' }}>
                                 <Globe size={20} />
                             </div>
                             <span style={{ fontWeight: '700', fontSize: '1rem', color: 'var(--text-main)' }}>{t('language')}</span>
@@ -109,8 +109,8 @@ const Profile = () => {
 
                     {/* Currency Selection Chips */}
                     <div style={{ background: 'var(--surface-color)', padding: '20px', borderRadius: '24px', border: '1px solid var(--glass-border)', boxShadow: '0 4px 15px rgba(0,0,0,0.03)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', color: 'var(--primary-color)', marginBottom: '16px' }}>
-                            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'var(--primary-light)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '16px' }}>
+                            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'var(--primary-light)', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--primary-darker)' }}>
                                 <DollarSign size={20} />
                             </div>
                             <span style={{ fontWeight: '700', fontSize: '1rem', color: 'var(--text-main)' }}>{t('currency')}</span>

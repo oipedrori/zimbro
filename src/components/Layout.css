@@ -76,7 +76,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    color: var(--primary-color);
+    color: var(--highlight-color);
     box-shadow: var(--shadow-md);
     pointer-events: auto;
     transition: transform 0.2s ease;

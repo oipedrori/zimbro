@@ -218,7 +218,7 @@ const Home = () => {
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '180px', gap: '8px', borderBottom: '1px solid var(--glass-border)', paddingBottom: '10px', position: 'relative' }}>
                                 
                                 {/* Linha do Eixo 0 */}
-                                <div style={{ position: 'absolute', left: 0, right: 0, top: '50%', height: '1px', background: 'var(--glass-border)', zIndex: 0 }}></div>
+                                <div style={{ position: 'absolute', left: 0, right: 0, top: 'calc(50% - 8px)', height: '1px', background: 'var(--glass-border)', zIndex: 0 }}></div>
                                 
                                 {yearlyStats.map((stat, i) => {
                                     const isNegative = stat.balance < 0;
@@ -291,7 +291,7 @@ const Home = () => {
             >
                 <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px' }}>
                     <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
-                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--surface-color)', border: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--primary-color)' }}>
+                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--surface-color)', border: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--highlight-color)' }}>
                             <User size={20} />
                         </div>
                         <div>
@@ -406,7 +406,7 @@ const Home = () => {
                         <div className="glass-panel" style={{ padding: 0, overflow: 'hidden' }}>
                             {filteredTransactions.map((tx, i) => (
                                 <SwipeableItem key={tx.id} onDelete={() => deleteTx(tx.id)} onEdit={() => handleEditTx(tx)}>
-                                    <div onClick={() => handleEditTx(tx)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', borderBottom: i === transactions.length - 1 ? 'none' : '1px solid var(--glass-border)', cursor: 'pointer' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', borderBottom: i === transactions.length - 1 ? 'none' : '1px solid var(--glass-border)' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                                             <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: getCategoryTheme(tx.category, tx.type).color + '20', display: 'flex', justifyContent: 'center', alignItems: 'center', color: getCategoryTheme(tx.category, tx.type).color, fontWeight: 'bold', fontSize: '1.2rem' }}>
                                                 {getEmojiForDescription(tx.description, getCategoryTheme(tx.category, tx.type).icon)}
@@ -425,9 +425,10 @@ const Home = () => {
                         </div>
                     )}
                 </section>
-
-                <TransactionModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingTx(null); }} defaultType={modalType} initialData={editingTx} onSuccess={refetch} />
             </div>
+
+            <TransactionModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingTx(null); }} defaultType={modalType} initialData={editingTx} onSuccess={refetch} />
+
 
             <style>{`
                 @keyframes slideInUp {

@@ -357,6 +357,12 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
                                     ref={inputRef}
                                     value={manualText}
                                     onChange={(e) => setManualText(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && !e.shiftKey) {
+                                            e.preventDefault();
+                                            handleSendText();
+                                        }
+                                    }}
                                     placeholder={conversationContext ? t('ai_status_typing') : t('ai_status_input')}
                                     className="manual-text-input"
                                     rows={3}
