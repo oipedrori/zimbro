@@ -86,9 +86,12 @@ const Home = () => {
     // Swipe handlers
     const minSwipeDistance = 50;
 
+    const [lastX, setLastX] = useState(0);
+
     const onTouchStart = (e) => {
         setTouchEnd(null);
         setTouchStart(e.targetTouches[0].clientX);
+        setLastX(e.targetTouches[0].clientX);
         setIsSwiping(true);
     };
 
@@ -96,8 +99,12 @@ const Home = () => {
         if (!touchStart) return;
         const currentX = e.targetTouches[0].clientX;
         const diff = currentX - touchStart;
-        setSwipeOffset(diff);
-        setTouchEnd(currentX);
+        
+        // Se o movimento for muito pequeno, ignora para não interferir no scroll
+        if (Math.abs(diff) > 5) {
+            setSwipeOffset(diff);
+            setTouchEnd(currentX);
+        }
     };
 
     const onTouchEnd = () => {
@@ -117,7 +124,8 @@ const Home = () => {
             prevMonth();
         }
         
-        setSwipeOffset(0);
+        // Pequeno atraso para o reset não parecer brusco caso o mês não mude
+        setTimeout(() => setSwipeOffset(0), 10);
     };
 
     // Cálculos do Dashboard
@@ -335,6 +343,7 @@ const Home = () => {
                 </div>
 
                 <section
+                    key={monthPrefix}
                     className="glass-panel"
                     onClick={() => setIsFlipped(true)}
                     onTouchStart={onTouchStart}
@@ -343,8 +352,10 @@ const Home = () => {
                     style={{ 
                         flexShrink: 0, padding: '24px', background: cardGradient, color: 'white', border: 'none', 
                         position: 'relative', overflow: 'hidden', cursor: 'pointer',
+                        touchAction: 'pan-y',
                         transform: `translateX(${swipeOffset}px)`,
-                        transition: isSwiping ? 'none' : 'transform 0.3s cubic-bezier(0.1, 0.7, 0.1, 1)'
+                        transition: isSwiping ? 'none' : 'transform 0.3s cubic-bezier(0.1, 0.7, 0.1, 1)',
+                        animation: !isSwiping ? (swipeDirection === 'left' ? 'slideLeftIn 0.3s ease-out' : swipeDirection === 'right' ? 'slideRightIn 0.3s ease-out' : 'none') : 'none'
                     }}
                 >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
