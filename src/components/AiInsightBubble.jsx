@@ -21,16 +21,28 @@ const AiInsightBubble = ({ transactions, onClose }) => {
             // Mostrar o balão na tela com os pontinhos carregando
             setTimeout(() => setVisible(true), 300);
 
-            const insight = await generateInsightMessage(transactions);
-            if (!isMounted) return;
+            try {
+                const insight = await generateInsightMessage(transactions);
+                
+                if (isMounted) {
+                    setMessage(insight);
+                    setIsLoading(false);
 
-            setMessage(insight);
-            setIsLoading(false);
-
-            // Autodestruição após 6 segundos de aparecer a mensagem para ler com calma
-            hideTimeout = setTimeout(() => {
-                handleDismiss();
-            }, 6000);
+                    // Autodestruição após 6 segundos de aparecer a mensagem para ler com calma
+                    hideTimeout = setTimeout(() => {
+                        handleDismiss();
+                    }, 8000);
+                }
+            } catch (error) {
+                console.error("Bubble fetch error:", error);
+                if (isMounted) {
+                    setMessage("Pronto para organizar suas finanças hoje? É só apertar e falar.");
+                    setIsLoading(false);
+                    hideTimeout = setTimeout(() => {
+                        handleDismiss();
+                    }, 8000);
+                }
+            }
         };
 
         fetchMessage();
