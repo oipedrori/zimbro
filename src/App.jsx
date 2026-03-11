@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { I18nProvider } from './contexts/I18nContext';
 import Layout from './components/Layout';
 import LoadingDots from './components/LoadingDots';
+import InstallPrompt from './components/InstallPrompt';
 import './index.css';
 
 // Lazy load pages for performance
