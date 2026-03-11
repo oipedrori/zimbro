@@ -243,32 +243,28 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
                         <button
                             type="button"
                             onClick={() => {
-                                if (repeatType === 'none') {
-                                    setConfirmConfig({
-                                        title: t('confirm_delete', { defaultValue: 'Excluir Movimentação' }),
-                                        message: t('confirm_delete_msg', { defaultValue: 'Tem certeza que deseja excluir este registro?' }),
-                                        onConfirm: () => handleDelete()
-                                    });
-                                } else {
-                                    setConfirmConfig({
-                                        title: t('recurring_delete_title', { defaultValue: 'Movimentação Recorrente' }),
-                                        message: t('recurring_delete_msg', { defaultValue: 'Deseja excluir apenas este mês ou toda a série?' }),
-                                        options: [
-                                            { 
-                                                label: t('only_this_month', { defaultValue: 'Apenas este mês' }), 
-                                                value: 'skip',
-                                                color: 'var(--bg-color)',
-                                                textColor: 'var(--text-main)' // ConfirmDialog uses color for BG, let's fix that if needed or just use default
-                                            },
-                                            { 
-                                                label: t('all_series', { defaultValue: 'Toda a série' }), 
-                                                value: 'all',
-                                                color: 'var(--danger-color)'
-                                            }
-                                        ],
-                                        onConfirm: (val) => handleDelete(val)
-                                    });
-                                }
+                                const isRecurring = repeatType !== 'none';
+                                setConfirmConfig({
+                                    title: isRecurring ? t('recurring_delete_title', { defaultValue: 'Movimentação Recorrente' }) : t('confirm_delete', { defaultValue: 'Excluir Movimentação' }),
+                                    message: isRecurring ? t('recurring_delete_msg', { defaultValue: 'Deseja excluir apenas este mês ou toda a série?' }) : t('confirm_delete_msg', { defaultValue: 'Tem certeza que deseja excluir este registro?' }),
+                                    options: isRecurring ? [
+                                        { 
+                                            label: t('only_this_month', { defaultValue: 'Apenas este mês' }), 
+                                            value: 'skip',
+                                            color: 'var(--surface-color)',
+                                            textColor: 'var(--text-main)'
+                                        },
+                                        { 
+                                            label: t('all_series', { defaultValue: 'Toda a série' }), 
+                                            value: 'all',
+                                            color: 'var(--danger-color)'
+                                        }
+                                    ] : [],
+                                    onConfirm: (val) => {
+                                        console.log("Deletion confirmed with option:", val);
+                                        handleDelete(val || 'all');
+                                    }
+                                });
                                 setIsConfirmOpen(true);
                             }}
                             style={{
@@ -335,6 +331,12 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
             height: 4px;
             background: var(--glass-border);
             border-radius: 2px;
+        }
+
+        body.modal-open .glass-panel,
+        body.modal-open .bottom-blur-layer {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
         }
       `}</style>
         </div>

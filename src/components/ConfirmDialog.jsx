@@ -60,7 +60,7 @@ const ConfirmDialog = ({
                                     onClose();
                                 }}
                             >
-                                {opt.label}
+                                <span style={{ color: opt.textColor || 'white' }}>{opt.label}</span>
                             </button>
                         ))
                     ) : (

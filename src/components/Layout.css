@@ -41,6 +41,12 @@
     pointer-events: none;
     z-index: 45;
     /* Below the nav but above content */
+    transition: opacity 0.3s ease;
+}
+
+body.modal-open .bottom-blur-layer {
+    opacity: 0;
+    pointer-events: none;
 }
 
 .bottom-nav {

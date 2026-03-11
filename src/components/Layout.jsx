@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { Plus, Mic, X, Edit2 } from 'lucide-react';
+import { Plus, Mic, X, Keyboard } from 'lucide-react';
 import AiPanel from './AiPanel';
 import DynamicIslandHint from './DynamicIslandHint';
 import TransactionModal from './TransactionModal';
@@ -120,7 +120,7 @@ const Layout = () => {
                                 aria-label={t('ai_mic_label')}
                             >
                                 <div className="mystical-aura"></div>
-                                <img src="/Z.png" alt="Zimbroo" />
+                                <Mic size={32} color="white" strokeWidth={2.5} />
                             </button>
                         </div>
 
@@ -129,7 +129,7 @@ const Layout = () => {
                             onClick={() => handleAiClick('text')}
                             aria-label={t('type_text')}
                         >
-                            <Edit2 size={24} />
+                            <Keyboard size={24} />
                         </button>
                     </div>
                 </nav>

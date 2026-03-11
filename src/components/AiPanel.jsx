@@ -359,24 +359,39 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
 
                     {(!aiMessage || (conversationContext && !isProcessing)) ? (
                         isManualTextMode ? (
-                            <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', width: '100%', gap: '16px', alignItems: 'center' }}>
-                                <textarea
-                                    ref={inputRef}
-                                    value={manualText}
-                                    onChange={(e) => setManualText(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' && !e.shiftKey) {
-                                            e.preventDefault();
-                                            handleSendText();
-                                        }
-                                    }}
-                                    placeholder={conversationContext ? t('ai_status_typing') : t('ai_status_input')}
-                                    className="manual-text-input"
-                                    rows={3}
-                                />
-                                <button className="send-transcript-btn" onClick={handleSendText} disabled={!manualText.trim() || isProcessing} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <Send size={18} /> {t('process')}
-                                </button>
+                            <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'center', height: '100%', justifyContent: 'space-between' }}>
+                                <div style={{ textAlign: 'center', marginTop: '40px' }}>
+                                    <h3 style={{ color: 'white', fontSize: '1.4rem', fontWeight: '600', marginBottom: '8px', opacity: 0.9 }}>
+                                        {t('ai_type_details', { defaultValue: 'Detalhes da movimentação' })}
+                                    </h3>
+                                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem' }}>
+                                        {t('ai_processing_hint', { defaultValue: 'A Inteligência Artificial irá processar as informações' })}
+                                    </p>
+                                </div>
+
+                                <div className="messaging-input-container">
+                                    <textarea
+                                        ref={inputRef}
+                                        value={manualText}
+                                        onChange={(e) => setManualText(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' && !e.shiftKey) {
+                                                e.preventDefault();
+                                                handleSendText();
+                                            }
+                                        }}
+                                        placeholder={conversationContext ? t('ai_status_typing') : t('ai_status_input')}
+                                        className="messaging-textarea"
+                                        rows={1}
+                                    />
+                                    <button 
+                                        className="messaging-send-btn" 
+                                        onClick={handleSendText} 
+                                        disabled={!manualText.trim() || isProcessing}
+                                    >
+                                        <Send size={20} />
+                                    </button>
+                                </div>
                             </div>
                         ) : transcript ? (
                             <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
@@ -389,13 +404,14 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
                             </div>
                         ) : (
                             <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center' }}>
-                                <p className="ai-greeting" style={{ marginTop: '0' }}>
-                                    {isListening ? (
-                                        <>{t('ai_status_listening', { defaultValue: `Olá, ${currentUser?.displayName?.split(' ')[0] || t('user', { defaultValue: 'Usuário' })}! Como posso te ajudar hoje?` })}</>
-                                    ) : (
-                                        <>{t('ai_greeting_idle', { defaultValue: 'A inteligência artificial está \n disponível para ajudar' })}</>
-                                    )}
-                                </p>
+                                <div className="ai-status-header">
+                                    <h3 style={{ color: 'white', fontSize: '1.4rem', fontWeight: '600', marginBottom: '8px', opacity: 0.9 }}>
+                                        {isListening ? t('listening_now', { defaultValue: 'Ouvindo...' }) : t('ai_ready', { defaultValue: 'Pronto para ajudar' })}
+                                    </h3>
+                                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem' }}>
+                                        {isListening ? t('ai_speak_now', { defaultValue: 'Fale os detalhes da movimentação' }) : t('ai_hint_voice', { defaultValue: 'Toque para falar ou digite os detalhes' })}
+                                    </p>
+                                </div>
 
                                 {/* Frases Flutuantes Refinadas */}
                                 {activeSuggestions.length > 0 && (
@@ -556,57 +572,71 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
           cursor: not-allowed;
         }
 
-        .manual-text-input {
-            width: 90%;
-            max-width: 400px;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.3);
-            border-radius: 16px;
-            padding: 16px;
+        .messaging-input-container {
+            width: 100%;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 8px 8px 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .messaging-textarea {
+            flex: 1;
+            background: transparent;
+            border: none;
             color: white;
-            font-size: 1.5rem;
-            line-height: 1.5;
+            font-size: 1.1rem;
             font-family: inherit;
             outline: none;
             resize: none;
-            backdrop-filter: blur(10px);
-            animation: fadeInScale 0.3s forwards;
-            text-align: center;
+            padding: 8px 0;
+            max-height: 120px;
         }
 
-        .manual-text-input::placeholder {
-            color: rgba(255,255,255,0.5);
+        .messaging-textarea::placeholder {
+            color: rgba(255, 255, 255, 0.4);
         }
 
-        .suggestions-container {
-            position: relative;
-            width: 100%;
-            height: 0;
+        .messaging-send-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            border: none;
+            color: white;
             display: flex;
-            justify-content: center;
-        }
-
-        .floating-suggestion {
-            position: absolute;
-            color: rgba(255, 255, 255, 0.8);
-            font-family: 'Solway', serif;
-            animation: smoothFade 6s ease-in-out forwards;
-            pointer-events: none;
-            text-align: center;
-            width: 80%;
-            max-width: 320px;
-            font-size: 1.3rem;
-            line-height: 1.4;
-            display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
-        @keyframes smoothFade {
-            0% { opacity: 0; transform: translateY(15px); }
-            20% { opacity: 0.8; transform: translateY(0); }
-            80% { opacity: 0.8; transform: translateY(-10px); }
-            100% { opacity: 0; transform: translateY(-25px); }
+        .messaging-send-btn:active {
+            transform: scale(0.9);
+        }
+
+        .messaging-send-btn:disabled {
+            opacity: 0.3;
+            filter: grayscale(1);
+        }
+
+        .ai-status-header {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
       `}</style>
         </div>
