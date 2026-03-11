@@ -178,6 +178,8 @@ const Profile = () => {
                         <span style={{ fontWeight: '600', color: 'var(--danger-color)' }}>{t('logout')}</span>
                     </div>
                 </div>
+            </section>
+
             {/* Easter Egg / Version */}
             <div style={{ marginTop: '40px', paddingBottom: '20px', textAlign: 'center' }}>
                 <p 
