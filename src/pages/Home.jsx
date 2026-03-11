@@ -212,22 +212,71 @@ const Home = () => {
                         </section>
 
                         <section className="glass-panel" style={{ padding: '24px' }}>
-                            <h3 style={{ fontSize: '1rem', marginBottom: '24px' }}>{t('monthly_balances_current_year', { defaultValue: 'Saldos Mensais' })} ({currentDate.getFullYear()})</h3>
-                            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', height: '160px', gap: '8px', borderBottom: '1px solid var(--glass-border)', paddingBottom: '10px' }}>
-                                {yearlyStats.map((stat, i) => (
-                                    <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%' }}>
-                                        <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end', width: '100%' }}>
-                                            <div style={{
-                                                width: '100%',
-                                                height: `${Math.max(5, Math.min(100, (Math.abs(stat.balance) / 5000) * 100))}%`,
-                                                background: stat.balance < 0 ? 'var(--danger-color)' : 'var(--primary-dark)',
-                                                borderRadius: '4px 4px 0 0',
-                                                opacity: stat.month === (currentDate.getMonth() + 1) ? 1 : 0.4
-                                            }}></div>
+                            <h3 style={{ fontSize: '1rem', marginBottom: '24px' }}>{t('monthly_balances_current_year', { defaultValue: 'Saldos Mensais' })}</h3>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '180px', gap: '8px', borderBottom: '1px solid var(--glass-border)', paddingBottom: '10px', position: 'relative' }}>
+                                
+                                {/* Linha do Eixo 0 */}
+                                <div style={{ position: 'absolute', left: 0, right: 0, top: '50%', height: '1px', background: 'var(--glass-border)', zIndex: 0 }}></div>
+                                
+                                {yearlyStats.map((stat, i) => {
+                                    const isNegative = stat.balance < 0;
+                                    const maxVal = 5000; // Valor máximo para escala visual
+                                    const heightPct = Math.max(2, Math.min(50, (Math.abs(stat.balance) / maxVal) * 50)); 
+                                    
+                                    return (
+                                        <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', position: 'relative', zIndex: 1 }}>
+                                            
+                                            {/* Container dividido ao meio (50% topo positivo, 50% bottom negativo) */}
+                                            <div style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                                                
+                                                {/* Metade Positiva */}
+                                                <div style={{ height: '50%', width: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+                                                    {!isNegative && stat.balance > 0 && (
+                                                        <div style={{
+                                                            width: '100%',
+                                                            height: `${heightPct * 2}%`,
+                                                            background: 'var(--primary-dark)',
+                                                            borderRadius: '4px 4px 0 0',
+                                                            opacity: stat.month === (currentDate.getMonth() + 1) ? 1 : 0.4,
+                                                            display: 'flex',
+                                                            justifyContent: 'center',
+                                                            alignItems: 'center',
+                                                            overflow: 'hidden'
+                                                        }}>
+                                                            <span style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.9)', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
+                                                                {Math.abs(stat.balance) >= 1000 ? `${(stat.balance/1000).toFixed(1)}k` : stat.balance}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Metade Negativa */}
+                                                <div style={{ height: '50%', width: '100%', display: 'flex', alignItems: 'flex-start', justifyContent: 'center' }}>
+                                                     {isNegative && (
+                                                        <div style={{
+                                                            width: '100%',
+                                                            height: `${heightPct * 2}%`,
+                                                            background: 'var(--danger-color)',
+                                                            borderRadius: '0 0 4px 4px',
+                                                            opacity: stat.month === (currentDate.getMonth() + 1) ? 1 : 0.4,
+                                                            display: 'flex',
+                                                            justifyContent: 'center',
+                                                            alignItems: 'center',
+                                                            overflow: 'hidden'
+                                                        }}>
+                                                            <span style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.9)', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
+                                                                {Math.abs(stat.balance) >= 1000 ? `${(Math.abs(stat.balance)/1000).toFixed(1)}k` : Math.abs(stat.balance)}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Rótulo do Mês na Base */}
+                                            <span style={{ fontSize: '0.7rem', marginTop: '6px', color: 'var(--text-muted)' }}>{stat.label.charAt(0)}</span>
                                         </div>
-                                        <span style={{ fontSize: '0.7rem', marginTop: '6px', color: 'var(--text-muted)' }}>{stat.label.charAt(0)}</span>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </section>
                     </div>
@@ -277,8 +326,7 @@ const Home = () => {
                             <h2 style={{ fontSize: 'clamp(1.8rem, 8vw, 2.5rem)', marginBottom: '24px', fontWeight: '700', letterSpacing: '-1px', wordBreak: 'break-word' }}>{formatCurrency(balance)}</h2>
                         </div>
                         <div style={{ position: 'relative', display: 'flex' }}>
-                            <div className={`card-aura ${isNegative ? 'negative' : ''}`}></div>
-                            <Pointer size={18} opacity={0.8} />
+                            <Pointer className="pointer-icon pulse-animation" size={18} opacity={0.8} />
                         </div>
                     </div>
 
@@ -381,6 +429,14 @@ const Home = () => {
                 @keyframes slideInUp {
                     from { transform: translateY(100%); }
                     to { transform: translateY(0); }
+                }
+                @keyframes subtlePulse {
+                    0%, 90% { transform: scale(1); opacity: 0.8; }
+                    95% { transform: scale(1.2); opacity: 1; }
+                    100% { transform: scale(1); opacity: 0.8; }
+                }
+                .pointer-icon.pulse-animation {
+                    animation: subtlePulse 5s infinite ease-in-out;
                 }
             `}</style>
         </>

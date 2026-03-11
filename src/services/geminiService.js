@@ -49,18 +49,29 @@ REGRAS ESTRITAS:
 
 Você APENAS PODE RESPONDER com um objeto JSON puro. NÃO INCLUA \`\`\`json ou markdown. Seu JSON deve obrigatoriamente seguir um destes modelos abaixo baseado no objetivo da fala:
 
-MODELO 1: ADICIONAR NOVA TRANSAÇÃO
+MODELO 1: ADICIONAR NOVA(S) TRANSAÇÃO(ÕES)
 {
   "action": "add",
-  "transaction": {
-    "type": "expense", // ou "income"
-    "amount": 10.50, // O valor de UMA parcela se for installment. Use PONTO (.) decimal.
-    "description": "Ex: Aluguel",
-    "category": "ID_CATEGORIA",
-    "date": "2026-03-04",
-    "repeatType": "none", // "none", "recurring", "installment"
-    "installments": 1 // Quantidade de parcelas se for installment.
-  }
+  "transactions": [
+    {
+      "type": "expense", // ou "income"
+      "amount": 10.50, // O valor de UMA parcela se for installment. Use PONTO (.) decimal.
+      "description": "Ex: Padaria",
+      "category": "ID_CATEGORIA",
+      "date": "2026-03-04",
+      "repeatType": "none", // "none", "recurring", "installment"
+      "installments": 1 // Quantidade de parcelas se for installment.
+    },
+    {
+      "type": "expense",
+      "amount": 120.00,
+      "description": "Ex: Energia",
+      "category": "ID_CATEGORIA",
+      "date": "2026-03-04",
+      "repeatType": "recurring",
+      "installments": 1
+    }
+  ]
 }
 
 MODELO 2: PEDIR MAIS INFORMAÇÕES (Sugerir Recorrência ou falta de dados)
@@ -123,7 +134,7 @@ export const generateInsightMessage = async (transactions = [], locale = 'pt') =
     const genAI = new GoogleGenerativeAI(API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-    const recentTxsStr = transactions.slice(0, 8).map(t =>
+    const recentTxsStr = transactions.slice(0, 10).map(t =>
       `Tipo: ${t.type === 'expense' ? 'Despesa' : 'Receita'} | Valor: ${t.amount} | Desc: ${t.description} | Data: ${t.virtualDate}`
     ).join('\n');
 

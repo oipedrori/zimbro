@@ -251,22 +251,37 @@ const AiPanel = ({ isActive, onClose, onOpenManualModal, onListeningChange }) =>
                         }, 1000); // re-open mic after reading so user can keep asking
                     }
                 } else if (result.action === 'add') {
-                    const tx = result.transaction;
-                    const finalDate = tx.date ? tx.date : format(new Date(), 'yyyy-MM-dd');
+                    const txs = result.transactions;
+                    if (!txs || !Array.isArray(txs) || txs.length === 0) {
+                        setAiMessage("Não consegui entender os valores para adicionar.");
+                        setIsProcessing(false);
+                        return;
+                    }
 
-                    await addTx({
-                        type: tx.type,
-                        amount: parseFloat(tx.amount),
-                        description: tx.description,
-                        category: tx.category,
-                        date: finalDate,
-                        repeatType: tx.repeatType,
-                        installments: tx.installments || 1
-                    });
+                    // Processar todas as transações em lote
+                    let totalAdded = 0;
+                    for (const tx of txs) {
+                        const finalDate = tx.date ? tx.date : format(new Date(), 'yyyy-MM-dd');
+                        await addTx({
+                            type: tx.type,
+                            amount: parseFloat(tx.amount),
+                            description: tx.description,
+                            category: tx.category,
+                            date: finalDate,
+                            repeatType: tx.repeatType,
+                            installments: tx.installments || 1
+                        });
+                        totalAdded++;
+                    }
 
-                    // Confirmação de Sucesso Polida e Curta
-                    const tipoTexto = tx.type === 'income' ? 'Adicionado com sucesso' : 'Gasto registrado';
-                    setAiMessage(`Tudo certo! ${tipoTexto}: ${tx.description} (R$ ${tx.amount}).`);
+                    // Confirmação de Sucesso Polida para Múltiplos ou Único
+                    if (totalAdded > 1) {
+                         setAiMessage(`Tudo certo! Adicionei ${totalAdded} novos registros para você.`);
+                    } else {
+                         const tx = txs[0];
+                         const tipoTexto = tx.type === 'income' ? 'Adicionado com sucesso' : 'Gasto registrado';
+                         setAiMessage(`Tudo certo! ${tipoTexto}: ${tx.description} (R$ ${tx.amount}).`);
+                    }
 
                     setTranscript('');
                     transcriptRef.current = '';
