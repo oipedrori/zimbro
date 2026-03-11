@@ -299,6 +299,12 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
         .modal-overlay.visible {
           background: rgba(0,0,0,0.6);
         }
+        @media (min-width: 1024px) {
+            .modal-overlay {
+                align-items: center;
+                justify-content: center;
+            }
+        }
         .modal-content {
           width: 100%;
           background: var(--bg-color); /* Usando bg-color que é opaco */
@@ -320,6 +326,26 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
         }
         .modal-content.slide-down {
           transform: translateY(100%);
+        }
+        @media (min-width: 1024px) {
+            .modal-content {
+                width: 480px;
+                border-radius: 32px;
+                transform: scale(0.9) translateY(20px);
+                opacity: 0;
+                transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+            .modal-content.slide-up {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+            .modal-content.slide-down {
+                transform: scale(0.9) translateY(20px);
+                opacity: 0;
+            }
+            .modal-content::before {
+                display: none;
+            }
         }
         .modal-content::before {
             content: '';

@@ -88,17 +88,22 @@ body {
 }
 
 #root {
-  /* Restrict max width to simulate mobile app on desktop and center it */
-  max-width: 480px;
-  margin: 0 auto;
   min-height: 100vh;
   min-height: 100dvh;
   position: relative;
   background-color: var(--bg-color);
-  box-shadow: var(--shadow-lg);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+@media (max-width: 1023px) {
+  #root {
+    /* Restrict max width to simulate mobile app on desktop/large screens only if not in desktop mode */
+    max-width: 480px;
+    margin: 0 auto;
+    box-shadow: var(--shadow-lg);
+  }
 }
 
 /* Typography */

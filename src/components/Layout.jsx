@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { Plus, Mic, X, Keyboard } from 'lucide-react';
+import { Plus, Mic, X, Keyboard, Home as HomeIcon, BarChart2, Shield, Wallet as WalletIcon, User as UserIcon } from 'lucide-react';
+import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import AiPanel from './AiPanel';
 import DynamicIslandHint from './DynamicIslandHint';
 import TransactionModal from './TransactionModal';
@@ -61,8 +61,54 @@ const Layout = () => {
         setIsTextMode(false);
     };
 
+    const NavLinks = [
+        { path: '/', icon: <HomeIcon size={20} />, label: t('home', { defaultValue: 'Início' }) },
+        { path: '/statistics', icon: <BarChart2 size={20} />, label: t('statistics', { defaultValue: 'Estatísticas' }) },
+        { path: '/limits', icon: <Shield size={20} />, label: t('limits', { defaultValue: 'Limites' }) },
+        { path: '/wallet', icon: <WalletIcon size={20} />, label: t('wallet', { defaultValue: 'Carteira' }) },
+        { path: '/profile', icon: <UserIcon size={20} />, label: t('profile', { defaultValue: 'Perfil' }) },
+    ];
+
     return (
-        <div className="app-container" style={{ overflow: 'hidden', position: 'relative' }}>
+        <div className="app-container">
+            {/* Sidebar para Desktop */}
+            <aside className="desktop-sidebar">
+                <div className="sidebar-header">
+                    <img src="/Z.png" alt="Zimbroo" className="sidebar-logo" />
+                    <h1 className="sidebar-title">Zimbroo</h1>
+                </div>
+
+                <nav className="sidebar-nav">
+                    {NavLinks.map(link => (
+                        <NavLink 
+                            key={link.path} 
+                            to={link.path} 
+                            className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+                        >
+                            {link.icon}
+                            <span>{link.label}</span>
+                        </NavLink>
+                    ))}
+                </nav>
+
+                <div className="sidebar-footer">
+                    <button 
+                        className="sidebar-add-btn"
+                        onClick={() => setIsManualModalOpen(true)}
+                    >
+                        <Plus size={20} />
+                        <span>{t('add_transaction')}</span>
+                    </button>
+                    
+                    <button 
+                        className="sidebar-ai-btn"
+                        onClick={() => handleAiClick('voice')}
+                    >
+                        <Mic size={20} />
+                        <span>IA Zimbro</span>
+                    </button>
+                </div>
+            </aside>
 
             {/* O conteúdo das páginas (Home, Stats) será renderizado aqui */}
             <main

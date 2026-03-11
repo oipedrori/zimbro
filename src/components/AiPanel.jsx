@@ -468,10 +468,22 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
           transition: opacity 0.5s ease;
           display: none;
         }
+        @media (min-width: 1024px) {
+            .ai-overlay {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
         .ai-overlay.active { 
           opacity: 1; 
           pointer-events: auto; 
           display: block;
+        }
+        @media (min-width: 1024px) {
+            .ai-overlay.active {
+                display: flex;
+            }
         }
         
         .mystical-aura {
@@ -536,6 +548,17 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
           justify-content: flex-start;
           align-items: center;
           padding: 80px 24px;
+        }
+        @media (min-width: 1024px) {
+            .ai-minimal-content {
+                padding: 40px;
+                max-width: 800px;
+                height: auto;
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: 32px;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                box-shadow: 0 40px 100px rgba(0,0,0,0.4);
+            }
         }
 
         .ai-status-text {
