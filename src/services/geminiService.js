@@ -123,7 +123,7 @@ export const generateInsightMessage = async (transactions = [], locale = 'pt') =
     const genAI = new GoogleGenerativeAI(API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-    const recentTxsStr = transactions.slice(0, 20).map(t =>
+    const recentTxsStr = transactions.slice(0, 8).map(t =>
       `Tipo: ${t.type === 'expense' ? 'Despesa' : 'Receita'} | Valor: ${t.amount} | Desc: ${t.description} | Data: ${t.virtualDate}`
     ).join('\n');
 

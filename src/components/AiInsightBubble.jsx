@@ -46,9 +46,6 @@ const AiInsightBubble = ({ preFetchedMessage, onClose }) => {
                     preFetchedMessage
                 )}
             </div>
-            {/* Elementos visuais pontilhados de um balão de pensamento */}
-            <div className="thought-dot dot-1"></div>
-            <div className="thought-dot dot-2"></div>
         </div>
     );
 };
