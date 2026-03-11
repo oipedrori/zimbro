@@ -156,7 +156,7 @@ const Profile = () => {
                     >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                             <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center', border: 'none' }}>
-                                <img src="/notion_logo.png" style={{ width: '22px', height: '22px', objectFit: 'contain' }} alt="Notion" />
+                                <img src="/notion_logo.png" style={{ width: '22px', height: '22px', objectFit: 'contain' }} alt="Notion" loading="eager" />
                             </div>
                             <span style={{ fontWeight: '600', fontSize: '1rem' }}>Sincronizar com Notion</span>
                         </div>

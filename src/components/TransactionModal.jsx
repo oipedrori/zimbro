@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import { useI18n } from '../contexts/I18nContext';
 import { haptic } from '../utils/haptic';
 import LoadingDots from './LoadingDots';
+import ConfirmDialog from './ConfirmDialog';
 
 const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialData = null, onSuccess }) => {
     const { addTx, updateTx, deleteTx } = useTransactions(format(new Date(), 'yyyy-MM'));
@@ -22,6 +23,8 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
 
     const [shouldRender, setShouldRender] = useState(isOpen);
     const [isAnimating, setIsAnimating] = useState(false);
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [confirmConfig, setConfirmConfig] = useState({});
 
     // Pre-fill if editing
     useEffect(() => {
@@ -65,6 +68,23 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
     if (!shouldRender && !isOpen) return null;
 
     const categories = type === 'expense' ? CATEGORIAS_DESPESA : CATEGORIAS_RECEITA;
+
+    const handleDelete = async (option = 'all') => {
+        setLoading(true);
+        try {
+            const skipMonth = option === 'skip' ? format(new Date(date), 'yyyy-MM') : null;
+            await deleteTx(initialData.id, skipMonth);
+            haptic.success();
+            onSuccess?.();
+            onClose();
+        } catch (e) {
+            console.error(e);
+            alert("Erro ao excluir transação");
+        } finally {
+            setLoading(false);
+            setIsConfirmOpen(false);
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -222,20 +242,34 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
                     {initialData && (
                         <button
                             type="button"
-                            onClick={async () => {
-                                if (window.confirm(t('confirm_delete', { defaultValue: 'Tem certeza que deseja excluir?' }))) {
-                                    setLoading(true);
-                                    try {
-                                        await deleteTx(initialData.id);
-                                        haptic.success();
-                                        onSuccess?.();
-                                        onClose();
-                                    } catch (e) {
-                                        console.error(e);
-                                    } finally {
-                                        setLoading(false);
-                                    }
+                            onClick={() => {
+                                if (repeatType === 'none') {
+                                    setConfirmConfig({
+                                        title: t('confirm_delete', { defaultValue: 'Excluir Movimentação' }),
+                                        message: t('confirm_delete_msg', { defaultValue: 'Tem certeza que deseja excluir este registro?' }),
+                                        onConfirm: () => handleDelete()
+                                    });
+                                } else {
+                                    setConfirmConfig({
+                                        title: t('recurring_delete_title', { defaultValue: 'Movimentação Recorrente' }),
+                                        message: t('recurring_delete_msg', { defaultValue: 'Deseja excluir apenas este mês ou toda a série?' }),
+                                        options: [
+                                            { 
+                                                label: t('only_this_month', { defaultValue: 'Apenas este mês' }), 
+                                                value: 'skip',
+                                                color: 'var(--bg-color)',
+                                                textColor: 'var(--text-main)' // ConfirmDialog uses color for BG, let's fix that if needed or just use default
+                                            },
+                                            { 
+                                                label: t('all_series', { defaultValue: 'Toda a série' }), 
+                                                value: 'all',
+                                                color: 'var(--danger-color)'
+                                            }
+                                        ],
+                                        onConfirm: (val) => handleDelete(val)
+                                    });
                                 }
+                                setIsConfirmOpen(true);
                             }}
                             style={{
                                 marginTop: '4px', width: '100%', padding: '12px',
@@ -248,6 +282,12 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
                     )}
                 </form>
             </div>
+
+            <ConfirmDialog 
+                isOpen={isConfirmOpen}
+                onClose={() => setIsConfirmOpen(false)}
+                {...confirmConfig}
+            />
 
             <style>{`
         .modal-overlay {
@@ -265,7 +305,7 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
         }
         .modal-content {
           width: 100%;
-          background: var(--surface-color);
+          background: var(--bg-color); /* Usando bg-color que é opaco */
           border-top-left-radius: 32px;
           border-top-right-radius: 32px;
           padding: 24px;

@@ -90,7 +90,7 @@ const Layout = () => {
                 defaultType="expense"
             />
 
-            {location.pathname === '/' && <div className="bottom-blur-layer" />}
+            {location.pathname === '/' && !isManualModalOpen && !isAiActive && <div className="bottom-blur-layer" />}
 
             {/* Navegação Simplificada - Botão Místico de IA e Balão */}
             {location.pathname === '/' && !isManualModalOpen && !isAiActive && (

@@ -44,9 +44,26 @@ export const addTransaction = async (userId, data) => {
     }
 };
 
-export const deleteTransaction = async (userId, transactionId) => {
+export const deleteTransaction = async (userId, transactionId, dateToSkip = null) => {
     try {
-        await deleteDoc(doc(db, TRANSACTIONS_COLLECTION, transactionId));
+        const docRef = doc(db, TRANSACTIONS_COLLECTION, transactionId);
+        
+        if (dateToSkip) {
+            // Se informarmos um mês para pular, apenas adicionamos ao array de excluídos
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                const excludedMonths = data.excludedMonths || [];
+                if (!excludedMonths.includes(dateToSkip)) {
+                    await updateDoc(docRef, {
+                        excludedMonths: [...excludedMonths, dateToSkip]
+                    });
+                }
+            }
+        } else {
+            // Deleção total do documento
+            await deleteDoc(docRef);
+        }
     } catch (error) {
         console.error("Error deleting transaction: ", error);
         throw error;
@@ -110,7 +127,7 @@ export const getTransactionsByMonth = async (userId, monthPrefix) => {
  * Lógica do Motor de Planejamento (Recorrentes e Parceladas)
  * Ele analisa todas as transacoes do usuario e calcula quais valem para o `targetMonth` ('YYYY-MM').
  */
-const prepareMonthlyTransactions = (allTxs, targetMonth) => {
+export const prepareMonthlyTransactions = (allTxs, targetMonth) => {
     const [targetY, targetM] = targetMonth.split('-').map(Number);
     const targetDateValue = targetY * 12 + targetM; // Facilita comparacao de meses
 
@@ -118,6 +135,11 @@ const prepareMonthlyTransactions = (allTxs, targetMonth) => {
         const txDate = tx.date; // Ex: '2026-03-01'
         const [y, m] = txDate.split('-').map(Number);
         const txDateValue = y * 12 + m;
+
+        // Verificar se este mês específico foi excluído da recorrência
+        if (tx.excludedMonths && tx.excludedMonths.includes(targetMonth)) {
+            return false;
+        }
 
         if (tx.repeatType === 'none') {
             return txDate.startsWith(targetMonth);
