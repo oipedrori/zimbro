@@ -181,10 +181,10 @@ const Profile = () => {
             </section>
 
             {/* Easter Egg / Version */}
-            <div style={{ marginTop: '40px', paddingBottom: '20px', textAlign: 'center' }}>
+            <div style={{ marginTop: '40px', paddingBottom: '40px', textAlign: 'center', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <p 
                     onClick={() => setShowEasterEgg(!showEasterEgg)}
-                    style={{ fontSize: '0.8rem', color: 'var(--text-muted)', cursor: 'pointer', opacity: 0.5, transition: 'opacity 0.2s' }}
+                    style={{ fontSize: '0.8rem', color: 'var(--text-muted)', cursor: 'pointer', opacity: 0.5, transition: 'opacity 0.2s', zIndex: 1 }}
                     onMouseEnter={(e) => e.target.style.opacity = 1}
                     onMouseLeave={(e) => e.target.style.opacity = 0.5}
                 >
@@ -192,16 +192,41 @@ const Profile = () => {
                 </p>
                 
                 {showEasterEgg && (
-                    <div className="animate-fade-in" style={{ marginTop: '16px', padding: '16px', borderRadius: '16px', background: 'var(--surface-color)', border: '1px solid var(--glass-border)', boxShadow: 'var(--shadow-sm)' }}>
-                        <p style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontStyle: 'italic', lineHeight: '1.5', margin: 0 }}>
+                    <div 
+                        onClick={() => setShowEasterEgg(false)}
+                        style={{ 
+                            position: 'absolute', 
+                            bottom: '100%', 
+                            marginBottom: '12px',
+                            width: '280px',
+                            background: 'var(--surface-color)', 
+                            padding: '16px 20px', 
+                            borderRadius: '24px', 
+                            border: '1px solid var(--glass-border)', 
+                            boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
+                            backdropFilter: 'blur(12px)',
+                            WebkitBackdropFilter: 'blur(12px)',
+                            animation: 'bubblePop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+                            cursor: 'pointer',
+                            zIndex: 10
+                        }}
+                    >
+                        <p style={{ fontSize: '0.95rem', color: 'var(--text-main)', fontStyle: 'italic', lineHeight: '1.5', margin: 0 }}>
                             "Deitou-se e dormiu sob o zimbro. De repente um anjo o tocou e disse: 'Levante-se e coma'."
                         </p>
-                        <p style={{ fontSize: '0.75rem', color: 'var(--primary-color)', fontWeight: '700', marginTop: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                        <p style={{ fontSize: '0.75rem', color: 'var(--primary-color)', fontWeight: '700', marginTop: '10px', textTransform: 'uppercase', letterSpacing: '1px' }}>
                             — 1 Reis 19:5
                         </p>
                     </div>
                 )}
             </div>
+
+            <style>{`
+                @keyframes bubblePop {
+                    0% { transform: scale(0.1) translateY(20px); opacity: 0; }
+                    100% { transform: scale(1) translateY(0); opacity: 1; }
+                }
+            `}</style>
         </div>
     );
 };
