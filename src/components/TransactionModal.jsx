@@ -19,7 +19,25 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
     const [loading, setLoading] = useState(false);
     const { t, getCurrencySymbol } = useI18n();
 
+    const [shouldRender, setShouldRender] = useState(isOpen);
+    const [isAnimating, setIsAnimating] = useState(false);
+
     // Pre-fill if editing
+    useEffect(() => {
+        if (isOpen) {
+            setShouldRender(true);
+            setTimeout(() => setIsAnimating(true), 10);
+            document.body.classList.add('modal-open');
+        } else {
+            setIsAnimating(false);
+            const timeout = setTimeout(() => {
+                setShouldRender(false);
+            }, 300); // match transition duration
+            document.body.classList.remove('modal-open');
+            return () => clearTimeout(timeout);
+        }
+    }, [isOpen]);
+
     useEffect(() => {
         if (isOpen && initialData) {
             setType(initialData.type || defaultType);
@@ -41,16 +59,9 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
             setRepeatType('none');
             setInstallments(1);
         }
-
-        if (isOpen) {
-            document.body.classList.add('modal-open');
-        } else {
-            document.body.classList.remove('modal-open');
-        }
-        return () => document.body.classList.remove('modal-open');
     }, [isOpen, initialData, defaultType]);
 
-    if (!isOpen) return null;
+    if (!shouldRender && !isOpen) return null;
 
     const categories = type === 'expense' ? CATEGORIAS_DESPESA : CATEGORIAS_RECEITA;
 
@@ -93,8 +104,8 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
     };
 
     return (
-        <div className="modal-overlay">
-            <div className="modal-content animate-slide-up">
+        <div className={`modal-overlay ${isAnimating ? 'visible' : ''}`} onClick={onClose}>
+            <div className={`modal-content ${isAnimating ? 'slide-up' : 'slide-down'}`} onClick={e => e.stopPropagation()}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
                     <h2 style={{ fontSize: '1.2rem' }}>{initialData ? t('edit_transaction') : t('add_transaction')}</h2>
                     <button onClick={onClose} style={{ fontSize: '1.2rem', color: 'var(--text-muted)', padding: '4px' }}>✕</button>
@@ -239,13 +250,15 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
         .modal-overlay {
           position: fixed;
           top: 0; left: 0; right: 0; bottom: 0;
-          background: rgba(0,0,0,0.6);
-          backdrop-filter: blur(8px);
-          -webkit-backdrop-filter: blur(8px);
+          background: rgba(0,0,0,0);
           z-index: 10000;
           display: flex;
           align-items: flex-end;
           touch-action: none;
+          transition: background 0.3s ease;
+        }
+        .modal-overlay.visible {
+          background: rgba(0,0,0,0.6);
         }
         .modal-content {
           width: 100%;
@@ -260,6 +273,14 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
           box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
           overscroll-behavior: contain;
           position: relative;
+          transform: translateY(100%);
+          transition: transform 0.3s cubic-bezier(0.1, 0.7, 0.1, 1);
+        }
+        .modal-content.slide-up {
+          transform: translateY(0);
+        }
+        .modal-content.slide-down {
+          transform: translateY(100%);
         }
         .modal-content::before {
             content: '';

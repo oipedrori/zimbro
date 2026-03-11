@@ -34,6 +34,8 @@ const Home = () => {
     const [swipeDirection, setSwipeDirection] = useState(''); // 'left' or 'right'
     const [touchStart, setTouchStart] = useState(null);
     const [touchEnd, setTouchEnd] = useState(null);
+    const [swipeOffset, setSwipeOffset] = useState(0);
+    const [isSwiping, setIsSwiping] = useState(false);
 
     useEffect(() => {
         if (isFlipped) {
@@ -87,17 +89,35 @@ const Home = () => {
     const onTouchStart = (e) => {
         setTouchEnd(null);
         setTouchStart(e.targetTouches[0].clientX);
+        setIsSwiping(true);
     };
 
-    const onTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX);
+    const onTouchMove = (e) => {
+        if (!touchStart) return;
+        const currentX = e.targetTouches[0].clientX;
+        const diff = currentX - touchStart;
+        setSwipeOffset(diff);
+        setTouchEnd(currentX);
+    };
 
     const onTouchEnd = () => {
-        if (!touchStart || !touchEnd) return;
+        setIsSwiping(false);
+        if (!touchStart || !touchEnd) {
+            setSwipeOffset(0);
+            return;
+        }
+        
         const distance = touchStart - touchEnd;
         const isLeftSwipe = distance > minSwipeDistance;
         const isRightSwipe = distance < -minSwipeDistance;
-        if (isLeftSwipe) nextMonth();
-        if (isRightSwipe) prevMonth();
+
+        if (isLeftSwipe) {
+            nextMonth();
+        } else if (isRightSwipe) {
+            prevMonth();
+        }
+        
+        setSwipeOffset(0);
     };
 
     // Cálculos do Dashboard
@@ -320,7 +340,12 @@ const Home = () => {
                     onTouchStart={onTouchStart}
                     onTouchMove={onTouchMove}
                     onTouchEnd={onTouchEnd}
-                    style={{ flexShrink: 0, padding: '24px', background: cardGradient, color: 'white', border: 'none', position: 'relative', overflow: 'hidden', cursor: 'pointer' }}
+                    style={{ 
+                        flexShrink: 0, padding: '24px', background: cardGradient, color: 'white', border: 'none', 
+                        position: 'relative', overflow: 'hidden', cursor: 'pointer',
+                        transform: `translateX(${swipeOffset}px)`,
+                        transition: isSwiping ? 'none' : 'transform 0.3s cubic-bezier(0.1, 0.7, 0.1, 1)'
+                    }}
                 >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                         <div>
