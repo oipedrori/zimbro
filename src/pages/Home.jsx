@@ -10,6 +10,7 @@ import SwipeableItem from '../components/SwipeableItem';
 import { Plus, ChevronLeft, ChevronRight, User, Pointer, X } from 'lucide-react';
 import { Link, useOutletContext } from 'react-router-dom';
 import { getYearlyStats } from '../services/transactionService';
+import { getEmojiForDescription } from '../utils/emojiUtils';
 
 const Home = () => {
     const { currentUser } = useAuth();
@@ -404,8 +405,8 @@ const Home = () => {
                                 <SwipeableItem key={tx.id} onDelete={() => deleteTx(tx.id)} onEdit={() => handleEditTx(tx)}>
                                     <div onClick={() => handleEditTx(tx)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', borderBottom: i === transactions.length - 1 ? 'none' : '1px solid var(--glass-border)', cursor: 'pointer' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                                            <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: getCategoryTheme(tx.category, tx.type).color + '20', display: 'flex', justifyContent: 'center', alignItems: 'center', color: getCategoryTheme(tx.category, tx.type).color, fontWeight: 'bold' }}>
-                                                {getCategoryTheme(tx.category, tx.type).icon || getCategoryTheme(tx.category, tx.type).label.charAt(0)}
+                                            <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: getCategoryTheme(tx.category, tx.type).color + '20', display: 'flex', justifyContent: 'center', alignItems: 'center', color: getCategoryTheme(tx.category, tx.type).color, fontWeight: 'bold', fontSize: '1.2rem' }}>
+                                                {getEmojiForDescription(tx.description, getCategoryTheme(tx.category, tx.type).icon)}
                                             </div>
                                             <div style={{ display: 'flex', flexDirection: 'column' }}>
                                                 <p style={{ fontWeight: '500', margin: 0 }}>{tx.dynamicDescription || tx.description}</p>
