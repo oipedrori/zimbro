@@ -255,8 +255,6 @@ const Home = () => {
                             <h3 style={{ fontSize: '1rem', marginBottom: '24px' }}>{t('monthly_balances_current_year', { defaultValue: 'Saldos Mensais' })}</h3>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '180px', gap: '8px', borderBottom: '1px solid var(--glass-border)', paddingBottom: '10px', position: 'relative' }}>
                                 
-                                {/* Linha do Eixo 0 */}
-                                <div style={{ position: 'absolute', left: 0, right: 0, top: 'calc(50% - 8px)', height: '1px', background: 'var(--glass-border)', zIndex: 0 }}></div>
                                 
                                 {yearlyStats.map((stat, i) => {
                                     const isNegative = stat.balance < 0;

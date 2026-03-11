@@ -82,8 +82,6 @@ const Statistics = () => {
                     </div>
                 ) : (
                     <div style={{ position: 'relative', height: '180px', paddingBottom: '20px', borderBottom: '1px solid var(--glass-border)' }}>
-                        {/* Linha Zero Central */}
-                        <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', background: 'var(--glass-border)', zIndex: 0 }}></div>
 
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '100%', position: 'relative', zIndex: 1 }}>
                             {yearlyStats.map((stat) => {
