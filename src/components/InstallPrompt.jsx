@@ -94,8 +94,8 @@ const InstallPrompt = () => {
                     <img src="/favicon.png" alt="Zimbroo Icon" style={{ width: '28px', height: '28px' }} />
                 </div>
                 <div>
-                    <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{t('install_title')}</h4>
-                    <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: '1.4', marginTop: '4px' }}>
+                    <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{t('install_title')}</h4>
+                    <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: '1.3', marginTop: '2px' }}>
                         {t('install_desc')}
                     </p>
                 </div>
