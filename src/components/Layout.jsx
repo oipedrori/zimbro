@@ -7,7 +7,7 @@ import TransactionModal from './TransactionModal';
 import AiInsightBubble from './AiInsightBubble';
 import { useI18n } from '../contexts/I18nContext';
 import { useTransactions } from '../hooks/useTransactions';
-import { getYearlyStats } from '../services/transactionService';
+import { format } from 'date-fns';
 import { generateInsightMessage } from '../services/geminiService';
 import './Layout.css';
 
