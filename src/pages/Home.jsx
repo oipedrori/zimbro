@@ -489,7 +489,15 @@ const Home = () => {
                 style={{ paddingBottom: '120px', animation: 'slideUp 0.3s forwards' }}
             >
                 {/* Header (Now always visible but behaves differently on desktop) */}
-                <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', marginBottom: '24px' }}>
+                <header style={{ 
+                    display: 'flex', 
+                    flexDirection: isDesktop ? 'row' : 'column',
+                    justifyContent: 'space-between', 
+                    alignItems: isDesktop ? 'center' : 'flex-start', 
+                    paddingTop: '10px', 
+                    marginBottom: '24px',
+                    gap: isDesktop ? '0' : '16px'
+                }}>
                     <div 
                         onClick={() => isDesktop ? setIsSidebarOpen(true) : null}
                         style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: isDesktop ? 'pointer' : 'default' }}
@@ -503,7 +511,17 @@ const Home = () => {
                     </div>
 
                     {/* Desktop/Mobile Month Navigation */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--surface-color)', padding: '6px 12px', borderRadius: '20px', border: '1px solid var(--glass-border)' }}>
+                    <div style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '8px', 
+                        background: 'var(--surface-color)', 
+                        padding: '6px 12px', 
+                        borderRadius: '20px', 
+                        border: '1px solid var(--glass-border)',
+                        alignSelf: isDesktop ? 'auto' : 'stretch',
+                        justifyContent: isDesktop ? 'flex-start' : 'space-between'
+                    }}>
                         <button onClick={() => { haptic.light(); setCurrentDate(subMonths(currentDate, 1)); }} style={{ border: 'none', background: 'transparent', color: 'var(--text-main)', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
                             <ChevronLeft size={20} />
                         </button>
