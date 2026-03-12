@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Mic, Plus, Edit2, Send } from 'lucide-react';
+import { Mic, Plus, Edit2, Send, X } from 'lucide-react';
 import { analyzeTextWithGemini } from '../services/geminiService';
 import { useTransactions } from '../hooks/useTransactions';
 import { format } from 'date-fns';
@@ -359,6 +359,20 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
 
     return (
         <div className={`ai-overlay ${isActive ? 'active' : ''}`}>
+            <button 
+                onClick={onClose}
+                aria-label="Close"
+                style={{
+                    position: 'absolute', top: '24px', right: '24px',
+                    width: '48px', height: '48px', borderRadius: '50%',
+                    background: 'rgba(255, 255, 255, 0.1)', color: 'white',
+                    display: 'flex', justifyContent: 'center', alignItems: 'center',
+                    border: 'none', cursor: 'pointer', zIndex: 3001,
+                    backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)'
+                }}
+            >
+                <X size={28} />
+            </button>
 
             <div className="ai-minimal-content">
                 {/* Texto de Status no Topo - Só renderiza conteúdo se isActive (evita flash de texto na saída) */}
@@ -374,7 +388,7 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
                     )}
 
                     {(!aiMessage || (conversationContext && !isProcessing)) ? (
-                        isManualTextMode ? (
+                        (isTextMode || isManualTextMode) ? (
                             <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'center', height: '100%', justifyContent: 'space-between' }}>
                                 <div style={{ textAlign: 'center', marginTop: '40px' }}>
                                     <h3 style={{ color: 'white', fontSize: '1.4rem', fontWeight: '600', marginBottom: '8px', opacity: 0.9 }}>

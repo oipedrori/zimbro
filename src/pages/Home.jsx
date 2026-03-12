@@ -25,6 +25,23 @@ const Home = () => {
 
     const { transactions, allTransactions, loading, refetch, deleteTx } = useTransactions(monthPrefix);
     const { t, formatCurrency, locale } = useI18n();
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+    // Lock body scroll when any modal or sidebar is open
+    useEffect(() => {
+        if (isSidebarOpen || isModalOpen || isLimitModalOpen || isConfirmOpen) {
+            document.body.style.overflow = 'hidden';
+            // Also prevent touchmove for mobile
+            document.body.style.touchAction = 'none';
+        } else {
+            document.body.style.overflow = '';
+            document.body.style.touchAction = '';
+        }
+        return () => {
+            document.body.style.overflow = '';
+            document.body.style.touchAction = '';
+        };
+    }, [isSidebarOpen, isModalOpen, isLimitModalOpen, isConfirmOpen]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalType, setModalType] = useState('expense');
     const [editingTx, setEditingTx] = useState(null);
@@ -45,7 +62,6 @@ const Home = () => {
 
     // === Bento Desktop Logic ===
     const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const { logout } = useAuth();
     const { changeLocale, currency, changeCurrency } = useI18n();
     const [theme, setTheme] = useState(localStorage.getItem('zimbroo_theme') || 'system');
@@ -846,7 +862,6 @@ const Home = () => {
                                     <Plus size={32} />
                                     <span style={{ fontWeight: '700' }}>Adicionar Limite</span>
                                 </button>
-                                
                                 {CATEGORIAS_DESPESA.filter(cat => limits[cat.id]).map((cat) => {
                                     const limitAmount = limits[cat.id];
                                     const spent = expensesByCategory[cat.id] || 0;
@@ -883,66 +898,70 @@ const Home = () => {
                                 })}
                             </div>
                         </section>
-
-                        {/* --- Floating Action Buttons (Desktop Only - Following the scroll, HORIZONTALLY CENTERED) --- */}
-                        <div style={{ 
-                            position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)',
-                            display: 'flex', alignItems: 'center', gap: '20px', zIndex: 1000,
-                            padding: '12px 24px', background: 'var(--surface-color)', borderRadius: '40px',
-                            border: '1px solid var(--glass-border)', boxShadow: '0 15px 40px rgba(0,0,0,0.15)',
-                            backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)'
-                        }}>
-                             <button 
-                                className="desktop-fab"
-                                onClick={() => handleOpenModal('expense')}
-                                style={{ 
-                                    width: '48px', height: '48px', borderRadius: '50%', 
-                                    background: 'var(--bg-color)', color: 'var(--text-main)', 
-                                    display: 'flex', justifyContent: 'center', alignItems: 'center', 
-                                    border: '1px solid var(--glass-border)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', 
-                                    cursor: 'pointer', transition: 'all 0.2s'
-                                }}
-                                onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'}
-                                onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
-                            >
-                                <Plus size={24} />
-                            </button>
-
-                            {/* MICROFONE: Center, Largest */}
-                            <button 
-                                className="desktop-fab pulse-animation"
-                                onClick={() => setIsAiActive(true)}
-                                style={{ 
-                                    width: '64px', height: '64px', borderRadius: '50%', 
-                                    background: 'var(--primary-gradient)', color: 'white', 
-                                    display: 'flex', justifyContent: 'center', alignItems: 'center', 
-                                    border: 'none', boxShadow: '0 8px 24px rgba(var(--primary-rgb), 0.3)', 
-                                    cursor: 'pointer', transition: 'all 0.2s'
-                                }}
-                                onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'}
-                                onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
-                            >
-                                <Mic size={32} />
-                            </button>
-
-                            <button 
-                                className="desktop-fab"
-                                onClick={() => setIsAiActive(true)}
-                                style={{ 
-                                    width: '48px', height: '48px', borderRadius: '50%', 
-                                    background: 'var(--bg-color)', color: 'var(--text-main)', 
-                                    display: 'flex', justifyContent: 'center', alignItems: 'center', 
-                                    border: '1px solid var(--glass-border)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', 
-                                    cursor: 'pointer', transition: 'all 0.2s'
-                                }}
-                                onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'}
-                                onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
-                            >
-                                <Keyboard size={24} />
-                            </button>
-                        </div>
                     </div>
                 )}
+            </div>
+
+            {/* --- Fixed Elements (Outside of transformed container) --- */}
+            
+            {/* Desktop FABs */}
+            {isDesktop && (
+                <div style={{ 
+                    position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)',
+                    display: 'flex', alignItems: 'center', gap: '20px', zIndex: 1000,
+                    padding: '12px 24px', background: 'var(--surface-color)', borderRadius: '40px',
+                    border: '1px solid var(--glass-border)', boxShadow: '0 15px 40px rgba(0,0,0,0.15)',
+                    backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)'
+                }}>
+                        <button 
+                        className="desktop-fab"
+                        onClick={() => handleOpenModal('expense')}
+                        style={{ 
+                            width: '48px', height: '48px', borderRadius: '50%', 
+                            background: 'var(--bg-color)', color: 'var(--text-main)', 
+                            display: 'flex', justifyContent: 'center', alignItems: 'center', 
+                            border: '1px solid var(--glass-border)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', 
+                            cursor: 'pointer', transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'}
+                        onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                    >
+                        <Plus size={24} />
+                    </button>
+
+                    <button 
+                        className="desktop-fab pulse-animation"
+                        onClick={() => setIsAiActive(true)}
+                        style={{ 
+                            width: '64px', height: '64px', borderRadius: '50%', 
+                            background: 'var(--primary-gradient)', color: 'white', 
+                            display: 'flex', justifyContent: 'center', alignItems: 'center', 
+                            border: 'none', boxShadow: '0 8px 24px rgba(var(--primary-rgb), 0.3)', 
+                            cursor: 'pointer', transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'}
+                        onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                    >
+                        <Mic size={32} />
+                    </button>
+
+                    <button 
+                        className="desktop-fab"
+                        onClick={() => setIsAiActive(true)}
+                        style={{ 
+                            width: '48px', height: '48px', borderRadius: '50%', 
+                            background: 'var(--bg-color)', color: 'var(--text-main)', 
+                            display: 'flex', justifyContent: 'center', alignItems: 'center', 
+                            border: '1px solid var(--glass-border)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', 
+                            cursor: 'pointer', transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'}
+                        onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                    >
+                        <Keyboard size={24} />
+                    </button>
+                </div>
+            )}
             <TransactionModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingTx(null); }} defaultType={modalType} initialData={editingTx} onSuccess={refetch} />
 
             <ConfirmDialog 
@@ -973,6 +992,14 @@ const Home = () => {
                 @keyframes slideInUp {
                     from { transform: translateY(100%); }
                     to { transform: translateY(0); }
+                }
+                @keyframes slideInLeft {
+                    from { transform: translateX(-100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
                 }
                 @keyframes subtlePulse {
                     0%, 90% { transform: scale(1); opacity: 0.8; }
@@ -1017,7 +1044,7 @@ const Home = () => {
                             position: 'fixed', top: 0, left: 0,
                             width: '360px', height: '100%', background: 'var(--bg-color)',
                             boxShadow: '10px 0 50px rgba(0,0,0,0.15)', zIndex: 11001,
-                            transition: 'left 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                            animation: 'slideInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
                             padding: '32px', display: 'flex', flexDirection: 'column', overflowY: 'auto'
                         }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
@@ -1160,15 +1187,18 @@ const Home = () => {
                                                 onClick={() => setTempLimit({ ...tempLimit, categoryId: cat.id })}
                                                 title={t(cat.label)}
                                                 style={{
-                                                    aspectRatio: '1', borderRadius: '16px', border: '2px solid',
+                                                    padding: '12px 4px', borderRadius: '16px', border: '2px solid',
                                                     borderColor: tempLimit.categoryId === cat.id ? cat.color : 'transparent',
                                                     background: tempLimit.categoryId === cat.id ? cat.color + '20' : 'var(--surface-color)',
-                                                    fontSize: '1.4rem', cursor: 'pointer', transition: 'all 0.2s',
-                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                    position: 'relative', overflow: 'hidden'
+                                                    cursor: 'pointer', transition: 'all 0.2s',
+                                                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                                                    position: 'relative', overflow: 'hidden', gap: '4px'
                                                 }}
                                             >
-                                                {cat.icon}
+                                                <span style={{ fontSize: '1.4rem' }}>{cat.icon}</span>
+                                                <span style={{ fontSize: '0.55rem', fontWeight: '700', textTransform: 'uppercase', opacity: 0.9, textAlign: 'center', width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                    {t(cat.label, { defaultValue: cat.label }).split(' ')[0]}
+                                                </span>
                                                 {isAiLoading && tempLimit.categoryId === cat.id && (
                                                     <div className="sparkle-overlay" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(255,255,255,0.1)', animation: 'sparklePulse 1s infinite' }} />
                                                 )}
@@ -1267,7 +1297,6 @@ const Home = () => {
                         `}</style>
                     </>
                 )}
-            </div>
         </>
     );
 };

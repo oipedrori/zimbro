@@ -190,14 +190,27 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
                                 style={{ color: 'var(--text-main)', boxSizing: 'border-box', width: '100%', padding: '14px', borderRadius: 'var(--border-radius-md)', border: '1px solid var(--glass-border)', background: 'var(--bg-color)', fontSize: '1rem', outline: 'none', appearance: 'none', minHeight: '48px' }}
                             />
                         </div>
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '600' }}>{t('category')}</label>
-                            <select
-                                value={category} onChange={e => setCategory(e.target.value)}
-                                style={{ color: 'var(--text-main)', boxSizing: 'border-box', width: '100%', padding: '14px', borderRadius: 'var(--border-radius-md)', border: '1px solid var(--glass-border)', background: 'var(--bg-color)', fontSize: '1rem', outline: 'none', appearance: 'none', minHeight: '48px' }}
-                            >
-                                {categories.map(c => <option key={c.id} value={c.id}>{t(c.label, { defaultValue: c.label })}</option>)}
-                            </select>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
+                            {categories.map(c => (
+                                <button
+                                    key={c.id}
+                                    type="button"
+                                    onClick={() => setCategory(c.id)}
+                                    style={{
+                                        padding: '12px 4px', borderRadius: '16px', border: '2px solid',
+                                        borderColor: category === c.id ? c.color : 'transparent',
+                                        background: category === c.id ? c.color + '20' : 'var(--bg-color)',
+                                        cursor: 'pointer', transition: 'all 0.2s',
+                                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                                        gap: '4px', overflow: 'hidden'
+                                    }}
+                                >
+                                    <span style={{ fontSize: '1.4rem' }}>{c.icon}</span>
+                                    <span style={{ fontSize: '0.6rem', fontWeight: '700', textTransform: 'uppercase', opacity: 0.9, textAlign: 'center', width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                        {t(c.label, { defaultValue: c.label }).split(' ')[0]}
+                                    </span>
+                                </button>
+                            ))}
                         </div>
                     </div>
 
