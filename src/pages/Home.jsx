@@ -18,30 +18,13 @@ import { haptic } from '../utils/haptic';
 const Home = () => {
     const { currentUser } = useAuth();
     const { setIsAiActive } = useOutletContext();
-
-    // Controle do Mês Atual no Dashboard
-    const [currentDate, setCurrentDate] = useState(new Date());
-    const monthPrefix = format(currentDate, 'yyyy-MM');
-
-    const { transactions, allTransactions, loading, refetch, deleteTx } = useTransactions(monthPrefix);
     const { t, formatCurrency, locale } = useI18n();
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const { logout } = useAuth();
+    const { changeLocale, currency, changeCurrency } = useI18n();
 
-    // Lock body scroll when any modal or sidebar is open
-    useEffect(() => {
-        if (isSidebarOpen || isModalOpen || isLimitModalOpen || isConfirmOpen) {
-            document.body.style.overflow = 'hidden';
-            // Also prevent touchmove for mobile
-            document.body.style.touchAction = 'none';
-        } else {
-            document.body.style.overflow = '';
-            document.body.style.touchAction = '';
-        }
-        return () => {
-            document.body.style.overflow = '';
-            document.body.style.touchAction = '';
-        };
-    }, [isSidebarOpen, isModalOpen, isLimitModalOpen, isConfirmOpen]);
+    // --- State Declarations ---
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalType, setModalType] = useState('expense');
     const [editingTx, setEditingTx] = useState(null);
@@ -59,20 +42,35 @@ const Home = () => {
     const [confirmConfig, setConfirmConfig] = useState({});
     const [isAiLoading, setIsAiLoading] = useState(false);
     const [aiSuggestion, setAiSuggestion] = useState(null);
-
-    // === Bento Desktop Logic ===
     const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
-    const { logout } = useAuth();
-    const { changeLocale, currency, changeCurrency } = useI18n();
     const [theme, setTheme] = useState(localStorage.getItem('zimbroo_theme') || 'system');
-
+    const [isLimitModalOpen, setIsLimitModalOpen] = useState(false);
+    const [tempLimit, setTempLimit] = useState({ categoryId: '', amount: '' });
     const [limits, setLimits] = useState(() => {
         const saved = localStorage.getItem('zimbroo_limits');
         return saved ? JSON.parse(saved) : {};
     });
 
-    const [isLimitModalOpen, setIsLimitModalOpen] = useState(false);
-    const [tempLimit, setTempLimit] = useState({ categoryId: '', amount: '' });
+    // --- Derived Variables ---
+    const monthPrefix = format(currentDate, 'yyyy-MM');
+    const { transactions, allTransactions, loading, refetch, deleteTx } = useTransactions(monthPrefix);
+
+    // Lock body scroll when any modal or sidebar is open
+    useEffect(() => {
+        if (isSidebarOpen || isModalOpen || isLimitModalOpen || isConfirmOpen) {
+            document.body.style.overflow = 'hidden';
+            document.body.style.touchAction = 'none';
+        } else {
+            document.body.style.overflow = '';
+            document.body.style.touchAction = '';
+        }
+        return () => {
+            document.body.style.overflow = '';
+            document.body.style.touchAction = '';
+        };
+    }, [isSidebarOpen, isModalOpen, isLimitModalOpen, isConfirmOpen]);
+
+    // --- Effects & Handlers ---
 
     useEffect(() => {
         const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
