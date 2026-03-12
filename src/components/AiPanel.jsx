@@ -129,16 +129,14 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
             };
 
             recognition.onend = () => {
+                // If it was supposed to be listening and it wasn't triggered by a stop()
+                // we don't force restart to avoid infinite loops, but we let the user know
                 setIsListening(false);
-                // Try to process if ended and we have transcript
-                if (transcriptRef.current.trim().length > 0 && !isProcessing) {
-                    processTextRef.current(transcriptRef.current);
-                }
             };
 
             recognitionRef.current = recognition;
         }
-    }, []);
+    }, [isProcessing]); // Re-bind if necessary
 
     // Monitora mudança na prop isActive do bottom-nav para ligar o microfone automaticamente
     useEffect(() => {
@@ -373,6 +371,27 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
             >
                 <X size={28} />
             </button>
+
+            {/* Manual Mic Toggle (Center) */}
+            <div style={{ position: 'absolute', bottom: '60px', left: '50%', transform: 'translateX(-50%)', zIndex: 3001 }}>
+                <button
+                    className={`ai-mic-btn ${isListening ? 'listening active' : ''}`}
+                    onClick={toggleListen}
+                    style={{ 
+                        width: '80px', height: '80px', background: 'var(--primary-gradient)', 
+                        border: 'none', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center',
+                        boxShadow: '0 20px 40px rgba(0,0,0,0.3)', cursor: 'pointer', transition: 'all 0.3s'
+                    }}
+                >
+                    <div className="mystical-aura"></div>
+                    {isListening ? <Mic size={32} color="white" /> : <Mic size={32} color="rgba(255,255,255,0.4)" />}
+                </button>
+                {!isListening && !isManualTextMode && !transcript && (
+                    <p style={{ color: 'white', fontSize: '0.8rem', fontWeight: '700', marginTop: '12px', textAlign: 'center', opacity: 0.7 }}>
+                        TOQUE PARA FALAR
+                    </p>
+                )}
+            </div>
 
             <div className="ai-minimal-content">
                 {/* Texto de Status no Topo - Só renderiza conteúdo se isActive (evita flash de texto na saída) */}

@@ -818,7 +818,7 @@ const Home = () => {
                                 </button>
                             </div>
                             
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '350px', overflowY: 'auto', paddingRight: '4px' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', maxHeight: '350px', overflowY: 'auto' }}>
                                 {CATEGORIAS_DESPESA.filter(cat => limits[cat.id]).length === 0 ? (
                                     <div style={{ textAlign: 'center', padding: '32px', border: '1px solid var(--glass-border)', borderRadius: '24px', background: 'var(--surface-color)' }}>
                                         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '0' }}>Nenhum limite configurado</p>
@@ -833,7 +833,10 @@ const Home = () => {
                                         return (
                                             <div key={cat.id} style={{ background: 'var(--surface-color)', padding: '16px', borderRadius: '20px', border: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                    <span style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--text-main)' }}>{cat.icon} {t(cat.label)}</span>
+                                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                        <span style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--text-main)' }}>{cat.icon} {t(cat.label)}</span>
+                                                        <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--text-muted)' }}>{formatCurrency(limitAmount)}</span>
+                                                    </div>
                                                     <span style={{ fontSize: '0.8rem', fontWeight: '800', color: isOverLimit ? 'var(--danger-color)' : 'var(--text-muted)' }}>
                                                         {Math.round((spent / limitAmount) * 100)}%
                                                     </span>
@@ -881,14 +884,21 @@ const Home = () => {
                         </div>
                     </div>
 
-                    <div style={{ position: 'relative', height: '240px', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '12px', borderBottom: '1px solid var(--glass-border)', paddingBottom: '24px' }}>
+                    <div style={{ position: 'relative', height: '240px', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '12px', paddingBottom: '32px' }}>
                         {chartType === 'bar' ? (
                             yearlyStats.map((stat, i) => {
                                 const maxVal = Math.max(...yearlyStats.map(s => Math.abs(s.balance)), 5000);
                                 const h = Math.max(4, (Math.abs(stat.balance) / maxVal) * 100);
                                 const isCurrent = stat.month === (currentDate.getMonth() + 1);
                                 return (
-                                    <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', height: '100%', justifyContent: 'flex-end' }}>
+                                    <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', height: '100%', justifyContent: 'flex-end', position: 'relative' }}>
+                                        <span style={{ 
+                                            position: 'absolute', bottom: `${h + 2}%`, fontSize: '0.7rem', fontWeight: '700', 
+                                            color: stat.balance >= 0 ? 'var(--primary-dark)' : 'var(--danger-color)',
+                                            whiteSpace: 'nowrap'
+                                        }}>
+                                            {formatCurrency(stat.balance).split(',')[0]}
+                                        </span>
                                         <div style={{ 
                                             width: '100%', height: `${h}%`, 
                                             background: stat.balance >= 0 ? 'var(--primary-color)' : 'var(--danger-color)',
@@ -897,22 +907,24 @@ const Home = () => {
                                             boxShadow: isCurrent ? '0 0 20px rgba(var(--primary-rgb), 0.2)' : 'none',
                                             transition: 'height 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
                                         }} />
-                                        <span style={{ fontSize: '0.8rem', color: isCurrent ? 'var(--primary-dark)' : 'var(--text-muted)', fontWeight: isCurrent ? '700' : '500' }}>{stat.label.substring(0, 3)}</span>
+                                        <span style={{ fontSize: '0.8rem', color: isCurrent ? 'var(--primary-dark)' : 'var(--text-muted)', fontWeight: isCurrent ? '700' : '500' }}>
+                                            {format(new Date(2024, stat.month - 1, 1), 'MMM', { locale: { pt: ptBR, en: enUS, es: es, fr: fr }[locale] || ptBR }).substring(0, 3).toUpperCase()}
+                                        </span>
                                     </div>
                                 );
                             })
                         ) : (
                             <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-                                <svg width="100%" height="100%" viewBox="0 0 1000 100" preserveAspectRatio="none">
+                                <svg width="100%" height="100%" viewBox="0 0 1000 100" preserveAspectRatio="none" style={{ overflow: 'visible' }}>
                                     <path 
                                         d={`M ${yearlyStats.map((stat, i) => {
                                             const maxVal = Math.max(...yearlyStats.map(s => Math.abs(s.balance)), 5000);
                                             const x = (i / (yearlyStats.length - 1)) * 1000;
-                                            const y = 80 - (stat.balance / maxVal) * 60; // 20-80 range for safety
+                                            const y = 80 - (stat.balance / maxVal) * 60;
                                             return `${x},${y}`;
                                         }).join(' L ')}`}
-                                        fill="none" stroke="var(--primary-color)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"
-                                        style={{ transition: 'all 0.5s ease' }}
+                                        fill="none" stroke="var(--primary-color)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+                                        style={{ transition: 'all 0.5s ease', opacity: 0.8 }}
                                     />
                                     {yearlyStats.map((stat, i) => {
                                         const maxVal = Math.max(...yearlyStats.map(s => Math.abs(s.balance)), 5000);
@@ -920,17 +932,28 @@ const Home = () => {
                                         const y = 80 - (stat.balance / maxVal) * 60;
                                         const isCurrent = stat.month === (currentDate.getMonth() + 1);
                                         return (
-                                            <circle 
-                                                key={i} cx={x} cy={y} r={isCurrent ? 6 : 4} 
-                                                fill={isCurrent ? 'var(--primary-color)' : 'var(--bg-color)'} 
-                                                stroke="var(--primary-color)" strokeWidth="2"
-                                            />
+                                            <g key={i}>
+                                                <text 
+                                                    x={x} y={y - 10} textAnchor="middle" 
+                                                    style={{ fontSize: '10px', fontWeight: '700', fill: stat.balance >= 0 ? 'var(--primary-dark)' : 'var(--danger-color)' }}
+                                                >
+                                                    {formatCurrency(stat.balance).split(',')[0]}
+                                                </text>
+                                                <circle 
+                                                    cx={x} cy={y} r={isCurrent ? 4 : 2.5} 
+                                                    fill={isCurrent ? 'var(--primary-color)' : 'var(--bg-color)'} 
+                                                    stroke="var(--primary-color)" strokeWidth="1.5"
+                                                    style={{ transition: 'all 0.3s' }}
+                                                />
+                                            </g>
                                         );
                                     })}
                                 </svg>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0 0 0' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '16px 0 0 0' }}>
                                     {yearlyStats.map((stat, i) => (
-                                        <span key={i} style={{ fontSize: '0.75rem', color: 'var(--text-muted)', width: '25px', textAlign: 'center' }}>{stat.label.charAt(0)}</span>
+                                        <span key={i} style={{ fontSize: '0.75rem', color: stat.month === (currentDate.getMonth() + 1) ? 'var(--primary-dark)' : 'var(--text-muted)', fontWeight: '600', width: '35px', textAlign: 'center' }}>
+                                            {format(new Date(2024, stat.month - 1, 1), 'MMM', { locale: { pt: ptBR, en: enUS, es: es, fr: fr }[locale] || ptBR }).substring(0, 3).toUpperCase()}
+                                        </span>
                                     ))}
                                 </div>
                             </div>
