@@ -162,6 +162,15 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
 
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                     <div>
+                        <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '600' }}>{t('description')}</label>
+                        <input
+                            type="text" value={description} onChange={e => setDescription(e.target.value)}
+                            placeholder="" required
+                            style={{ color: 'var(--text-main)', boxSizing: 'border-box', width: '100%', padding: '14px', borderRadius: 'var(--border-radius-md)', border: '1px solid var(--glass-border)', background: 'var(--bg-color)', fontSize: '1rem', outline: 'none' }}
+                        />
+                    </div>
+
+                    <div>
                         <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '600' }}>{t('value')} ({getCurrencySymbol()})</label>
                         <input
                             type="text" 
@@ -169,15 +178,6 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
                             value={amount} 
                             onChange={e => setAmount(e.target.value)}
                             placeholder="0,00" required
-                            style={{ color: 'var(--text-main)', boxSizing: 'border-box', width: '100%', padding: '14px', borderRadius: 'var(--border-radius-md)', border: '1px solid var(--glass-border)', background: 'var(--bg-color)', fontSize: '1rem', outline: 'none' }}
-                        />
-                    </div>
-
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '600' }}>{t('description')}</label>
-                        <input
-                            type="text" value={description} onChange={e => setDescription(e.target.value)}
-                            placeholder="" required
                             style={{ color: 'var(--text-main)', boxSizing: 'border-box', width: '100%', padding: '14px', borderRadius: 'var(--border-radius-md)', border: '1px solid var(--glass-border)', background: 'var(--bg-color)', fontSize: '1rem', outline: 'none' }}
                         />
                     </div>
