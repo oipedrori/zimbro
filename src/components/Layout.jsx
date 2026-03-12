@@ -142,19 +142,6 @@ const Layout = () => {
             )}
 
             {/* Se o painel de IA estiver ativo, mostramos o botão de fechar flutuando aqui caso não queira usar o handleAiClick do layout */}
-            {isAiActive && (
-                <nav className="bottom-nav" style={{ zIndex: 5001 }}>
-                    <div className="nav-center-item">
-                        <button
-                            className={`ai-mic-btn active ${isListening ? 'listening' : ''}`}
-                            onClick={handleCloseAi}
-                        >
-                            <div className="mystical-aura"></div>
-                            <X size={32} color="#ffffff" strokeWidth={2.5} />
-                        </button>
-                    </div>
-                </nav>
-            )}
         </div>
     );
 };

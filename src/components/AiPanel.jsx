@@ -357,45 +357,55 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
 
     return (
         <div className={`ai-overlay ${isActive ? 'active' : ''}`}>
+            {/* Close Button - Responsive Position */}
             <button 
                 onClick={onClose}
                 aria-label="Close"
+                className="ai-close-btn"
                 style={{
-                    position: 'absolute', top: '24px', right: '24px',
+                    position: 'absolute', 
+                    top: isManualTextMode ? '16px' : '24px', 
+                    right: isManualTextMode ? '16px' : '24px',
                     width: '48px', height: '48px', borderRadius: '50%',
                     background: 'rgba(255, 255, 255, 0.1)', color: 'white',
                     display: 'flex', justifyContent: 'center', alignItems: 'center',
-                    border: 'none', cursor: 'pointer', zIndex: 3001,
+                    border: 'none', cursor: 'pointer', zIndex: 3005,
                     backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)'
                 }}
             >
                 <X size={28} />
             </button>
 
-            {/* Manual Mic Toggle (Center) */}
-            <div style={{ position: 'absolute', bottom: '60px', left: '50%', transform: 'translateX(-50%)', zIndex: 3001 }}>
-                <button
-                    className={`ai-mic-btn ${isListening ? 'listening active' : ''}`}
-                    onClick={toggleListen}
-                    style={{ 
-                        width: '80px', height: '80px', background: 'var(--primary-gradient)', 
-                        border: 'none', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center',
-                        boxShadow: '0 20px 40px rgba(0,0,0,0.3)', cursor: 'pointer', transition: 'all 0.3s'
-                    }}
-                >
-                    <div className="mystical-aura"></div>
-                    {isListening ? <Mic size={32} color="white" /> : <Mic size={32} color="rgba(255,255,255,0.4)" />}
-                </button>
-                {!isListening && !isManualTextMode && !transcript && (
-                    <p style={{ color: 'white', fontSize: '0.8rem', fontWeight: '700', marginTop: '12px', textAlign: 'center', opacity: 0.7 }}>
-                        TOQUE PARA FALAR
-                    </p>
-                )}
-            </div>
+            {/* Manual Mic Toggle (Center) - Hidden in Text Mode to avoid overlap */}
+            {!isManualTextMode && (
+                <div style={{ position: 'absolute', bottom: '60px', left: '50%', transform: 'translateX(-50%)', zIndex: 3001 }}>
+                    <button
+                        className={`ai-mic-btn ${isListening ? 'listening active' : ''}`}
+                        onClick={toggleListen}
+                        style={{ 
+                            width: '80px', height: '80px', background: 'var(--primary-gradient)', 
+                            border: 'none', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center',
+                            boxShadow: '0 20px 40px rgba(0,0,0,0.3)', cursor: 'pointer', transition: 'all 0.3s'
+                        }}
+                    >
+                        <div className="mystical-aura"></div>
+                        {isListening ? <Mic size={32} color="white" /> : <Mic size={32} color="rgba(255,255,255,0.4)" />}
+                    </button>
+                    {!isListening && !isManualTextMode && !transcript && (
+                        <p style={{ color: 'white', fontSize: '0.8rem', fontWeight: '700', marginTop: '12px', textAlign: 'center', opacity: 0.7 }}>
+                            TOQUE PARA FALAR
+                        </p>
+                    )}
+                </div>
+            )}
 
             <div className="ai-minimal-content">
                 {/* Texto de Status no Topo - Só renderiza conteúdo se isActive (evita flash de texto na saída) */}
-                <div className="ai-status-text" style={{ opacity: isActive ? 1 : 0, transition: 'opacity 0.2s' }}>
+                <div className="ai-status-text" style={{ 
+                    opacity: isActive ? 1 : 0, 
+                    transition: 'opacity 0.2s',
+                    paddingTop: isManualTextMode ? '20px' : '0' 
+                }}>
                     {isProcessing && (
                        <div style={{ marginBottom: '20px' }}><LoadingDots style={{ color: 'white' }} /></div>
                     )}
@@ -409,7 +419,7 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
                     {(!aiMessage || (conversationContext && !isProcessing)) ? (
                         (isTextMode || isManualTextMode) ? (
                             <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'center', height: '100%', justifyContent: 'space-between' }}>
-                                <div style={{ textAlign: 'center', marginTop: '40px' }}>
+                                <div style={{ textAlign: 'center', marginTop: '10px' }}>
                                     <h3 style={{ color: 'white', fontSize: '1.4rem', fontWeight: '600', marginBottom: '8px', opacity: 0.9 }}>
                                         {t('ai_type_details', { defaultValue: 'Detalhes da movimentação' })}
                                     </h3>

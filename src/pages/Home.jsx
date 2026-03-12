@@ -495,12 +495,12 @@ const Home = () => {
                     justifyContent: 'space-between', 
                     alignItems: isDesktop ? 'center' : 'flex-start', 
                     paddingTop: '10px', 
-                    marginBottom: '24px',
-                    gap: isDesktop ? '0' : '16px'
+                    marginBottom: isDesktop ? '24px' : '12px',
+                    gap: isDesktop ? '0' : '8px'
                 }}>
                     <div 
-                        onClick={() => isDesktop ? setIsSidebarOpen(true) : null}
-                        style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: isDesktop ? 'pointer' : 'default' }}
+                        onClick={() => setIsSidebarOpen(true)}
+                        style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
                     >
                         <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'var(--surface-color)', border: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--primary-color)' }}>
                             <User size={22} />
