@@ -132,3 +132,36 @@ export const generateInsightMessage = async (transactions = [], locale = 'pt') =
   const randomIndex = Math.floor(Math.random() * AI_BUBBLE_PHRASES.length);
   return AI_BUBBLE_PHRASES[randomIndex];
 };
+
+export const suggestCategoryLimit = async (category, transactions = [], locale = 'pt') => {
+  if (!API_KEY) return { amount: null };
+
+  try {
+    const genAI = new GoogleGenerativeAI(API_KEY);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+    const recentTxs = transactions
+      .filter(t => t.category === category)
+      .slice(0, 20)
+      .map(t => `R$${t.amount} (${t.description})`)
+      .join(', ');
+
+    const prompt = `
+      Com base na lista de gastos recentes da categoria "${category}": [${recentTxs || "Nenhum gasto registrado"}].
+      Estipule um limite mensal ideal para essa categoria. 
+      Considere a média de gastos e adicione uma margem de segurança de 10%.
+      
+      Retorne APENAS um JSON com o campo "amount" (número) e "reason" (uma frase curta explicando o porquê em ${locale}).
+      Ex: {"amount": 150.00, "reason": "Sua média é R$130, deixamos uma margem extra."}
+    `;
+
+    const result = await model.generateContent(prompt);
+    let text = result.response.text();
+    text = text.replace(/\`\`\`json/gi, '').replace(/\`\`\`/g, '').trim();
+    
+    return JSON.parse(text);
+  } catch (error) {
+    console.error("Error suggesting limit:", error);
+    return { amount: null, reason: "Não consegui calcular agora." };
+  }
+};

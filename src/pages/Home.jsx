@@ -8,7 +8,7 @@ import { useI18n } from '../contexts/I18nContext';
 import TransactionModal from '../components/TransactionModal';
 import SwipeableItem from '../components/SwipeableItem';
 import LoadingDots from '../components/LoadingDots';
-import { Plus, ChevronLeft, ChevronRight, User, Pointer, X, Trash2, PieChart, BarChart2, Shield, Mic, Keyboard } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, User, Pointer, X, Trash2, PieChart, BarChart2, Shield, Mic, Keyboard, Moon, Globe, DollarSign, LogOut } from 'lucide-react';
 import { Link, useOutletContext } from 'react-router-dom';
 import { getEmojiForDescription } from '../utils/emojiUtils';
 import { prepareMonthlyTransactions } from '../services/transactionService';
@@ -40,13 +40,23 @@ const Home = () => {
     const [isSwiping, setIsSwiping] = useState(false);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [confirmConfig, setConfirmConfig] = useState({});
+    const [isAiLoading, setIsAiLoading] = useState(false);
+    const [aiSuggestion, setAiSuggestion] = useState(null);
 
     // === Bento Desktop Logic ===
     const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const { logout } = useAuth();
+    const { changeLocale, currency, changeCurrency } = useI18n();
+    const [theme, setTheme] = useState(localStorage.getItem('zimbroo_theme') || 'system');
+
     const [limits, setLimits] = useState(() => {
         const saved = localStorage.getItem('zimbroo_limits');
         return saved ? JSON.parse(saved) : {};
     });
+
+    const [isLimitModalOpen, setIsLimitModalOpen] = useState(false);
+    const [tempLimit, setTempLimit] = useState({ categoryId: '', amount: '' });
 
     useEffect(() => {
         const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
@@ -74,6 +84,46 @@ const Home = () => {
             setIsClosingFlipped(false);
         }, 300);
     };
+
+    // AI Limit Suggestion Fetcher
+    const fetchLimitSuggestion = async (category) => {
+        if (!category) return;
+        setIsAiLoading(true);
+        setAiSuggestion(null);
+        
+        try {
+            const { suggestCategoryLimit } = await import('../services/geminiService');
+            const result = await suggestCategoryLimit(category, allTransactions, locale);
+            if (result && result.amount) {
+                setAiSuggestion(result);
+            }
+        } catch (err) {
+            console.error("Failed to fetch suggestion", err);
+        } finally {
+            setIsAiLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (isLimitModalOpen && tempLimit.categoryId) {
+            fetchLimitSuggestion(tempLimit.categoryId);
+        }
+    }, [tempLimit.categoryId, isLimitModalOpen]);
+
+    // Theme Sync Effect (copied from Profile.jsx logic)
+    useEffect(() => {
+        const root = document.documentElement;
+        if (theme === 'dark') {
+            root.classList.add('theme-dark');
+            root.classList.remove('theme-light');
+        } else if (theme === 'light') {
+            root.classList.add('theme-light');
+            root.classList.remove('theme-dark');
+        } else {
+            root.classList.remove('theme-dark', 'theme-light');
+        }
+        localStorage.setItem('zimbroo_theme', theme);
+    }, [theme]);
 
     // Calculate yearly stats locally from allTransactions to avoid redundant fetches
     React.useEffect(() => {
@@ -182,9 +232,10 @@ const Home = () => {
         if (activeFilter === 'all') return true;
         if (activeFilter === 'income') return t.type === 'income';
         if (activeFilter === 'expense') return t.type === 'expense';
-        if (activeFilter === 'variable') return t.repeatType === 'none' || !t.repeatType;
-        if (activeFilter === 'installment') return t.repeatType === 'installment';
-        if (activeFilter === 'recurring') return t.repeatType === 'recurring';
+        // Categorias de despesas específicas devem filtrar pelo tipo expense também
+        if (activeFilter === 'variable') return t.type === 'expense' && (t.repeatType === 'none' || !t.repeatType);
+        if (activeFilter === 'installment') return t.type === 'expense' && t.repeatType === 'installment';
+        if (activeFilter === 'recurring') return t.type === 'expense' && t.repeatType === 'recurring';
         return true;
     });
 
@@ -419,18 +470,28 @@ const Home = () => {
                 className={`page-container animate-fade-in`}
                 style={{ paddingBottom: '120px', animation: 'slideUp 0.3s forwards' }}
             >
-                {!isDesktop && (
-                    <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px' }}>
-                        <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
-                            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--surface-color)', border: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--highlight-color)' }}>
+                {/* Header (Now always visible but behaves differently on desktop) */}
+                <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px' }}>
+                    <div 
+                        onClick={() => isDesktop ? setIsSidebarOpen(true) : null}
+                        style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none', cursor: isDesktop ? 'pointer' : 'default' }}
+                    >
+                        {isDesktop ? (
+                             <div className="hover-scale" style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--surface-color)', border: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--highlight-color)' }}>
                                 <User size={20} />
-                            </div>
-                            <div>
-                                <h1 style={{ fontSize: '1.3rem', color: 'var(--text-main)', fontWeight: '700', paddingLeft: '4px' }}>{t('hello', { name: currentUser?.displayName?.split(' ')[0] || t('user', { defaultValue: 'Usuário' }) })}</h1>
-                            </div>
-                        </Link>
-                    </header>
-                )}
+                             </div>
+                        ) : (
+                            <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
+                                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--surface-color)', border: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--highlight-color)' }}>
+                                    <User size={20} />
+                                </div>
+                            </Link>
+                        )}
+                        <div>
+                            <h1 style={{ fontSize: '1.3rem', color: 'var(--text-main)', fontWeight: '700', paddingLeft: '4px' }}>{t('hello', { name: currentUser?.displayName?.split(' ')[0] || t('user', { defaultValue: 'Usuário' }) })}</h1>
+                        </div>
+                    </div>
+                </header>
 
                 {!isDesktop && (
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 10px', marginBottom: '8px' }}>
@@ -611,6 +672,24 @@ const Home = () => {
                                             <p style={{ fontWeight: '700', fontSize: '1.3rem', margin: 0 }}>{formatCurrency(expenses)}</p>
                                         </div>
                                     </div>
+
+                                    {/* Barra de Porcentagem de Gastos (Bento Desktop) */}
+                                    {incomes > 0 && (
+                                        <div style={{ marginTop: '24px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                            <div style={{ flex: 1, height: '8px', background: 'rgba(255, 255, 255, 0.2)', borderRadius: '10px', overflow: 'hidden' }}>
+                                                <div style={{
+                                                    width: `${Math.min((expenses / incomes) * 100, 100)}%`,
+                                                    height: '100%',
+                                                    background: 'white',
+                                                    borderRadius: '10px',
+                                                    transition: 'width 0.8s cubic-bezier(0.4, 0, 0.2, 1)'
+                                                }}></div>
+                                            </div>
+                                            <span style={{ fontSize: '1rem', fontWeight: '800', opacity: 0.9, minWidth: '45px', textAlign: 'right' }}>
+                                                {Math.round((expenses / incomes) * 100)}%
+                                            </span>
+                                        </div>
+                                    )}
                                 </section>
 
                                 <section className="transactions-section">
@@ -645,26 +724,28 @@ const Home = () => {
                                     {loading ? (
                                         <LoadingDots />
                                     ) : (
-                                        <div className="glass-panel" style={{ padding: 0, overflow: 'hidden' }}>
-                                            {filteredTransactions.slice(0, 10).map((tx, i) => (
-                                                <div key={tx.id} onClick={() => handleEditTx(tx)} style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', borderBottom: i === filteredTransactions.length - 1 ? 'none' : '1px solid var(--glass-border)', transition: 'background 0.2s' }} className="hover-brightness">
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                                                        <div style={{ width: '46px', height: '46px', borderRadius: '50%', background: getCategoryTheme(tx.category, tx.type).color + '20', display: 'flex', justifyContent: 'center', alignItems: 'center', color: getCategoryTheme(tx.category, tx.type).color, fontSize: '1.3rem' }}>
-                                                            {getEmojiForDescription(tx.description, getCategoryTheme(tx.category, tx.type).icon)}
+                                        <div className="glass-panel" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                                            <div style={{ maxHeight: '450px', overflowY: 'auto', scrollbarWidth: 'thin' }}>
+                                                {filteredTransactions.map((tx, i) => (
+                                                    <div key={tx.id} onClick={() => handleEditTx(tx)} style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', borderBottom: i === filteredTransactions.length - 1 ? 'none' : '1px solid var(--glass-border)', transition: 'background 0.2s' }} className="hover-brightness">
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                                            <div style={{ width: '46px', height: '46px', borderRadius: '50%', background: getCategoryTheme(tx.category, tx.type).color + '20', display: 'flex', justifyContent: 'center', alignItems: 'center', color: getCategoryTheme(tx.category, tx.type).color, fontSize: '1.3rem' }}>
+                                                                {getEmojiForDescription(tx.description, getCategoryTheme(tx.category, tx.type).icon)}
+                                                            </div>
+                                                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                                <p style={{ fontWeight: '600', margin: 0, color: 'var(--text-main)' }}>{tx.dynamicDescription || tx.description}</p>
+                                                                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>{tx.virtualDate.split('-').slice(1).reverse().join('/')}</p>
+                                                            </div>
                                                         </div>
-                                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                            <p style={{ fontWeight: '600', margin: 0, color: 'var(--text-main)' }}>{tx.dynamicDescription || tx.description}</p>
-                                                            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>{tx.virtualDate.split('-').slice(1).reverse().join('/')}</p>
-                                                        </div>
+                                                        <p style={{ fontWeight: '700', color: tx.type === 'income' ? 'var(--success-color)' : 'var(--danger-color)', margin: 0, fontSize: '1.1rem' }}>
+                                                            {tx.type === 'income' ? '+' : '-'} {formatCurrency(tx.amount)}
+                                                        </p>
                                                     </div>
-                                                    <p style={{ fontWeight: '700', color: tx.type === 'income' ? 'var(--success-color)' : 'var(--danger-color)', margin: 0, fontSize: '1.1rem' }}>
-                                                        {tx.type === 'income' ? '+' : '-'} {formatCurrency(tx.amount)}
-                                                    </p>
-                                                </div>
-                                            ))}
-                                            {filteredTransactions.length > 10 && (
-                                                <div style={{ padding: '16px', textAlign: 'center', color: 'var(--primary-dark)', fontWeight: '600', fontSize: '0.9rem', borderTop: '1px solid var(--glass-border)' }}>
-                                                    Ver todas as {filteredTransactions.length} transações
+                                                ))}
+                                            </div>
+                                            {filteredTransactions.length > 8 && (
+                                                <div style={{ padding: '12px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.75rem', borderTop: '1px solid var(--glass-border)', background: 'rgba(0,0,0,0.02)' }}>
+                                                    Role para ver mais
                                                 </div>
                                             )}
                                         </div>
@@ -749,12 +830,16 @@ const Home = () => {
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '24px' }}>
                                 <button
-                                    onClick={() => {/* Navigate to Limits page or open a mini-modal */ window.location.href='/limits'; }}
+                                    onClick={() => {
+                                        setTempLimit({ categoryId: CATEGORIAS_DESPESA[0].id, amount: '' });
+                                        setIsLimitModalOpen(true);
+                                    }}
                                     style={{ 
                                         background: 'var(--surface-color)', padding: '20px', borderRadius: '24px', 
                                         border: '2px dashed var(--primary-color)', color: 'var(--primary-color)',
                                         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', 
-                                        gap: '12px', cursor: 'pointer', transition: 'transform 0.2s'
+                                        gap: '12px', cursor: 'pointer', transition: 'transform 0.2s',
+                                        minHeight: '160px'
                                     }}
                                     className="hover-scale"
                                 >
@@ -799,60 +884,65 @@ const Home = () => {
                             </div>
                         </section>
 
-                        {/* --- Floating Action Buttons (Desktop Only - Following the scroll) --- */}
+                        {/* --- Floating Action Buttons (Desktop Only - Following the scroll, HORIZONTALLY CENTERED) --- */}
                         <div style={{ 
-                            position: 'fixed', bottom: '32px', right: '32px', 
-                            display: 'flex', flexDirection: 'column-reverse', gap: '16px', zIndex: 1000
+                            position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)',
+                            display: 'flex', alignItems: 'center', gap: '20px', zIndex: 1000,
+                            padding: '12px 24px', background: 'var(--surface-color)', borderRadius: '40px',
+                            border: '1px solid var(--glass-border)', boxShadow: '0 15px 40px rgba(0,0,0,0.15)',
+                            backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)'
                         }}>
-                            {/* MICROFONE: Bottom-most, Largest */}
+                             <button 
+                                className="desktop-fab"
+                                onClick={() => handleOpenModal('expense')}
+                                style={{ 
+                                    width: '48px', height: '48px', borderRadius: '50%', 
+                                    background: 'var(--bg-color)', color: 'var(--text-main)', 
+                                    display: 'flex', justifyContent: 'center', alignItems: 'center', 
+                                    border: '1px solid var(--glass-border)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', 
+                                    cursor: 'pointer', transition: 'all 0.2s'
+                                }}
+                                onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'}
+                                onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                            >
+                                <Plus size={24} />
+                            </button>
+
+                            {/* MICROFONE: Center, Largest */}
                             <button 
                                 className="desktop-fab pulse-animation"
                                 onClick={() => setIsAiActive(true)}
                                 style={{ 
-                                    width: '72px', height: '72px', borderRadius: '50%', 
+                                    width: '64px', height: '64px', borderRadius: '50%', 
                                     background: 'var(--primary-gradient)', color: 'white', 
                                     display: 'flex', justifyContent: 'center', alignItems: 'center', 
-                                    border: 'none', boxShadow: '0 12px 32px rgba(27, 69, 32, 0.4)', 
-                                    cursor: 'pointer' 
+                                    border: 'none', boxShadow: '0 8px 24px rgba(var(--primary-rgb), 0.3)', 
+                                    cursor: 'pointer', transition: 'all 0.2s'
                                 }}
+                                onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'}
+                                onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
                             >
                                 <Mic size={32} />
                             </button>
 
-                            {/* TECLADO: Above Mic, Medium */}
                             <button 
                                 className="desktop-fab"
                                 onClick={() => setIsAiActive(true)}
                                 style={{ 
-                                    width: '56px', height: '56px', borderRadius: '50%', 
-                                    background: 'var(--highlight-color)', color: 'white', 
+                                    width: '48px', height: '48px', borderRadius: '50%', 
+                                    background: 'var(--bg-color)', color: 'var(--text-main)', 
                                     display: 'flex', justifyContent: 'center', alignItems: 'center', 
-                                    border: 'none', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', 
-                                    cursor: 'pointer' 
+                                    border: '1px solid var(--glass-border)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', 
+                                    cursor: 'pointer', transition: 'all 0.2s'
                                 }}
+                                onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'}
+                                onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
                             >
                                 <Keyboard size={24} />
-                            </button>
-
-                            {/* ADICAO MANUAL (+): Top-most, Medium */}
-                            <button 
-                                className="desktop-fab"
-                                onClick={() => handleOpenModal('expense')}
-                                style={{ 
-                                    width: '56px', height: '56px', borderRadius: '50%', 
-                                    background: 'var(--highlight-color)', color: 'white', 
-                                    display: 'flex', justifyContent: 'center', alignItems: 'center', 
-                                    border: 'none', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', 
-                                    cursor: 'pointer' 
-                                }}
-                            >
-                                <Plus size={24} />
                             </button>
                         </div>
                     </div>
                 )}
-            </div>
-
             <TransactionModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingTx(null); }} defaultType={modalType} initialData={editingTx} onSuccess={refetch} />
 
             <ConfirmDialog 
@@ -861,6 +951,23 @@ const Home = () => {
                 {...confirmConfig}
             />
 
+            {/* Floating Microfone Button (MOBILE) - WITH PULSE ANIMATION */}
+            {!isDesktop && (
+                <button 
+                    className="fab-main pulse-centered"
+                    onClick={() => setIsAiActive(true)}
+                    style={{ 
+                        position: 'fixed', bottom: '30px', left: '50%', transform: 'translateX(-50%)', 
+                        zIndex: 1000, width: '64px', height: '64px', borderRadius: '50%', 
+                        background: 'var(--primary-gradient)', display: 'flex', 
+                        justifyContent: 'center', alignItems: 'center', color: 'white', 
+                        border: 'none', boxShadow: '0 8px 24px rgba(var(--primary-rgb), 0.3)',
+                        cursor: 'pointer'
+                    }}
+                >
+                    <Mic size={28} />
+                </button>
+            )}
 
             <style>{`
                 @keyframes slideInUp {
@@ -872,10 +979,295 @@ const Home = () => {
                     95% { transform: scale(1.2); opacity: 1; }
                     100% { transform: scale(1); opacity: 0.8; }
                 }
+                @keyframes pulse {
+                    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0.4); }
+                    70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(var(--primary-rgb), 0); }
+                    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0); }
+                }
+                @keyframes pulse-centered {
+                    0% { transform: translateX(-50%) scale(1); box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0.4); }
+                    70% { transform: translateX(-50%) scale(1.05); box-shadow: 0 0 0 15px rgba(var(--primary-rgb), 0); }
+                    100% { transform: translateX(-50%) scale(1); box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0); }
+                }
+                .pulse-animation {
+                    animation: pulse 2s infinite ease-in-out;
+                }
+                .pulse-centered {
+                    animation: pulse-centered 2s infinite ease-in-out;
+                }
                 .pointer-icon.pulse-animation {
                     animation: subtlePulse 5s infinite ease-in-out;
                 }
             `}</style>
+                {/* Sidebar Drawer para Desktop */}
+                {isDesktop && isSidebarOpen && (
+                    <>
+                        {/* Backdrop */}
+                        <div 
+                            onClick={() => setIsSidebarOpen(false)}
+                            style={{ 
+                                position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+                                background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)',
+                                zIndex: 11000, animation: 'fadeIn 0.3s forwards' 
+                            }}
+                        />
+                        
+                        {/* Drawer Content */}
+                        <div style={{
+                            position: 'fixed', top: 0, left: 0,
+                            width: '360px', height: '100%', background: 'var(--bg-color)',
+                            boxShadow: '10px 0 50px rgba(0,0,0,0.15)', zIndex: 11001,
+                            transition: 'left 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                            padding: '32px', display: 'flex', flexDirection: 'column', overflowY: 'auto'
+                        }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                                    <div style={{ width: '50px', height: '50px', borderRadius: '16px', background: 'var(--surface-color)', border: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--primary-color)' }}>
+                                        <User size={24} />
+                                    </div>
+                                    <div>
+                                        <h2 style={{ fontSize: '1.1rem', fontWeight: '700', margin: 0 }}>{currentUser?.displayName || 'Perfil'}</h2>
+                                        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>{currentUser?.email}</p>
+                                    </div>
+                                </div>
+                                <button onClick={() => setIsSidebarOpen(false)} style={{ padding: '8px', color: 'var(--text-muted)', border: 'none', background: 'transparent', cursor: 'pointer' }}>
+                                    <X size={24} />
+                                </button>
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                {/* Notion Sync Button */}
+                                <button 
+                                    style={{ 
+                                        background: '#000', color: 'white', padding: '16px 20px', borderRadius: '20px', 
+                                        display: 'flex', alignItems: 'center', gap: '14px', border: 'none', cursor: 'pointer',
+                                        fontSize: '0.95rem', fontWeight: '600', width: '100%'
+                                    }}
+                                >
+                                    <img src="/notion_logo.png" style={{ width: '20px', height: '20px' }} alt="Notion" />
+                                    Sincronizar com Notion
+                                </button>
+
+                                {/* Theme Section */}
+                                <div style={{ background: 'var(--surface-color)', padding: '20px', borderRadius: '24px', border: '1px solid var(--glass-border)' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                                        <div style={{ background: 'var(--primary-light)', padding: '8px', borderRadius: '10px', color: 'var(--primary-dark)' }}><Moon size={18} /></div>
+                                        <span style={{ fontWeight: '600' }}>{t('theme')}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', background: 'var(--bg-color)', borderRadius: '12px', padding: '4px' }}>
+                                        {['system', 'light', 'dark'].map(tOption => (
+                                            <button 
+                                                key={tOption}
+                                                onClick={() => setTheme(tOption)}
+                                                style={{ 
+                                                    flex: 1, padding: '8px', borderRadius: '8px', border: 'none',
+                                                    fontSize: '0.8rem', fontWeight: '600', cursor: 'pointer',
+                                                    background: theme === tOption ? 'var(--primary-color)' : 'transparent',
+                                                    color: theme === tOption ? 'white' : 'var(--text-muted)',
+                                                    transition: 'all 0.2s'
+                                                }}
+                                            >
+                                                {tOption === 'system' ? 'Auto' : tOption === 'light' ? 'Claro' : 'Escuro'}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Language/Currency Section */}
+                                <div style={{ background: 'var(--surface-color)', padding: '20px', borderRadius: '24px', border: '1px solid var(--glass-border)' }}>
+                                    <div style={{ marginBottom: '20px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                                            <div style={{ background: 'var(--primary-light)', padding: '8px', borderRadius: '10px', color: 'var(--primary-dark)' }}><Globe size={18} /></div>
+                                            <span style={{ fontWeight: '600' }}>{t('language')}</span>
+                                        </div>
+                                        <select 
+                                            value={locale} 
+                                            onChange={(e) => changeLocale(e.target.value)}
+                                            style={{ width: '100%', padding: '12px', borderRadius: '12px', background: 'var(--bg-color)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', fontSize: '0.9rem' }}
+                                        >
+                                            <option value="pt">Português</option>
+                                            <option value="en">English</option>
+                                            <option value="es">Español</option>
+                                            <option value="fr">Français</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                                            <div style={{ background: 'var(--primary-light)', padding: '8px', borderRadius: '10px', color: 'var(--primary-dark)' }}><DollarSign size={18} /></div>
+                                            <span style={{ fontWeight: '600' }}>Moeda</span>
+                                        </div>
+                                        <select 
+                                            value={currency} 
+                                            onChange={(e) => changeCurrency(e.target.value)}
+                                            style={{ width: '100%', padding: '12px', borderRadius: '12px', background: 'var(--bg-color)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', fontSize: '0.9rem' }}
+                                        >
+                                            <option value="BRL">R$ Real</option>
+                                            <option value="USD">$ Dollar</option>
+                                            <option value="EUR">€ Euro</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                {/* Logout */}
+                                <button 
+                                    onClick={logout}
+                                    style={{ 
+                                        display: 'flex', alignItems: 'center', gap: '14px', padding: '20px', 
+                                        background: 'rgba(239, 68, 68, 0.05)', borderRadius: '24px', 
+                                        border: '1px solid rgba(239, 68, 68, 0.1)', cursor: 'pointer',
+                                        color: 'var(--danger-color)', fontWeight: '700', marginTop: '20px'
+                                    }}
+                                >
+                                    <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '8px', borderRadius: '10px' }}><LogOut size={20} /></div>
+                                    {t('logout')}
+                                </button>
+                            </div>
+                        </div>
+                    </>
+                )}
+
+                {/* Modal Dinâmico de Limite */}
+                {isLimitModalOpen && (
+                    <>
+                        <div 
+                            onClick={() => setIsLimitModalOpen(false)}
+                            style={{ 
+                                position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+                                background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
+                                zIndex: 12000, animation: 'fadeIn 0.3s forwards' 
+                            }}
+                        />
+                        <div style={{
+                            position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+                            width: 'min(90%, 400px)', backgroundColor: 'var(--bg-color)', borderRadius: '32px',
+                            padding: '32px', zIndex: 12001, boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                            border: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column', gap: '24px',
+                            animation: 'modalOpen 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards'
+                        }}>
+                            <div>
+                                <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '8px' }}>Novo Limite Mensal</h2>
+                                <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Defina quanto você pretende gastar em uma categoria específica.</p>
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '8px', marginLeft: '4px' }}>CATEGORIA</label>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
+                                        {CATEGORIAS_DESPESA.map(cat => (
+                                            <button
+                                                key={cat.id}
+                                                onClick={() => setTempLimit({ ...tempLimit, categoryId: cat.id })}
+                                                title={t(cat.label)}
+                                                style={{
+                                                    aspectRatio: '1', borderRadius: '16px', border: '2px solid',
+                                                    borderColor: tempLimit.categoryId === cat.id ? cat.color : 'transparent',
+                                                    background: tempLimit.categoryId === cat.id ? cat.color + '20' : 'var(--surface-color)',
+                                                    fontSize: '1.4rem', cursor: 'pointer', transition: 'all 0.2s',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    position: 'relative', overflow: 'hidden'
+                                                }}
+                                            >
+                                                {cat.icon}
+                                                {isAiLoading && tempLimit.categoryId === cat.id && (
+                                                    <div className="sparkle-overlay" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(255,255,255,0.1)', animation: 'sparklePulse 1s infinite' }} />
+                                                )}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <p style={{ marginTop: '10px', textAlign: 'center', fontWeight: '700', color: 'var(--text-main)', fontSize: '0.9rem' }}>
+                                        {t(CATEGORIAS_DESPESA.find(c => c.id === tempLimit.categoryId)?.label || '') || '---'}
+                                    </p>
+                                </div>
+
+                                <div style={{ position: 'relative' }}>
+                                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '8px', marginLeft: '4px' }}>VALOR LIMITE</label>
+                                    <div style={{ position: 'relative' }}>
+                                        <div style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', fontWeight: '700', color: 'var(--text-muted)' }}>R$</div>
+                                        <input 
+                                            type="number"
+                                            value={tempLimit.amount}
+                                            onChange={(e) => setTempLimit({ ...tempLimit, amount: e.target.value })}
+                                            placeholder="0,00"
+                                            style={{
+                                                width: '100%', padding: '16px 16px 16px 45px', borderRadius: '16px',
+                                                background: 'var(--surface-color)', border: '1px solid var(--glass-border)',
+                                                color: 'var(--text-main)', fontSize: '1.2rem', fontWeight: '700', outline: 'none',
+                                                transition: 'all 0.3s'
+                                            }}
+                                            autoFocus
+                                        />
+
+                                        {/* AI Suggestion Bubble */}
+                                        {aiSuggestion && !isAiLoading && (
+                                            <div 
+                                                onClick={() => setTempLimit({ ...tempLimit, amount: aiSuggestion.amount.toString() })}
+                                                style={{
+                                                    position: 'absolute', bottom: '110%', left: '0', right: '0',
+                                                    background: 'var(--primary-color)', color: 'white', padding: '12px 16px',
+                                                    borderRadius: '16px 16px 16px 4px', fontSize: '0.85rem', fontWeight: '600',
+                                                    boxShadow: '0 10px 25px rgba(var(--primary-rgb), 0.3)', cursor: 'pointer',
+                                                    animation: 'bubbleBounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+                                                    zIndex: 10
+                                                }}
+                                            >
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                                                    <Mic size={14} />
+                                                    <span>Sugestão IA: <strong>R$ {aiSuggestion.amount}</strong></span>
+                                                </div>
+                                                <p style={{ margin: 0, opacity: 0.9, fontSize: '0.75rem', fontWeight: '500' }}>{aiSuggestion.reason}</p>
+                                                <div style={{ position: 'absolute', bottom: '-8px', left: '12px', width: 0, height: 0, borderLeft: '8px solid transparent', borderRight: '8px solid transparent', borderTop: '8px solid var(--primary-color)' }} />
+                                            </div>
+                                        )}
+                                        {isAiLoading && (
+                                            <div style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary-color)', animation: 'spin 1s linear infinite' }}>
+                                                <div style={{ width: '20px', height: '20px', border: '2px solid transparent', borderTopColor: 'currentColor', borderRadius: '50%' }} />
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                                <button 
+                                    onClick={() => setIsLimitModalOpen(false)}
+                                    style={{ flex: 1, padding: '16px', borderRadius: '16px', background: 'var(--surface-color)', border: 'none', color: 'var(--text-main)', fontWeight: '700', cursor: 'pointer' }}
+                                >
+                                    Cancelar
+                                </button>
+                                <button 
+                                    onClick={() => {
+                                        if (tempLimit.categoryId && tempLimit.amount) {
+                                            setLimits({ ...limits, [tempLimit.categoryId]: parseFloat(tempLimit.amount) });
+                                            setIsLimitModalOpen(false);
+                                            haptic.medium();
+                                        }
+                                    }}
+                                    style={{ flex: 2, padding: '16px', borderRadius: '16px', background: 'var(--primary-color)', border: 'none', color: 'white', fontWeight: '700', cursor: 'pointer', boxShadow: '0 8px 20px rgba(var(--primary-rgb), 0.3)' }}
+                                >
+                                    Salvar Limite
+                                </button>
+                            </div>
+                        </div>
+
+                        <style>{`
+                            @keyframes modalOpen {
+                                0% { opacity: 0; transform: translate(-50%, -40%) scale(0.95); }
+                                100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                            }
+                            @keyframes bubbleBounce {
+                                0% { transform: translateY(10px) scale(0.8); opacity: 0; }
+                                100% { transform: translateY(0) scale(1); opacity: 1; }
+                            }
+                            @keyframes sparklePulse {
+                                0% { transform: scale(0.8); opacity: 0.3; }
+                                50% { transform: scale(1.2); opacity: 0.6; }
+                                100% { transform: scale(0.8); opacity: 0.3; }
+                            }
+                        `}</style>
+                    </>
+                )}
+            </div>
         </>
     );
 };
