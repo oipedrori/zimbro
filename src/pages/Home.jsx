@@ -515,7 +515,7 @@ const Home = () => {
                         display: 'flex', 
                         alignItems: 'center', 
                         gap: '8px', 
-                        background: 'var(--surface-color)', 
+                        background: 'transparent', 
                         padding: '6px 12px', 
                         borderRadius: '20px', 
                         border: '1px solid var(--glass-border)',
@@ -756,7 +756,22 @@ const Home = () => {
                                                         </div>
                                                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                                                             <p style={{ fontWeight: '600', margin: 0, color: 'var(--text-main)' }}>{tx.dynamicDescription || tx.description}</p>
-                                                            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>{tx.virtualDate.split('-').slice(1).reverse().join('/')}</p>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>{tx.virtualDate.split('-').slice(1).reverse().join('/')}</p>
+                                                                {tx.repeatType && (
+                                                                    <span style={{ 
+                                                                        fontSize: '0.65rem', 
+                                                                        padding: '1px 6px', 
+                                                                        borderRadius: '6px', 
+                                                                        background: tx.repeatType === 'recurring' ? 'rgba(67, 56, 202, 0.1)' : tx.repeatType === 'installment' ? 'rgba(180, 83, 9, 0.1)' : 'rgba(75, 85, 99, 0.1)',
+                                                                        color: tx.repeatType === 'recurring' ? '#4338CA' : tx.repeatType === 'installment' ? '#B45309' : '#4B5563',
+                                                                        fontWeight: '700',
+                                                                        textTransform: 'uppercase'
+                                                                    }}>
+                                                                        {tx.repeatType === 'recurring' ? t('tag_recurring') : tx.repeatType === 'installment' ? t('tag_installment') : t('tag_variable')}
+                                                                    </span>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <p style={{ fontWeight: '700', color: tx.type === 'income' ? 'var(--success-color)' : 'var(--danger-color)', margin: 0, fontSize: '1.1rem' }}>
@@ -1011,8 +1026,8 @@ const Home = () => {
                     100% { transform: scale(1); opacity: 0.8; }
                 }
             `}</style>
-                {/* Sidebar Drawer para Desktop */}
-                {isDesktop && isSidebarOpen && (
+                {/* Sidebar Drawer */}
+                {isSidebarOpen && (
                     <>
                         {/* Backdrop */}
                         <div 
@@ -1027,10 +1042,10 @@ const Home = () => {
                         {/* Drawer Content */}
                         <div style={{
                             position: 'fixed', top: 0, left: 0,
-                            width: '360px', height: '100%', background: 'var(--bg-color)',
+                            width: isDesktop ? '360px' : '85%', height: '100%', background: 'var(--bg-color)',
                             boxShadow: '10px 0 50px rgba(0,0,0,0.15)', zIndex: 11001,
                             animation: 'slideInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                            padding: '32px', display: 'flex', flexDirection: 'column', overflowY: 'auto'
+                            padding: isDesktop ? '32px' : '24px', display: 'flex', flexDirection: 'column', overflowY: 'auto'
                         }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>

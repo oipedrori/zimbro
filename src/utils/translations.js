@@ -30,9 +30,14 @@ export const translations = {
         filter_all: "Todas",
         filter_incomes: "Receitas",
         filter_expenses: "Despesas",
-        filter_variable: "Móveis",
-        filter_installment: "Parceladas",
-        filter_recurring: "Recorrentes",
+        filter_variable: "Móvel",
+        filter_installment: "Parcelado",
+        filter_recurring: "Recorrente",
+        
+        // Tags
+        tag_variable: "Móvel",
+        tag_installment: "Parcelado",
+        tag_recurring: "Recorrente",
 
         // Wallet
         wallet_title: "Minhas Contas",

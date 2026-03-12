@@ -502,14 +502,17 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
             <style>{`
         .ai-overlay {
           position: fixed;
-          top: 0; left: 0; right: 0; bottom: 0; 
+          top: 0; left: 0; width: 100vw; height: 100vh;
           background: rgba(0, 0, 0, 0.5); 
           backdrop-filter: blur(40px);
           -webkit-backdrop-filter: blur(40px);
           z-index: 2000;
           opacity: 0; pointer-events: none;
           transition: opacity 0.5s ease;
-          display: none;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
         }
         @media (min-width: 1024px) {
             .ai-overlay {
@@ -521,7 +524,6 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
         .ai-overlay.active { 
           opacity: 1; 
           pointer-events: auto; 
-          display: block;
         }
         @media (min-width: 1024px) {
             .ai-overlay.active {
