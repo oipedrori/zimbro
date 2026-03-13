@@ -12,15 +12,18 @@ const ConfirmDialog = ({
     type = 'danger',
     confirmLabel,
     cancelLabel,
-    options = [] // [{ label, value, color }]
+    options = [], // [{ label, value, color }]
+    requireConfirm = null // string to match
 }) => {
     const [shouldRender, setShouldRender] = useState(isOpen);
     const [isAnimating, setIsAnimating] = useState(false);
+    const [confirmText, setConfirmText] = useState('');
     const { t } = useI18n();
 
     useEffect(() => {
         if (isOpen) {
             setShouldRender(true);
+            setConfirmText(''); // Reset when open
             setTimeout(() => setIsAnimating(true), 10);
         } else {
             setIsAnimating(false);
@@ -49,13 +52,36 @@ const ConfirmDialog = ({
                 <h2 className="confirm-title">{title}</h2>
                 <p className="confirm-message">{message}</p>
 
+                {requireConfirm && (
+                    <div style={{ marginBottom: '24px' }}>
+                        <input 
+                            type="text" 
+                            placeholder={t('type_to_confirm', { defaultValue: `Digite ${requireConfirm}` })}
+                            value={confirmText}
+                            onChange={(e) => setConfirmText(e.target.value)}
+                            style={{
+                                width: '100%', padding: '14px', borderRadius: '12px',
+                                border: '1px solid var(--glass-border)', background: 'var(--bg-color)',
+                                color: 'var(--text-main)', textAlign: 'center', fontSize: '1rem',
+                                fontWeight: '700', outline: 'none', transition: 'all 0.2s',
+                                borderColor: confirmText === requireConfirm ? 'var(--danger-color)' : 'var(--glass-border)'
+                            }}
+                        />
+                    </div>
+                )}
+
                 <div className="confirm-actions">
                     {options.length > 0 ? (
                         options.map((opt, i) => (
                             <button
                                 key={i}
                                 className="confirm-btn"
-                                style={{ background: opt.color || 'var(--primary-gradient)', color: 'white' }}
+                                disabled={requireConfirm && confirmText !== requireConfirm}
+                                style={{ 
+                                    background: opt.color || 'var(--primary-gradient)', 
+                                    color: 'white',
+                                    opacity: (requireConfirm && confirmText !== requireConfirm) ? 0.5 : 1
+                                }}
                                 onClick={() => {
                                     onConfirm(opt.value);
                                     onClose();
@@ -67,6 +93,10 @@ const ConfirmDialog = ({
                     ) : (
                         <button
                             className="confirm-btn confirm-btn-primary"
+                            disabled={requireConfirm && confirmText !== requireConfirm}
+                            style={{ 
+                                opacity: (requireConfirm && confirmText !== requireConfirm) ? 0.5 : 1
+                            }}
                             onClick={() => {
                                 onConfirm();
                                 onClose();

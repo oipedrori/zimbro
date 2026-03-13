@@ -135,7 +135,8 @@ const Home = () => {
                 setAiSuggestion(result);
             }
         } catch (err) {
-            console.error("Failed to fetch suggestion", err);
+            console.error("Notion Exchange Error:", err);
+            setError(err.message || "Erro ao conectar com o Notion. Tente novamente.");
         } finally {
             setIsAiLoading(false);
         }
@@ -1240,66 +1241,26 @@ const Home = () => {
                 )}
 
                 {/* Delete Account Confirmation Overlay */}
-                {showDeleteConfirm && (
-                    <div style={{
-                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                        background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(10px)',
-                        WebkitBackdropFilter: 'blur(10px)',
-                        display: 'flex', justifyContent: 'center', alignItems: 'center',
-                        padding: '24px', zIndex: 20000
-                    }}>
-                        <div style={{
-                            background: 'var(--bg-color)', padding: '32px 24px',
-                            borderRadius: '32px', border: '1px solid var(--glass-border)',
-                            width: '100%', maxWidth: '340px', textAlign: 'center',
-                            boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
-                            animation: 'bubblePop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards'
-                        }}>
-                            <div style={{ width: '64px', height: '64px', borderRadius: '20px', background: 'var(--danger-light)', color: 'var(--danger-color)', display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto 20px' }}>
-                                <Trash2 size={32} />
-                            </div>
-                            <h2 style={{ fontSize: '1.4rem', marginBottom: '12px', color: 'var(--text-main)', fontFamily: "'Solway', serif" }}>Tem certeza?</h2>
-                            <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '24px', lineHeight: '1.5' }}>
-                                Esta ação excluirá todos os seus dados permanentemente.
-                            </p>
-                            
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                <button
-                                    onClick={async () => {
-                                        setIsDeleting(true);
-                                        try {
-                                            await deleteAccount();
-                                        } catch (e) {
-                                            alert(e.message);
-                                        } finally {
-                                            setIsDeleting(false);
-                                            setShowDeleteConfirm(false);
-                                        }
-                                    }}
-                                    disabled={isDeleting}
-                                    style={{
-                                        height: '56px', borderRadius: '16px',
-                                        background: 'var(--danger-color)', color: 'white',
-                                        fontWeight: '700', fontSize: '1rem', border: 'none'
-                                    }}
-                                >
-                                    {isDeleting ? 'Excluindo...' : 'Sim, excluir permanentemente'}
-                                </button>
-                                <button
-                                    onClick={() => setShowDeleteConfirm(false)}
-                                    disabled={isDeleting}
-                                    style={{
-                                        height: '56px', borderRadius: '16px',
-                                        background: 'var(--primary-light)', color: 'var(--primary-darker)',
-                                        fontWeight: '700', fontSize: '1rem', border: 'none'
-                                    }}
-                                >
-                                    Cancelar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                <ConfirmDialog
+                    isOpen={showDeleteConfirm}
+                    onClose={() => setShowDeleteConfirm(false)}
+                    title="Tem certeza?"
+                    requireConfirm="DELETE"
+                    message="Esta ação excluirá todos os seus dados permanentemente e não pode ser desfeita. Para confirmar, digite DELETE no campo abaixo."
+                    confirmLabel={isDeleting ? "Excluindo..." : "Sim, excluir minha conta"}
+                    type="danger"
+                    onConfirm={async () => {
+                        setIsDeleting(true);
+                        try {
+                            await deleteAccount();
+                        } catch (e) {
+                            alert(e.message);
+                        } finally {
+                            setIsDeleting(false);
+                            setShowDeleteConfirm(false);
+                        }
+                    }}
+                />
 
                 {/* Modal Dinâmico de Limite */}
                 {isLimitModalOpen && (
