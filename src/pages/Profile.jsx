@@ -242,8 +242,11 @@ const Profile = () => {
                             <Trash2 size={32} />
                         </div>
                         <h2 style={{ fontSize: '1.4rem', marginBottom: '12px', color: 'var(--text-main)', fontFamily: "'Solway', serif" }}>Tem certeza?</h2>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '20px', lineHeight: '1.5' }}>
-                            Esta ação é <b>permanente</b>. Todos os seus dados serão apagados.
+                        <p style={{ color: 'var(--danger-color)', fontSize: '0.95rem', marginBottom: '20px', lineHeight: '1.5', fontWeight: '700' }}>
+                            ESTA AÇÃO É PERMANENTE E IRREVERSÍVEL.
+                        </p>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '20px', lineHeight: '1.5' }}>
+                            Todos os seus dados, movimentações e configurações serão apagados imediatamente e <b>jamais poderão ser recuperados</b>.
                         </p>
 
                         <div style={{ marginBottom: '24px' }}>
