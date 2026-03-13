@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useTransactions } from '../hooks/useTransactions';
 import { CATEGORIAS_DESPESA, CATEGORIAS_RECEITA } from '../utils/categories';
 import { format } from 'date-fns';
@@ -125,7 +126,7 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
         }
     };
 
-    return (
+    return createPortal(
         <div className={`modal-overlay ${isAnimating ? 'visible' : ''}`} onClick={onClose}>
             <div className={`modal-content ${isAnimating ? 'slide-up' : 'slide-down'}`} onClick={e => e.stopPropagation()}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
@@ -390,7 +391,8 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
             -webkit-backdrop-filter: none !important;
         }
       `}</style>
-        </div>
+        </div>,
+        document.body
     );
 };
 

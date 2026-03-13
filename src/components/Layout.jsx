@@ -90,9 +90,6 @@ const Layout = () => {
             {/* O conteúdo das páginas (Home, Stats) será renderizado aqui */}
             <main
                 className="main-content"
-                style={{
-                    willChange: 'transform'
-                }}
             >
                 <Outlet context={{ setIsAiActive }} />
             </main>

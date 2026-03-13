@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { AlertCircle, AlertTriangle, Trash2 } from 'lucide-react';
 import { useI18n } from '../contexts/I18nContext';
 
@@ -32,7 +33,7 @@ const ConfirmDialog = ({
 
     if (!shouldRender && !isOpen) return null;
 
-    return (
+    return createPortal(
         <div 
             className={`confirm-overlay ${isAnimating ? 'visible' : ''}`}
             onClick={onClose}
@@ -167,7 +168,8 @@ const ConfirmDialog = ({
                     border: 1px solid var(--glass-border);
                 }
             `}</style>
-        </div>
+        </div>,
+        document.body
     );
 };
 
