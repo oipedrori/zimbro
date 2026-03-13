@@ -26,11 +26,11 @@
   --success-color: var(--primary-dark);
   --success-light: var(--primary-light);
 
-  --glass-bg: rgba(255, 255, 255, 0.8);
-  --glass-border: rgba(27, 69, 32, 0.1);
-  --shadow-sm: 0 4px 6px -1px rgba(14, 34, 16, 0.05);
-  --shadow-md: 0 10px 15px -3px rgba(14, 34, 16, 0.08);
-  --shadow-lg: 0 20px 25px -5px rgba(14, 34, 16, 0.1);
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  --shadow-lg: 0 12px 40px 0 rgba(0, 0, 0, 0.1);
 
   --border-radius-sm: 8px;
   --border-radius-md: 16px;
@@ -48,8 +48,8 @@
     --surface-color: #0a140b;
     --text-main: #ffffff;
     --text-muted: #b8dfc4;
-    --glass-bg: rgba(5, 10, 6, 0.85);
-    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-bg: rgba(10, 20, 11, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.12);
   }
 }
 
@@ -58,8 +58,8 @@
   --surface-color: #0a140b;
   --text-main: #ffffff;
   --text-muted: #b8dfc4;
-  --glass-bg: rgba(5, 10, 6, 0.85);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-bg: rgba(10, 20, 11, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.12);
 }
 
 :root.theme-light {
@@ -67,8 +67,8 @@
   --surface-color: #ffffff;
   --text-main: #0E2210;
   --text-muted: #1B4520;
-  --glass-bg: rgba(255, 255, 255, 0.75);
-  --glass-border: rgba(255, 255, 255, 0.4);
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.3);
 }
 
 * {
@@ -125,11 +125,11 @@ p {
 /* Common Layout Utilities */
 .glass-panel {
   background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid var(--glass-border);
   border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
 }
 
   .page-container {
