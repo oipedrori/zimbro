@@ -360,43 +360,63 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
 
     return (
         <div className={`ai-overlay ${isActive ? 'active' : ''}`}>
-            {/* Close Button - Responsive Position */}
-            <button 
-                onClick={onClose}
-                aria-label="Close"
-                className="ai-close-btn"
-                style={{
-                    position: 'absolute', 
-                    top: isManualTextMode ? '16px' : '24px', 
-                    right: isManualTextMode ? '16px' : '24px',
-                    width: '48px', height: '48px', borderRadius: '50%',
-                    background: 'rgba(255, 255, 255, 0.1)', color: 'white',
-                    display: 'flex', justifyContent: 'center', alignItems: 'center',
-                    border: 'none', cursor: 'pointer', zIndex: 3005,
-                    backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)'
-                }}
-            >
-                <X size={24} />
-            </button>
+            {/* Close Button - Only in TEXT mode */}
+            {isManualTextMode && (
+                <button 
+                    onClick={onClose}
+                    aria-label="Close"
+                    className="ai-close-btn"
+                    style={{
+                        position: 'absolute', 
+                        top: '16px', 
+                        right: '16px',
+                        width: '48px', height: '48px', borderRadius: '50%',
+                        background: 'rgba(255, 255, 255, 0.1)', color: 'white',
+                        display: 'flex', justifyContent: 'center', alignItems: 'center',
+                        border: 'none', cursor: 'pointer', zIndex: 3005,
+                        backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)'
+                    }}
+                >
+                    <X size={24} />
+                </button>
+            )}
 
-            {/* Manual Mic Toggle (Center) - Fixed at bottom center */}
+            {/* Mic Toggle (Center) - In voice mode, this BECOMES the close button if not listening? Or just as requested: X replaces mic button when open. */}
             {!isManualTextMode && (
                 <div style={{ position: 'fixed', bottom: '60px', left: '0', right: '0', zIndex: 3001, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <button
-                        className={`ai-mic-btn ${isListening ? 'listening active' : ''}`}
-                        onClick={toggleListen}
-                        style={{ 
-                            width: '80px', height: '80px', background: 'var(--primary-gradient)', 
-                            border: 'none', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center',
-                            boxShadow: '0 20px 40px rgba(0,0,0,0.3)', cursor: 'pointer', transition: 'all 0.3s'
-                        }}
-                    >
-                        <div className="mystical-aura"></div>
-                        {isListening ? <Mic size={32} color="white" /> : <Mic size={32} color="rgba(255,255,255,0.4)" />}
-                    </button>
-                    {!isListening && !isManualTextMode && !transcript && (
+                    {isListening ? (
+                        <button
+                            className={`ai-mic-btn listening active`}
+                            onClick={toggleListen}
+                            style={{ 
+                                width: '80px', height: '80px', background: 'var(--primary-gradient)', 
+                                border: 'none', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center',
+                                boxShadow: '0 20px 40px rgba(0,0,0,0.3)', cursor: 'pointer', transition: 'all 0.3s'
+                            }}
+                        >
+                            <div className="mystical-aura"></div>
+                            <Mic size={32} color="white" />
+                        </button>
+                    ) : (
+                        <button
+                            className="ai-voice-close-btn"
+                            onClick={onClose}
+                            style={{ 
+                                animation: 'slideUp 0.3s ease'
+                            }}
+                        >
+                            <X size={32} />
+                        </button>
+                    )}
+                    
+                    {isListening && (
                         <p style={{ color: 'white', fontSize: '0.8rem', fontWeight: '700', marginTop: '12px', textAlign: 'center', opacity: 0.7 }}>
-                            TOQUE PARA FALAR
+                            {t('listening_now', { defaultValue: 'OUVINDO...' })}
+                        </p>
+                    )}
+                    {!isListening && (
+                         <p style={{ color: 'white', fontSize: '0.8rem', fontWeight: '700', marginTop: '12px', textAlign: 'center', opacity: 0.7 }}>
+                            TOQUE NO X PARA FECHAR
                         </p>
                     )}
                 </div>
@@ -435,6 +455,7 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
                                     <textarea
                                         ref={inputRef}
                                         value={manualText}
+                                        autoFocus
                                         onChange={(e) => setManualText(e.target.value)}
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter' && !e.shiftKey) {
@@ -519,7 +540,7 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
         }
         .ai-overlay.active { 
           opacity: 1; 
-          background: rgba(0, 0, 0, 0.4); 
+          background: rgba(27, 69, 32, 0.4); /* Greenish brand overlay */
           pointer-events: auto; 
           backdrop-filter: blur(8px);
           -webkit-backdrop-filter: blur(8px);
@@ -540,6 +561,25 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
         .ai-mic-btn.listening .mystical-aura {
           display: block;
           animation: blobMorph 4s linear infinite alternate, intenseOrganicGlow 1.5s ease-in-out infinite alternate;
+        }
+
+        /* Voice Mode Close Button - Replaces Mic style */
+        .ai-voice-close-btn {
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          cursor: pointer;
+          backdrop-filter: blur(10px);
+          transition: all 0.3s;
+        }
+        .ai-voice-close-btn:active {
+          transform: scale(0.9);
         }
 
         @keyframes blobMorph {
@@ -587,6 +627,8 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
           justify-content: flex-start;
           align-items: center;
           padding: 80px 24px;
+          /* Relative for sticky child */
+          position: relative;
         }
         @media (min-width: 1024px) {
             .ai-minimal-content {
@@ -604,6 +646,7 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
           margin-top: 40px;
           text-align: center;
           width: 100%;
+          flex: 1; /* Take space to push input down */
         }
 
         .ai-greeting { 
@@ -656,21 +699,24 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
           cursor: not-allowed;
         }
 
+        /* Sticky Input Container (WhatsApp Style) */
         .messaging-input-container {
-            width: 100%;
-            max-width: 500px;
+            position: absolute;
+            bottom: max(20px, env(safe-area-inset-bottom));
+            left: 16px;
+            right: 16px;
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 24px;
+            border-radius: 28px;
             padding: 8px 8px 8px 16px;
             display: flex;
             align-items: center;
             gap: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
             animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 3010;
         }
 
         .messaging-textarea {
@@ -682,8 +728,8 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
             font-family: inherit;
             outline: none;
             resize: none;
-            padding: 8px 0;
-            max-height: 120px;
+            padding: 10px 0;
+            max-height: 150px;
         }
 
         .messaging-textarea::placeholder {

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { AlertCircle, AlertTriangle, Trash2 } from 'lucide-react';
+import { AlertCircle, AlertTriangle, Trash2, X } from 'lucide-react';
 import { useI18n } from '../contexts/I18nContext';
 
 const ConfirmDialog = ({ 

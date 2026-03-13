@@ -102,7 +102,8 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
 
             const txData = {
                 type,
-                amount: numericAmount,
+                amount: repeatType === 'installment' ? numericAmount / Number(installments) : numericAmount,
+                totalAmount: repeatType === 'installment' ? numericAmount : null, // Store total for reference
                 description,
                 category,
                 date,
@@ -191,7 +192,9 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
                     </div>
 
                     <div>
-                        <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '600' }}>{t('value')} ({getCurrencySymbol()})</label>
+                        <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '600' }}>
+                            {repeatType === 'installment' ? t('total_value', { defaultValue: 'Valor Total' }) : t('value')} ({getCurrencySymbol()})
+                        </label>
                         <input
                             type="text" 
                             inputMode="decimal"
@@ -200,6 +203,11 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
                             placeholder="0,00" required
                             style={{ color: 'var(--text-main)', boxSizing: 'border-box', width: '100%', padding: '14px', borderRadius: 'var(--border-radius-md)', border: '1px solid var(--glass-border)', background: 'var(--bg-color)', fontSize: '1rem', outline: 'none' }}
                         />
+                        {repeatType === 'installment' && amount && installments > 1 && (
+                            <p style={{ fontSize: '0.85rem', color: 'var(--primary-dark)', marginTop: '8px', fontWeight: '600' }}>
+                                ✨ {installments}x {t('of_value', { defaultValue: 'de' })} {getCurrencySymbol()} {(parseFloat(amount.replace(',', '.')) / installments || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / {t('month', { defaultValue: 'mês' })}
+                            </p>
+                        )}
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
