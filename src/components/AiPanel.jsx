@@ -376,7 +376,7 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
                     backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)'
                 }}
             >
-                <X size={28} />
+                <X size={24} />
             </button>
 
             {/* Manual Mic Toggle (Center) - Fixed at bottom center */}
@@ -506,32 +506,23 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
         .ai-overlay {
           position: fixed;
           top: 0; left: 0; width: 100vw; height: 100vh;
-          background: rgba(0, 0, 0, 0.5); 
-          backdrop-filter: blur(40px);
-          -webkit-backdrop-filter: blur(40px);
+          background: rgba(0, 0, 0, 0); 
           z-index: 2000;
           opacity: 0; pointer-events: none;
-          transition: opacity 0.5s ease;
+          transition: all 0.5s ease;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-        }
-        @media (min-width: 1024px) {
-            .ai-overlay {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
+          backdrop-filter: blur(0px);
+          -webkit-backdrop-filter: blur(0px);
         }
         .ai-overlay.active { 
           opacity: 1; 
+          background: rgba(0, 0, 0, 0.4); 
           pointer-events: auto; 
-        }
-        @media (min-width: 1024px) {
-            .ai-overlay.active {
-                display: flex;
-            }
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
         }
         
         .mystical-aura {

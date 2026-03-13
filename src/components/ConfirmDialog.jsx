@@ -45,6 +45,27 @@ const ConfirmDialog = ({
                 className={`confirm-content ${isAnimating ? 'slide-up' : 'slide-down'}`}
                 onClick={e => e.stopPropagation()}
             >
+                <div style={{ position: 'absolute', top: '16px', right: '16px', zIndex: 10 }}>
+                    <button 
+                        onClick={onClose} 
+                        style={{ 
+                            width: '44px', 
+                            height: '44px', 
+                            borderRadius: '50%', 
+                            background: 'var(--bg-color)', 
+                            border: '1px solid var(--glass-border)',
+                            color: 'var(--text-main)', 
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s'
+                        }}
+                    >
+                        <X size={24} />
+                    </button>
+                </div>
+
                 <div className="confirm-icon-box">
                     {type === 'danger' ? <Trash2 size={32} color="#ef4444" /> : <AlertCircle size={32} color="var(--primary-color)" />}
                 </div>
@@ -122,49 +143,92 @@ const ConfirmDialog = ({
                     background: rgba(0,0,0,0);
                     z-index: 20000;
                     display: flex;
-                    align-items: center;
+                    align-items: flex-end;
                     justify-content: center;
-                    padding: 24px;
-                    transition: background 0.3s ease;
+                    padding: 0;
+                    transition: all 0.3s ease;
                     touch-action: none;
+                    backdrop-filter: blur(0px);
+                    -webkit-backdrop-filter: blur(0px);
                 }
                 .confirm-overlay.visible {
-                    background: rgba(0,0,0,0.7);
+                    background: rgba(0,0,0,0.4);
+                    backdrop-filter: blur(8px);
+                    -webkit-backdrop-filter: blur(8px);
                 }
                 .confirm-content {
                     width: 100%;
-                    max-width: 340px;
-                    background: var(--surface-color);
-                    border-radius: 28px;
-                    padding: 32px 24px;
+                    max-width: none;
+                    background: var(--bg-color);
+                    border-radius: 32px 32px 0 0;
+                    padding: 32px 24px 48px;
                     text-align: center;
-                    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-                    transform: scale(0.8) translateY(20px);
-                    opacity: 0;
-                    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                    box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
+                    transform: translateY(100%);
+                    opacity: 1;
+                    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+                    position: relative;
+                }
+                .confirm-content::before {
+                    content: '';
+                    position: absolute;
+                    top: 12px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    width: 40px;
+                    height: 4px;
+                    background: var(--glass-border);
+                    border-radius: 2px;
                 }
                 .confirm-content.slide-up {
-                    transform: scale(1) translateY(0);
+                    transform: translateY(0);
                     opacity: 1;
                 }
                 .confirm-content.slide-down {
-                    transform: scale(0.8) translateY(20px);
-                    opacity: 0;
+                    transform: translateY(100%);
+                    opacity: 1;
                 }
+
+                @media (min-width: 1024px) {
+                    .confirm-overlay {
+                        align-items: center;
+                        padding: 24px;
+                    }
+                    .confirm-content {
+                        max-width: 380px;
+                        border-radius: 28px;
+                        transform: scale(0.9) translateY(20px);
+                        opacity: 0;
+                    }
+                    .confirm-content::before {
+                        display: none;
+                    }
+                    .confirm-content.slide-up {
+                        transform: scale(1) translateY(0);
+                        opacity: 1;
+                    }
+                    .confirm-content.slide-down {
+                        transform: scale(0.9) translateY(20px);
+                        opacity: 0;
+                    }
+                }
+
                 .confirm-icon-box {
                     width: 64px;
                     height: 64px;
-                    background: var(--bg-color);
+                    background: var(--surface-color);
                     border-radius: 20px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     margin: 0 auto 20px;
+                    border: 1px solid var(--glass-border);
                 }
                 .confirm-title {
                     font-size: 1.25rem;
                     color: var(--text-main);
                     margin-bottom: 12px;
+                    font-weight: 700;
                 }
                 .confirm-message {
                     font-size: 0.95rem;
@@ -183,7 +247,9 @@ const ConfirmDialog = ({
                     border-radius: 16px;
                     font-weight: 700;
                     font-size: 1rem;
-                    transition: transform 0.2s;
+                    transition: all 0.2s;
+                    border: none;
+                    cursor: pointer;
                 }
                 .confirm-btn:active {
                     transform: scale(0.98);
@@ -191,9 +257,10 @@ const ConfirmDialog = ({
                 .confirm-btn-primary {
                     background: var(--primary-gradient);
                     color: white;
+                    box-shadow: 0 8px 20px rgba(var(--primary-rgb), 0.2);
                 }
                 .confirm-btn-outline {
-                    background: var(--bg-color);
+                    background: var(--surface-color);
                     color: var(--text-main);
                     border: 1px solid var(--glass-border);
                 }

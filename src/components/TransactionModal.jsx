@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { X } from 'lucide-react';
 import { useTransactions } from '../hooks/useTransactions';
 import { CATEGORIAS_DESPESA, CATEGORIAS_RECEITA } from '../utils/categories';
 import { format } from 'date-fns';
@@ -129,9 +130,27 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
     return createPortal(
         <div className={`modal-overlay ${isAnimating ? 'visible' : ''}`} onClick={onClose}>
             <div className={`modal-content ${isAnimating ? 'slide-up' : 'slide-down'}`} onClick={e => e.stopPropagation()}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-                    <h2 style={{ fontSize: '1.2rem' }}>{initialData ? t('edit_transaction') : t('add_transaction')}</h2>
-                    <button onClick={onClose} style={{ fontSize: '1.2rem', color: 'var(--text-muted)', padding: '4px' }}>✕</button>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                    <h2 style={{ fontSize: '1.2rem', fontWeight: '700' }}>{initialData ? t('edit_transaction') : t('add_transaction')}</h2>
+                    <button 
+                        onClick={onClose} 
+                        style={{ 
+                            width: '44px', 
+                            height: '44px', 
+                            borderRadius: '50%', 
+                            background: 'var(--surface-color)', 
+                            border: '1px solid var(--glass-border)',
+                            color: 'var(--text-main)', 
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                            flexShrink: 0
+                        }}
+                    >
+                        <X size={24} />
+                    </button>
                 </div>
 
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '24px' }}>
@@ -318,10 +337,14 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
           justify-content: center;
           padding: 0;
           touch-action: none;
-          transition: background 0.3s ease;
+          transition: all 0.3s ease;
+          backdrop-filter: blur(0px);
+          -webkit-backdrop-filter: blur(0px);
         }
         .modal-overlay.visible {
-          background: rgba(0,0,0,0.6);
+          background: rgba(0,0,0,0.4);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
         }
         
         .modal-content {

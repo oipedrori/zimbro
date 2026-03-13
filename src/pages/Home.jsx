@@ -1067,8 +1067,9 @@ const Home = () => {
                             onClick={closeSidebar}
                             style={{ 
                                 position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
-                                background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)',
+                                background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)',
                                 zIndex: 11000, 
+                                transition: 'all 0.3s ease',
                                 animation: isSidebarClosing ? 'fadeOut 0.3s forwards' : 'fadeIn 0.3s forwards' 
                             }}
                         />
@@ -1113,18 +1114,20 @@ const Home = () => {
                                         <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>{currentUser?.email}</p>
                                     </div>
                                 </Link>
-                                <button 
+                                 <button 
                                     onClick={closeSidebar} 
                                     style={{ 
-                                        position: 'absolute',
-                                        top: '24px',
-                                        right: '16px',
-                                        padding: '8px', 
-                                        color: 'var(--text-muted)', 
-                                        border: 'none', 
-                                        background: 'transparent', 
+                                        width: '44px',
+                                        height: '44px',
+                                        borderRadius: '50%',
+                                        background: 'var(--surface-color)',
+                                        border: '1px solid var(--glass-border)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        color: 'var(--text-main)',
                                         cursor: 'pointer',
-                                        zIndex: 2
+                                        transition: 'all 0.2s'
                                     }}
                                 >
                                     <X size={24} />
@@ -1269,20 +1272,52 @@ const Home = () => {
                             onClick={() => setIsLimitModalOpen(false)}
                             style={{ 
                                 position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
-                                background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
-                                zIndex: 12000, animation: 'fadeIn 0.3s forwards' 
+                                background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)',
+                                zIndex: 12000, transition: 'all 0.3s ease' 
                             }}
                         />
                         <div style={{
-                            position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-                            width: 'min(90%, 550px)', backgroundColor: 'var(--bg-color)', borderRadius: '32px',
-                            padding: '32px', zIndex: 12001, boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-                            border: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column', gap: '24px',
-                            animation: 'modalOpen 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards'
+                            position: 'fixed', 
+                            bottom: isDesktop ? 'auto' : 0, 
+                            top: isDesktop ? '50%' : 'auto',
+                            left: isDesktop ? '50%' : 0,
+                            right: isDesktop ? 'auto' : 0,
+                            transform: isDesktop ? 'translate(-50%, -50%)' : 'translateY(0)',
+                            width: isDesktop ? 'min(90%, 550px)' : '100%', 
+                            backgroundColor: 'var(--bg-color)', 
+                            borderRadius: isDesktop ? '32px' : '32px 32px 0 0',
+                            padding: isDesktop ? '32px' : '32px 24px 48px', 
+                            zIndex: 12001, 
+                            boxShadow: isDesktop ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)' : '0 -10px 40px rgba(0,0,0,0.2)',
+                            border: '1px solid var(--glass-border)', 
+                            display: 'flex', 
+                            flexDirection: 'column', 
+                            gap: '24px',
+                            animation: isDesktop ? 'modalOpen 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards' : 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards'
                         }}>
-                            <div>
-                                <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '8px' }}>Novo Limite Mensal</h2>
-                                <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Defina quanto você pretende gastar em uma categoria específica.</p>
+                            {!isDesktop && (
+                                <div style={{ 
+                                    position: 'absolute', top: '12px', left: '50%', transform: 'translateX(-50%)',
+                                    width: '40px', height: '4px', background: 'var(--glass-border)', borderRadius: '2px'
+                                }} />
+                            )}
+
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                <div>
+                                    <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '8px' }}>Novo Limite Mensal</h2>
+                                    <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Defina quanto você pretende gastar em uma categoria específica.</p>
+                                </div>
+                                <button 
+                                    onClick={() => setIsLimitModalOpen(false)}
+                                    style={{ 
+                                        width: '44px', height: '44px', borderRadius: '50%', 
+                                        background: 'var(--surface-color)', border: '1px solid var(--glass-border)',
+                                        color: 'var(--text-main)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        cursor: 'pointer', transition: 'all 0.2s', flexShrink: 0
+                                    }}
+                                >
+                                    <X size={24} />
+                                </button>
                             </div>
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -1392,6 +1427,10 @@ const Home = () => {
                             @keyframes modalOpen {
                                 0% { opacity: 0; transform: translate(-50%, -40%) scale(0.95); }
                                 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                            }
+                            @keyframes slideUp {
+                                from { transform: translateY(100%); }
+                                to { transform: translateY(0); }
                             }
                             @keyframes bubbleBounce {
                                 0% { transform: translateY(10px) scale(0.8); opacity: 0; }
