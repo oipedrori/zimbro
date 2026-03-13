@@ -129,16 +129,9 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
     return createPortal(
         <div className={`modal-overlay ${isAnimating ? 'visible' : ''}`} onClick={onClose}>
             <div className={`modal-content ${isAnimating ? 'slide-up' : 'slide-down'}`} onClick={e => e.stopPropagation()}>
-                <div className="modal-handle" />
-                
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', alignItems: 'center' }}>
-                    <h2 style={{ fontSize: '1.2rem', margin: 0 }}>{initialData ? t('edit_transaction') : t('add_transaction')}</h2>
-                    <button onClick={onClose} style={{ 
-                        width: '32px', height: '32px', borderRadius: '50%',
-                        display: 'flex', justifyContent: 'center', alignItems: 'center',
-                        background: 'var(--surface-color)', border: '1px solid var(--glass-border)',
-                        color: 'var(--text-muted)', cursor: 'pointer'
-                    }}>✕</button>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+                    <h2 style={{ fontSize: '1.2rem' }}>{initialData ? t('edit_transaction') : t('add_transaction')}</h2>
+                    <button onClick={onClose} style={{ fontSize: '1.2rem', color: 'var(--text-muted)', padding: '4px' }}>✕</button>
                 </div>
 
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '24px' }}>
@@ -148,7 +141,7 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
                             flex: 1, padding: '12px', borderRadius: 'var(--border-radius-md)',
                             background: type === 'expense' ? 'var(--danger-color)' : 'var(--bg-color)',
                             color: type === 'expense' ? 'white' : 'var(--text-main)',
-                            fontWeight: '600', transition: 'all 0.2s', border: 'none'
+                            fontWeight: '600', transition: 'all 0.2s'
                         }}
                         onClick={() => { setType('expense'); setCategory(CATEGORIAS_DESPESA[0].id); }}
                     >
@@ -160,7 +153,7 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
                             flex: 1, padding: '12px', borderRadius: 'var(--border-radius-md)',
                             background: type === 'income' ? 'var(--success-color)' : 'var(--bg-color)',
                             color: type === 'income' ? 'white' : 'var(--text-main)',
-                            fontWeight: '600', transition: 'all 0.2s', border: 'none'
+                            fontWeight: '600', transition: 'all 0.2s'
                         }}
                         onClick={() => { setType('income'); setCategory(CATEGORIAS_RECEITA[0].id); }}
                     >
@@ -262,7 +255,7 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
                             marginTop: '10px', width: '100%', padding: '16px', background: 'var(--primary-gradient)',
                             color: 'white', borderRadius: 'var(--border-radius-lg)', fontWeight: 'bold', fontSize: '1.1rem',
                             display: 'flex', justifyContent: 'center', alignItems: 'center', height: '56px',
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)', border: 'none'
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                         }}
                     >
                         {loading ? <LoadingDots style={{ color: 'white' }} /> : (initialData ? t('save') : t('add'))}
@@ -299,8 +292,7 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
                             style={{
                                 marginTop: '4px', width: '100%', padding: '12px',
                                 border: '1px solid var(--danger-color)', color: 'var(--danger-color)',
-                                borderRadius: 'var(--border-radius-lg)', fontWeight: '600', fontSize: '1rem',
-                                background: 'transparent'
+                                borderRadius: 'var(--border-radius-lg)', fontWeight: '600', fontSize: '1rem'
                             }}
                         >
                             {t('delete_transaction', { defaultValue: 'Excluir Movimentação' })}
@@ -324,6 +316,7 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
           display: flex;
           align-items: flex-end;
           justify-content: center;
+          padding: 0;
           touch-action: none;
           transition: background 0.3s ease;
         }
@@ -333,11 +326,11 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
         
         .modal-content {
           width: 100%;
-          max-width: 450px;
+          max-width: none;
           background: var(--bg-color);
           border-radius: 32px 32px 0 0;
           padding: 32px 24px 48px;
-          max-height: 95vh;
+          max-height: 92vh;
           overflow-y: auto;
           box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
           overscroll-behavior: contain;
@@ -347,38 +340,28 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
           transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
           z-index: 10002;
         }
-        
-        .modal-handle {
-            width: 40px;
-            height: 4px;
-            background: var(--glass-border);
-            border-radius: 2px;
-            margin: 0 auto 20px;
-        }
 
         .modal-content.slide-up {
           transform: translateY(0);
         }
+
         .modal-content.slide-down {
           transform: translateY(100%);
         }
-        
+
         @media (min-width: 1024px) {
             .modal-overlay {
                 align-items: center;
+                justify-content: center;
                 padding: 24px;
             }
             .modal-content {
-                width: 620px;
+                max-width: 620px;
                 border-radius: 32px;
                 transform: scale(0.9) translateY(20px);
                 opacity: 0;
+                padding: 32px 24px;
                 transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-                padding: 32px;
-                margin-bottom: 0;
-            }
-            .modal-handle {
-                display: none;
             }
             .modal-content.slide-up {
                 transform: scale(1) translateY(0);
@@ -388,6 +371,21 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
                 transform: scale(0.9) translateY(20px);
                 opacity: 0;
             }
+            .modal-content::before {
+                display: none;
+            }
+        }
+
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 4px;
+            background: var(--glass-border);
+            border-radius: 2px;
         }
 
         body.modal-open .glass-panel,
