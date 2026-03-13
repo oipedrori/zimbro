@@ -97,12 +97,12 @@ body.hide-ai-btn .bottom-nav {
     justify-content: center;
     gap: 20px;
     padding: 12px 24px;
-    background: var(--surface-color);
+    background: var(--glass-bg);
     border-radius: 40px;
     border: 1px solid var(--glass-border);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     pointer-events: auto;
 }
 
@@ -110,16 +110,18 @@ body.hide-ai-btn .bottom-nav {
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: var(--surface-color);
+    background: var(--glass-bg);
     border: 1px solid var(--glass-border);
     display: flex;
     justify-content: center;
     align-items: center;
     color: var(--highlight-color);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-sm);
     pointer-events: auto;
     transition: transform 0.2s ease;
     cursor: pointer;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .nav-side-btn:active {
@@ -184,14 +186,13 @@ body.hide-ai-btn .bottom-nav {
 
 .ai-panel {
     width: 100%;
-    background: var(--surface-color);
-    /* Fallback */
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-radius: var(--border-radius-lg);
-    padding: 20px;
-    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.1);
+    background: var(--glass-bg);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border-radius: 32px 32px 0 0;
+    border: 1px solid var(--glass-border);
+    padding: 24px;
+    box-shadow: var(--shadow-lg);
     transform: translateY(100%);
     transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
 }
@@ -261,7 +262,9 @@ body.hide-ai-btn .bottom-nav {
     display: none;
     width: 280px;
     height: 100%;
-    background: var(--surface-color);
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     border-right: 1px solid var(--glass-border);
     flex-direction: column;
     padding: 32px 20px;
