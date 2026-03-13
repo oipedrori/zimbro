@@ -81,6 +81,8 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
     const [activeSuggestions, setActiveSuggestions] = useState([]);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [confirmConfig, setConfirmConfig] = useState({});
+    const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
+    const [viewportOffset, setViewportOffset] = useState(0);
     const inputRef = useRef(null);
     const recognitionRef = useRef(null);
     const silenceTimeoutRef = useRef(null);
@@ -172,6 +174,27 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
             setIsListening(false);
         }
     }, [isActive, isTextMode]); // Add isTextMode dependency
+
+    // Visual Viewport logic to handle keyboard
+    useEffect(() => {
+        if (!window.visualViewport) return;
+
+        const handleResize = () => {
+            const vv = window.visualViewport;
+            // offset simple calculation
+            const offset = window.innerHeight - vv.height;
+            setViewportOffset(offset > 50 ? offset : 0);
+            setViewportHeight(vv.height);
+        };
+
+        window.visualViewport.addEventListener('resize', handleResize);
+        window.visualViewport.addEventListener('scroll', handleResize);
+        
+        return () => {
+            window.visualViewport?.removeEventListener('resize', handleResize);
+            window.visualViewport?.removeEventListener('scroll', handleResize);
+        };
+    }, []);
 
     // Lógica das frases flutuantes (Refinada: uma por vez com cross-fade)
     useEffect(() => {
@@ -451,7 +474,13 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
                                     </p>
                                 </div>
 
-                                <div className="messaging-input-container">
+                                <div 
+                                    className="messaging-input-container"
+                                    style={{
+                                        bottom: viewportOffset > 0 ? `${viewportOffset + 10}px` : 'max(20px, env(safe-area-inset-bottom))',
+                                        transition: 'bottom 0.1s ease-out'
+                                    }}
+                                >
                                     <textarea
                                         ref={inputRef}
                                         value={manualText}

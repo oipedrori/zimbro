@@ -52,7 +52,7 @@ const ConfirmDialog = ({
                             width: '44px', 
                             height: '44px', 
                             borderRadius: '50%', 
-                            background: 'var(--bg-color)', 
+                            background: 'var(--surface-color)', 
                             border: '1px solid var(--glass-border)',
                             color: 'var(--text-main)', 
                             display: 'flex',

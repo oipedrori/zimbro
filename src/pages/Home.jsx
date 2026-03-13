@@ -378,7 +378,23 @@ const Home = () => {
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                         <h2 style={{ fontSize: '1.2rem', fontWeight: '700' }}>{t('statistics')}</h2>
-                        <button onClick={closeFlipped} style={{ fontSize: '1.5rem', color: 'var(--text-main)', padding: '8px' }}>
+                        <button 
+                            onClick={closeFlipped} 
+                            style={{ 
+                                width: '44px', 
+                                height: '44px', 
+                                borderRadius: '50%', 
+                                background: 'var(--surface-color)', 
+                                border: '1px solid var(--glass-border)',
+                                color: 'var(--text-main)', 
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                flexShrink: 0
+                            }}
+                        >
                             <X size={24} />
                         </button>
                     </div>
@@ -1099,21 +1115,20 @@ const Home = () => {
                             borderTop: isDesktop ? 'none' : '1px solid var(--glass-border)'
                         }}>
                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                                {/* User info now links to Profile */}
-                                <Link 
-                                    to="/profile" 
-                                    onClick={closeSidebar}
-                                    style={{ display: 'flex', alignItems: 'center', gap: '16px', textDecoration: 'none', color: 'inherit' }}
-                                >
-                                    <div style={{ width: '50px', height: '50px', border: '1px solid var(--glass-border)', borderRadius: '16px', background: 'var(--surface-color)', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--primary-color)' }}>
-                                        <User size={24} />
-                                    </div>
-                                    <div>
-                                        <h2 style={{ fontSize: '1.1rem', fontWeight: '700', margin: 0 }}>{currentUser?.displayName || 'Perfil'}</h2>
-                                        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>{currentUser?.email}</p>
-                                    </div>
-                                </Link>
+                                 {/* User info now links to Profile */}
+                                 <Link 
+                                     to="/profile" 
+                                     onClick={closeSidebar}
+                                     style={{ display: 'flex', alignItems: 'center', gap: '16px', textDecoration: 'none', color: 'inherit' }}
+                                 >
+                                     <div style={{ width: '50px', height: '50px', border: '1px solid var(--glass-border)', borderRadius: '16px', background: 'var(--surface-color)', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--primary-color)' }}>
+                                         <User size={24} />
+                                     </div>
+                                     <div>
+                                         <h2 style={{ fontSize: '1.1rem', fontWeight: '700', margin: 0 }}>{currentUser?.displayName || 'Perfil'}</h2>
+                                         <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>{currentUser?.email}</p>
+                                     </div>
+                                 </Link>
                                  <button 
                                     onClick={closeSidebar} 
                                     style={{ 
@@ -1127,13 +1142,13 @@ const Home = () => {
                                         justifyContent: 'center',
                                         color: 'var(--text-main)',
                                         cursor: 'pointer',
-                                        transition: 'all 0.2s'
+                                        transition: 'all 0.2s',
+                                        flexShrink: 0
                                     }}
                                 >
                                     <X size={24} />
                                 </button>
-                            </div>
-                        </div>
+                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                 {/* Notion Sync Button */}

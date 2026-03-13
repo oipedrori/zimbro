@@ -111,8 +111,28 @@ const Limits = () => {
                     </button>
                 )
             ) : (
-                <form onSubmit={handleAddLimit} className="glass-panel" style={{ padding: '20px', marginBottom: '24px', position: 'relative' }}>
-                    <button type="button" onClick={() => setIsAdding(false)} style={{ position: 'absolute', top: '10px', right: '10px', color: 'var(--text-muted)' }}><X size={20} /></button>
+                <form onSubmit={handleAddLimit} className="glass-panel" style={{ padding: '24px', marginBottom: '24px', position: 'relative' }}>
+                    <div style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 10 }}>
+                        <button 
+                            type="button" 
+                            onClick={() => setIsAdding(false)} 
+                            style={{ 
+                                width: '44px', 
+                                height: '44px', 
+                                borderRadius: '50%', 
+                                background: 'var(--surface-color)', 
+                                border: '1px solid var(--glass-border)',
+                                color: 'var(--text-main)', 
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            <X size={24} />
+                        </button>
+                    </div>
                     <h3 style={{ fontSize: '1.2rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '16px' }}>{t('config_limit')}</h3>
 
                     <div style={{ marginBottom: '12px' }}>

@@ -82,12 +82,26 @@ const InstallPrompt = () => {
             gap: '12px',
             animation: 'slideUpBounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
         }}>
-            <button
-                onClick={handleDismiss}
-                style={{ position: 'absolute', top: '12px', right: '12px', background: 'rgba(0,0,0,0.05)', borderRadius: '50%', padding: '4px' }}
-            >
-                <X size={16} color="var(--text-muted)" />
-            </button>
+            <div style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 10 }}>
+                <button
+                    onClick={handleDismiss}
+                    style={{ 
+                        width: '44px', 
+                        height: '44px', 
+                        borderRadius: '50%', 
+                        background: 'rgba(0,0,0,0.05)', 
+                        border: '1px solid var(--glass-border)',
+                        color: 'var(--text-main)', 
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                    }}
+                >
+                    <X size={20} />
+                </button>
+            </div>
 
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                 <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: 'var(--primary-color)', display: 'flex', justifyContent: 'center', alignItems: 'center', flexShrink: 0 }}>
