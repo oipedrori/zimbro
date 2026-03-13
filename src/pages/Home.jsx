@@ -674,12 +674,26 @@ const Home = () => {
                             <div className="glass-panel" style={{ padding: 0, overflow: 'hidden' }}>
                                 {filteredTransactions.map((tx, i) => (
                                     <SwipeableItem key={tx.id} onDelete={() => handleConfirmDelete(tx)} onEdit={() => handleEditTx(tx)}>
-                                        <div 
-                                            onClick={() => {
+                                        <button 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
                                                 handleEditTx(tx);
                                                 haptic.light();
                                             }}
-                                            style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', borderBottom: i === transactions.length - 1 ? 'none' : '1px solid var(--glass-border)' }}
+                                            style={{ 
+                                                width: '100%',
+                                                textAlign: 'left',
+                                                background: 'transparent',
+                                                border: 'none',
+                                                cursor: 'pointer', 
+                                                display: 'flex', 
+                                                justifyContent: 'space-between', 
+                                                alignItems: 'center', 
+                                                padding: '12px 16px', 
+                                                borderBottom: i === filteredTransactions.length - 1 ? 'none' : '1px solid var(--glass-border)',
+                                                color: 'inherit',
+                                                fontFamily: 'inherit'
+                                            }}
                                         >
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                                                 <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: getCategoryTheme(tx.category, tx.type).color + '20', display: 'flex', justifyContent: 'center', alignItems: 'center', color: getCategoryTheme(tx.category, tx.type).color, fontWeight: 'bold', fontSize: '1.2rem' }}>
@@ -693,7 +707,7 @@ const Home = () => {
                                             <p style={{ fontWeight: '600', color: tx.type === 'income' ? 'var(--success-color)' : 'var(--danger-color)', margin: 0 }}>
                                                 {tx.type === 'income' ? '+' : '-'} {formatCurrency(tx.amount)}
                                             </p>
-                                        </div>
+                                        </button>
                                     </SwipeableItem>
                                 ))}
                             </div>
