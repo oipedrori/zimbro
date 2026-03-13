@@ -49,7 +49,14 @@ const NotionImport = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code })
             });
-            const data = await response.json();
+            
+            let data;
+            try {
+                data = await response.json();
+            } catch (jsonErr) {
+                throw new Error("Resposta inválida do servidor (não é JSON).");
+            }
+
             if (data.access_token) {
                 setNotionToken(data.access_token);
                 localStorage.setItem('zimbroo_notion_token', data.access_token);

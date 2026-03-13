@@ -8,7 +8,7 @@ import { useI18n } from '../contexts/I18nContext';
 import TransactionModal from '../components/TransactionModal';
 import SwipeableItem from '../components/SwipeableItem';
 import LoadingDots from '../components/LoadingDots';
-import { Plus, ChevronLeft, ChevronRight, User, Pointer, X, Trash2, PieChart, BarChart2, Shield, Mic, Keyboard, Moon, Globe, DollarSign, LogOut } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, User, MousePointer2, X, Trash2, PieChart, BarChart2, Shield, Mic, Keyboard, Moon, Globe, DollarSign, LogOut } from 'lucide-react';
 import { Link, useOutletContext, useNavigate } from 'react-router-dom';
 import { getEmojiForDescription } from '../utils/emojiUtils';
 import { prepareMonthlyTransactions } from '../services/transactionService';
@@ -577,7 +577,7 @@ const Home = () => {
                                 <h2 style={{ fontSize: 'clamp(1.8rem, 8vw, 2.5rem)', marginBottom: '24px', fontWeight: '700', letterSpacing: '-1px', wordBreak: 'break-word' }}>{formatCurrency(balance)}</h2>
                             </div>
                             <div style={{ position: 'relative', display: !isDesktop ? 'flex' : 'none' }}>
-                                <Pointer className="pointer-icon" size={18} opacity={0.8} />
+                                <MousePointer2 className="pointer-icon" size={18} opacity={0.8} />
                             </div>
                         </div>
 
