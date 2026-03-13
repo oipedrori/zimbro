@@ -143,7 +143,7 @@ const ConfirmDialog = ({
                     background: rgba(0,0,0,0);
                     z-index: 20000;
                     display: flex;
-                    align-items: flex-end;
+                    align-items: flex-end; /* Bottom by default (mobile) */
                     justify-content: center;
                     padding: 0;
                     transition: all 0.3s ease;
@@ -165,7 +165,6 @@ const ConfirmDialog = ({
                     text-align: center;
                     box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
                     transform: translateY(100%);
-                    opacity: 1;
                     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
                     position: relative;
                 }

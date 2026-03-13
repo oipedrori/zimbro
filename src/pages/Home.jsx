@@ -539,7 +539,7 @@ const Home = () => {
                         background: 'transparent', 
                         padding: '6px 12px', 
                         borderRadius: '20px', 
-                        border: '1px solid var(--glass-border)',
+                        border: 'none',
                         alignSelf: isDesktop ? 'auto' : 'stretch',
                         justifyContent: isDesktop ? 'flex-start' : 'space-between'
                     }}>

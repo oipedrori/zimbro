@@ -226,18 +226,30 @@ const Profile = () => {
             {showDeleteConfirm && (
                 <div style={{
                     position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                    background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(10px)',
-                    WebkitBackdropFilter: 'blur(10px)',
-                    display: 'flex', justifyContent: 'center', alignItems: 'center',
-                    padding: '24px', zIndex: 20000
+                    background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)',
+                    display: 'flex', justifyContent: 'center', 
+                    alignItems: window.innerWidth < 1024 ? 'flex-end' : 'center',
+                    padding: window.innerWidth < 1024 ? '0' : '24px', zIndex: 20000,
+                    animation: 'fadeIn 0.3s ease'
                 }}>
                     <div style={{
-                        background: 'var(--surface-color)', padding: '32px 24px',
-                        borderRadius: '32px', border: '1px solid var(--glass-border)',
-                        width: '100%', maxWidth: '340px', textAlign: 'center',
+                        background: 'var(--bg-color)', padding: window.innerWidth < 1024 ? '32px 24px 48px' : '32px 24px',
+                        borderRadius: window.innerWidth < 1024 ? '32px 32px 0 0' : '32px', 
+                        border: '1px solid var(--glass-border)',
+                        width: '100%', maxWidth: window.innerWidth < 1024 ? 'none' : '340px', textAlign: 'center',
                         boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
-                        animation: 'bubblePop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards'
+                        animation: window.innerWidth < 1024 ? 'slideUpSheet 0.4s cubic-bezier(0.16, 1, 0.3, 1)' : 'bubblePop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+                        position: 'relative'
                     }}>
+                        {/* Handle for Mobile Bottom Sheet */}
+                        {window.innerWidth < 1024 && (
+                            <div style={{
+                                width: '40px', height: '4px', background: 'var(--glass-border)',
+                                borderRadius: '2px', position: 'absolute', top: '12px', left: '50%',
+                                transform: 'translateX(-50%)'
+                            }} />
+                        )}
                         <div style={{ width: '64px', height: '64px', borderRadius: '20px', background: 'var(--danger-light)', color: 'var(--danger-color)', display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto 20px' }}>
                             <Trash2 size={32} />
                         </div>
@@ -342,6 +354,14 @@ const Profile = () => {
                 @keyframes bubblePop {
                     0% { transform: scale(0.1) translateY(20px); opacity: 0; }
                     100% { transform: scale(1) translateY(0); opacity: 1; }
+                }
+                @keyframes slideUpSheet {
+                    from { transform: translateY(100%); }
+                    to { transform: translateY(0); }
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
                 }
             `}</style>
         </div>

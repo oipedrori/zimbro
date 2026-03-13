@@ -7,14 +7,31 @@ import LoadingDots from './components/LoadingDots';
 import InstallPrompt from './components/InstallPrompt';
 import './index.css';
 
+// Helper for lazy loading with retry logic
+const lazyWithRetry = (componentImport) => React.lazy(async () => {
+  const pageHasBeenForceRefreshed = JSON.parse(window.localStorage.getItem('page-has-been-force-refreshed') || 'false');
+
+  try {
+    const component = await componentImport();
+    window.localStorage.setItem('page-has-been-force-refreshed', 'false');
+    return component;
+  } catch (error) {
+    if (!pageHasBeenForceRefreshed) {
+      window.localStorage.setItem('page-has-been-force-refreshed', 'true');
+      return window.location.reload();
+    }
+    throw error;
+  }
+});
+
 // Lazy load pages for performance
-const Home = React.lazy(() => import('./pages/Home'));
-const Statistics = React.lazy(() => import('./pages/Statistics'));
-const Limits = React.lazy(() => import('./pages/Limits'));
-const Wallet = React.lazy(() => import('./pages/Wallet'));
-const Onboarding = React.lazy(() => import('./pages/Onboarding'));
-const Profile = React.lazy(() => import('./pages/Profile'));
-const NotionImport = React.lazy(() => import('./pages/NotionImport'));
+const Home = lazyWithRetry(() => import('./pages/Home'));
+const Statistics = lazyWithRetry(() => import('./pages/Statistics'));
+const Limits = lazyWithRetry(() => import('./pages/Limits'));
+const Wallet = lazyWithRetry(() => import('./pages/Wallet'));
+const Onboarding = lazyWithRetry(() => import('./pages/Onboarding'));
+const Profile = lazyWithRetry(() => import('./pages/Profile'));
+const NotionImport = lazyWithRetry(() => import('./pages/NotionImport'));
 
 const PrivateRoute = ({ children }) => {
   const { currentUser, loading } = useAuth();
