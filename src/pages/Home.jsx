@@ -1112,7 +1112,20 @@ const Home = () => {
                                         <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>{currentUser?.email}</p>
                                     </div>
                                 </Link>
-                                <button onClick={closeSidebar} style={{ padding: '8px', color: 'var(--text-muted)', border: 'none', background: 'transparent', cursor: 'pointer' }}>
+                                <button 
+                                    onClick={closeSidebar} 
+                                    style={{ 
+                                        position: 'absolute',
+                                        top: '24px',
+                                        right: '16px',
+                                        padding: '8px', 
+                                        color: 'var(--text-muted)', 
+                                        border: 'none', 
+                                        background: 'transparent', 
+                                        cursor: 'pointer',
+                                        zIndex: 2
+                                    }}
+                                >
                                     <X size={24} />
                                 </button>
                             </div>

@@ -14,7 +14,9 @@ export default async function handler(req, res) {
 
     const clientId = process.env.VITE_NOTION_CLIENT_ID;
     const clientSecret = process.env.NOTION_CLIENT_SECRET;
-    const redirectUri = process.env.VITE_NOTION_REDIRECT_URI;
+    // We will use the origin from the request or the environment variable
+    const origin = req.headers.origin || 'https://zimbroo.vercel.app';
+    const redirectUri = `${origin}/notion-callback`;
 
     try {
         const response = await fetch('https://api.notion.com/v1/oauth/token', {

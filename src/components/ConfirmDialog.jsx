@@ -87,14 +87,15 @@ const ConfirmDialog = ({
             <style>{`
                 .confirm-overlay {
                     position: fixed;
-                    top: 0; left: 0; right: 0; bottom: 0;
+                    inset: 0;
                     background: rgba(0,0,0,0);
                     z-index: 20000;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    padding: 20px;
+                    padding: 24px;
                     transition: background 0.3s ease;
+                    touch-action: none;
                 }
                 .confirm-overlay.visible {
                     background: rgba(0,0,0,0.7);
@@ -144,7 +145,6 @@ const ConfirmDialog = ({
                     display: flex;
                     flex-direction: column;
                     gap: 12px;
-                    margin-bottom: 20px; /* Adiciona margem na base para evitar que fique colado no fundo no mobile */
                 }
                 .confirm-btn {
                     width: 100%;

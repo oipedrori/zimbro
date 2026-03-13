@@ -309,11 +309,13 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
             <style>{`
         .modal-overlay {
           position: fixed;
-          top: 0; left: 0; right: 0; bottom: 0;
+          inset: 0;
           background: rgba(0,0,0,0);
           z-index: 10000;
           display: flex;
-          align-items: flex-end;
+          align-items: center;
+          justify-content: center;
+          padding: 24px;
           touch-action: none;
           transition: background 0.3s ease;
         }
@@ -328,26 +330,27 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
         }
         .modal-content {
           width: 100%;
+          max-width: 450px;
           background: var(--bg-color);
-          border-top-left-radius: 32px;
-          border-top-right-radius: 32px;
-          padding: 24px;
-          padding-top: 32px;
-          padding-bottom: calc(60px + env(safe-area-inset-bottom, 20px));
-          max-height: 92vh;
+          border-radius: 32px;
+          padding: 32px 24px;
+          max-height: 90vh;
           overflow-y: auto;
-          box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
+          box-shadow: 0 20px 50px rgba(0,0,0,0.3);
           overscroll-behavior: contain;
           position: relative;
-          transform: translateY(100%);
-          transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+          transform: scale(0.9) translateY(20px);
+          opacity: 0;
+          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
           z-index: 10002;
         }
         .modal-content.slide-up {
-          transform: translateY(0);
+          transform: scale(1) translateY(0);
+          opacity: 1;
         }
         .modal-content.slide-down {
-          transform: translateY(100%);
+          transform: scale(0.9) translateY(20px);
+          opacity: 0;
         }
         @media (min-width: 1024px) {
             .modal-content {

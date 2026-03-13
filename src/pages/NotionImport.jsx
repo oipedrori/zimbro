@@ -31,7 +31,7 @@ const NotionImport = () => {
 
     // Check if connected on mount
     const NOTION_CLIENT_ID = import.meta.env.VITE_NOTION_CLIENT_ID;
-    const NOTION_REDIRECT_URI = import.meta.env.VITE_NOTION_REDIRECT_URI || (window.location.origin + '/notion-callback');
+    const NOTION_REDIRECT_URI = window.location.origin + '/notion-callback';
 
     useEffect(() => {
         const code = searchParams.get('code');
