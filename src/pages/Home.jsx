@@ -806,7 +806,31 @@ const Home = () => {
                                     ) : (
                                         <div style={{ maxHeight: '450px', overflowY: 'auto', scrollbarWidth: 'thin', margin: '0 -32px' }}>
                                             {filteredTransactions.map((tx, i) => (
-                                                <div key={tx.id} onClick={() => handleEditTx(tx)} style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 32px', borderBottom: i === filteredTransactions.length - 1 ? 'none' : '1px solid var(--glass-border)', transition: 'background 0.2s', marginBottom: i === filteredTransactions.length - 1 ? (isDesktop ? '24px' : '80px') : '0' }} className="hover-brightness">
+                                                <button 
+                                                    key={tx.id} 
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleEditTx(tx);
+                                                        haptic.light();
+                                                    }} 
+                                                    style={{ 
+                                                        width: '100%',
+                                                        textAlign: 'left',
+                                                        background: 'transparent',
+                                                        border: 'none',
+                                                        cursor: 'pointer', 
+                                                        display: 'flex', 
+                                                        justifyContent: 'space-between', 
+                                                        alignItems: 'center', 
+                                                        padding: '16px 32px', 
+                                                        borderBottom: i === filteredTransactions.length - 1 ? 'none' : '1px solid var(--glass-border)', 
+                                                        transition: 'background 0.2s', 
+                                                        marginBottom: i === filteredTransactions.length - 1 ? (isDesktop ? '24px' : '80px') : '0',
+                                                        color: 'inherit',
+                                                        fontFamily: 'inherit'
+                                                    }} 
+                                                    className="hover-brightness"
+                                                >
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                                                         <div style={{ width: '46px', height: '46px', borderRadius: '50%', background: getCategoryTheme(tx.category, tx.type).color + '20', display: 'flex', justifyContent: 'center', alignItems: 'center', color: getCategoryTheme(tx.category, tx.type).color, fontSize: '1.3rem' }}>
                                                             {getEmojiForDescription(tx.description, getCategoryTheme(tx.category, tx.type).icon)}
@@ -834,7 +858,7 @@ const Home = () => {
                                                     <p style={{ fontWeight: '700', color: tx.type === 'income' ? 'var(--success-color)' : 'var(--danger-color)', margin: 0, fontSize: '1.1rem' }}>
                                                         {tx.type === 'income' ? '+' : '-'} {formatCurrency(tx.amount)}
                                                     </p>
-                                                </div>
+                                                </button>
                                             ))}
                                             {filteredTransactions.length === 0 && (
                                                 <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
