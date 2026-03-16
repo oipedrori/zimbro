@@ -77,9 +77,51 @@ const Layout = () => {
         setIsTextMode(false);
     };
 
+    const NavLinks = [
+        { path: '/', icon: <HomeIcon size={20} />, label: t('home', { defaultValue: 'Início' }) },
+        { path: '/statistics', icon: <BarChart2 size={20} />, label: t('statistics', { defaultValue: 'Estatísticas' }) },
+        { path: '/limits', icon: <Shield size={20} />, label: t('limits', { defaultValue: 'Limites' }) },
+        { path: '/wallet', icon: <WalletIcon size={20} />, label: t('wallet', { defaultValue: 'Carteira' }) },
+    ];
 
     return (
         <div className="app-container">
+            {/* Desktop Sidebar */}
+            <aside className="desktop-sidebar">
+                <div className="sidebar-header">
+                    <img src="/logo.png" className="sidebar-logo" alt="Zimbroo" />
+                    <h1 className="sidebar-title">Zimbroo</h1>
+                </div>
+
+                <nav className="sidebar-nav">
+                    {NavLinks.map(link => (
+                        <NavLink 
+                            key={link.path}
+                            to={link.path} 
+                            className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+                            onClick={() => haptic.light()}
+                        >
+                            {link.icon}
+                            <span>{link.label}</span>
+                        </NavLink>
+                    ))}
+                </nav>
+
+                <div className="sidebar-footer">
+                    <button className="sidebar-add-btn" onClick={() => setIsManualModalOpen(true)}>
+                        <Plus size={20} />
+                        <span>Novo Registro</span>
+                    </button>
+                    <button className="sidebar-ai-btn" onClick={() => handleAiClick('voice')}>
+                        <Mic size={20} />
+                        <span>Conversar com IA</span>
+                    </button>
+                    <div style={{ marginTop: '20px', borderTop: '1px solid var(--glass-border)', paddingTop: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                         <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textAlign: 'center' }}>v1.8.4 • Zimbroo</p>
+                    </div>
+                </div>
+            </aside>
+
             {/* O conteúdo das páginas (Home, Stats) será renderizado aqui */}
             <main
                 className="main-content"
@@ -104,9 +146,9 @@ const Layout = () => {
             />
 
             {/* Fixed FAB - Now renders globally to allow smooth slide animations */}
-            <div className={`bottom-blur-layer ${(location.pathname !== '/' || isManualModalOpen || isAiActive) ? 'hidden-state' : ''}`} />
+            <div className={`bottom-blur-layer ${(location.pathname !== '/' && location.pathname !== '/notion-callback' && location.pathname !== '/mic' || isManualModalOpen || isAiActive) ? 'hidden-state' : ''}`} />
 
-            <nav className={`bottom-nav ${(location.pathname !== '/' || isManualModalOpen || isAiActive) ? 'hidden-state' : ''}`}>
+            <nav className={`bottom-nav ${(location.pathname !== '/' && location.pathname !== '/notion-callback' && location.pathname !== '/mic' || isManualModalOpen || isAiActive) ? 'hidden-state' : ''}`}>
                 {showAiInsight && location.pathname === '/' && (
                     <div style={{ position: 'absolute', bottom: '100%', left: 0, right: 0, zIndex: 3000 }}>
                         <AiInsightBubble 

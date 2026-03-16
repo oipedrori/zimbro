@@ -25,10 +25,11 @@ const Home = () => {
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
-        if (params.get('code')) {
+        const code = params.get('code');
+        if (code) {
             setSidebarView('notion');
             setIsSidebarOpen(true);
-            // Clean URL immediately
+            // Use replaceState to clean URL WITHOUT re-mounting Home (and losing state)
             window.history.replaceState({}, document.title, window.location.pathname);
         }
     }, []);
@@ -1164,16 +1165,16 @@ const Home = () => {
                             left: 0,
                             right: isDesktop ? 'auto' : 0,
                             width: isDesktop ? '360px' : '100%', 
-                            height: isDesktop ? '100%' : 'auto', 
-                            maxHeight: isDesktop ? 'none' : '90dvh',
+                            height: isDesktop ? '100%' : (sidebarView === 'notion' ? '100%' : 'auto'), 
+                            maxHeight: (isDesktop || sidebarView === 'notion') ? 'none' : '90dvh',
                             background: 'var(--bg-color)',
                             boxShadow: '0 -10px 50px rgba(0,0,0,0.15)', 
                             zIndex: 11001,
-                            borderRadius: isDesktop ? '0' : '32px 32px 0 0',
+                            borderRadius: (isDesktop || sidebarView === 'notion') ? '0' : '32px 32px 0 0',
                             animation: isDesktop 
                                 ? (isSidebarClosing ? 'slideOutLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards' : 'slideInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards')
                                 : (isSidebarClosing ? 'slideOutDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards' : 'slideInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards'),
-                            padding: isDesktop ? '32px' : '32px 24px 120px 24px', 
+                            padding: isDesktop ? '32px' : (sidebarView === 'notion' ? '24px 24px 40px' : '32px 24px 120px 24px'), 
                             display: 'flex', 
                             flexDirection: 'column', 
                             overflowY: 'auto',
@@ -1200,6 +1201,8 @@ const Home = () => {
                                          setSidebarView('settings');
                                          closeSidebar();
                                      }}
+                                     // Passing detecting code from current URL for reliable exchange
+                                     initialOAuthCode={new URLSearchParams(window.location.search).get('code')}
                                  />
                              )}
                         </div>

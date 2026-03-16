@@ -6,7 +6,7 @@ import { addTransaction } from '../services/transactionService';
 import { useAuth } from '../contexts/AuthContext';
 import { haptic } from '../utils/haptic';
 
-const NotionImportContent = ({ onFinish, onBack }) => {
+const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
     const { currentUser } = useAuth();
     const [notionToken, setNotionToken] = useState(localStorage.getItem('zimbroo_notion_token') || '');
     const [expenseDbId, setExpenseDbId] = useState(localStorage.getItem('zimbroo_notion_expense_db_id') || '');
@@ -54,16 +54,12 @@ const NotionImportContent = ({ onFinish, onBack }) => {
         }
     };
 
-    // Auto-check for code in URL (if used directly, though Home.jsx will likely handle this)
+    // Auto-check for code from prop (passed from Home.jsx)
     useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const code = params.get('code');
-        if (code && !notionToken) {
-            handleExchangeCode(code);
-            // Clean URL without navigate to keep sheet open
-            window.history.replaceState({}, document.title, window.location.pathname);
+        if (initialOAuthCode && !notionToken) {
+            handleExchangeCode(initialOAuthCode);
         }
-    }, []);
+    }, [initialOAuthCode]);
 
     const refreshDatabases = async () => {
         if (!notionToken) return;
@@ -268,7 +264,7 @@ const NotionImportContent = ({ onFinish, onBack }) => {
                     {loading && <LoadingDots style={{ marginBottom: '20px' }} />}
                     {error && <div style={{ color: '#ef4444', marginBottom: '20px', fontSize: '0.85rem', fontWeight: '600' }}>⚠️ {error}</div>}
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '32px', maxHeight: '300px', overflowY: 'auto', paddingRight: '4px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '32px', overflowY: 'visible', paddingRight: '4px' }}>
                         {foundDbs.map(db => {
                             const isExpense = expenseDbId === db.id.replace(/-/g, '');
                             const isIncome = incomeDbId === db.id.replace(/-/g, '');
