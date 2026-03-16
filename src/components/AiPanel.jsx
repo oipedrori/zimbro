@@ -484,7 +484,7 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
 
                     {(!aiMessage || (conversationContext && !isProcessing)) ? (
                         (isTextMode || isManualTextMode) ? (
-                            <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'center', height: '100%' }}>
+                            <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'center' }}>
                                 <div style={{ textAlign: 'center', marginTop: '10px', flexShrink: 0 }}>
                                     <h3 style={{ color: 'white', fontSize: '1.4rem', fontWeight: '600', marginBottom: '8px', opacity: 0.9 }}>
                                         {t('ai_ready', { defaultValue: 'Zimbro está pronto para te ajudar' })}
