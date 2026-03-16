@@ -8,6 +8,8 @@ import { useI18n } from '../contexts/I18nContext';
 import TransactionModal from '../components/TransactionModal';
 import SwipeableItem from '../components/SwipeableItem';
 import LoadingDots from '../components/LoadingDots';
+import ProfileContent from '../components/ProfileContent';
+import NotionImportContent from '../components/NotionImportContent';
 import { Plus, ChevronLeft, ChevronRight, User, Pointer, X, Trash2, PieChart, BarChart2, Shield, Mic, Keyboard, Moon, Globe, DollarSign, LogOut } from 'lucide-react';
 import { Link, useOutletContext, useNavigate } from 'react-router-dom';
 import { getEmojiForDescription } from '../utils/emojiUtils';
@@ -21,10 +23,21 @@ const Home = () => {
     const { t, formatCurrency, locale, changeLocale, currency, changeCurrency } = useI18n();
     const navigate = useNavigate();
 
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('code')) {
+            setSidebarView('notion');
+            setIsSidebarOpen(true);
+            // Clean URL immediately
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    }, []);
+
     // --- State Declarations ---
     const [currentDate, setCurrentDate] = useState(new Date());
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isSidebarClosing, setIsSidebarClosing] = useState(false);
+    const [sidebarView, setSidebarView] = useState('settings'); // 'settings' or 'notion'
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalType, setModalType] = useState('expense');
     const [editingTx, setEditingTx] = useState(null);
@@ -1128,7 +1141,7 @@ const Home = () => {
                     100% { transform: scale(1); opacity: 0.8; }
                 }
             `}</style>
-                {/* Sidebar Drawer */}
+                {/* Unified Sidebar / Bottom Sheet */}
                 {isSidebarOpen && (
                     <>
                         {/* Backdrop */}
@@ -1143,7 +1156,7 @@ const Home = () => {
                             }}
                         />
                         
-                        {/* Drawer Content */}
+                        {/* Sheet/Drawer Content */}
                         <div style={{
                             position: 'fixed', 
                             top: isDesktop ? 0 : 'auto', 
@@ -1167,156 +1180,28 @@ const Home = () => {
                             overscrollBehavior: 'contain',
                             borderTop: isDesktop ? 'none' : '1px solid var(--glass-border)'
                         }}>
-                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
-                                 {/* User info now links to Profile */}
-                                 <Link 
-                                     to="/profile" 
-                                     onClick={closeSidebar}
-                                     style={{ display: 'flex', alignItems: 'center', gap: '16px', textDecoration: 'none', color: 'inherit' }}
-                                 >
-                                     <div style={{ width: '50px', height: '50px', border: '1px solid var(--glass-border)', borderRadius: '16px', background: 'var(--surface-color)', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--primary-color)' }}>
-                                         <User size={24} />
-                                     </div>
-                                     <div>
-                                         <h2 style={{ fontSize: '1.1rem', fontWeight: '700', margin: 0 }}>{currentUser?.displayName || 'Perfil'}</h2>
-                                         <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>{currentUser?.email}</p>
-                                     </div>
-                                 </Link>
-                                 <button 
-                                    onClick={closeSidebar} 
-                                    style={{ 
-                                        width: '44px',
-                                        height: '44px',
-                                        borderRadius: '50%',
-                                        background: 'var(--surface-color)',
-                                        border: '1px solid var(--glass-border)',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        color: 'var(--text-main)',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.2s',
-                                        flexShrink: 0
-                                    }}
-                                >
-                                    <X size={24} />
-                                </button>
-                         </div>
+                             {/* Bottom Sheet Handle for Mobile */}
+                             {!isDesktop && (
+                                 <div style={{
+                                     width: '40px', height: '4px', background: 'var(--glass-border)',
+                                     borderRadius: '2px', margin: '-16px auto 24px auto', opacity: 0.6
+                                 }} />
+                             )}
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                                {/* Notion Sync Button */}
-                                <button 
-                                    onClick={() => { closeSidebar(); navigate('/notion-import'); }}
-                                    style={{ 
-                                        background: '#000', color: 'white', padding: '16px 20px', borderRadius: '20px', 
-                                        display: 'flex', alignItems: 'center', gap: '14px', border: 'none', cursor: 'pointer',
-                                        fontSize: '0.95rem', fontWeight: '600', width: '100%'
-                                    }}
-                                >
-                                    <img src="/notion_logo.png" style={{ width: '20px', height: '20px' }} alt="Notion" />
-                                    Integração Notion
-                                </button>
-
-                                {/* Theme Section */}
-                                <div style={{ background: 'var(--surface-color)', padding: '20px', borderRadius: '24px', border: '1px solid var(--glass-border)' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                                        <div style={{ width: '36px', height: '36px', flexShrink: 0, background: 'var(--primary-light)', borderRadius: '10px', color: 'var(--primary-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Moon size={18} /></div>
-                                        <span style={{ fontWeight: '600' }}>{t('theme')}</span>
-                                    </div>
-                                    <div style={{ display: 'flex', background: 'var(--bg-color)', borderRadius: '12px', padding: '4px' }}>
-                                        {['system', 'light', 'dark'].map(tOption => (
-                                            <button 
-                                                key={tOption}
-                                                onClick={() => setTheme(tOption)}
-                                                style={{ 
-                                                    flex: 1, padding: '8px', borderRadius: '8px', border: 'none',
-                                                    fontSize: '0.8rem', fontWeight: '600', cursor: 'pointer',
-                                                    background: theme === tOption ? 'var(--primary-color)' : 'transparent',
-                                                    color: theme === tOption ? 'white' : 'var(--text-muted)',
-                                                    transition: 'all 0.2s'
-                                                }}
-                                            >
-                                                {tOption === 'system' ? 'Auto' : tOption === 'light' ? 'Claro' : 'Escuro'}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Language/Currency Section */}
-                                <div style={{ background: 'var(--surface-color)', padding: '20px', borderRadius: '24px', border: '1px solid var(--glass-border)' }}>
-                                    <div style={{ marginBottom: '20px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-                                            <div style={{ width: '36px', height: '36px', flexShrink: 0, background: 'var(--primary-light)', borderRadius: '10px', color: 'var(--primary-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Globe size={18} /></div>
-                                            <span style={{ fontWeight: '600' }}>{t('language')}</span>
-                                        </div>
-                                        <select 
-                                            value={locale} 
-                                            onChange={(e) => changeLocale(e.target.value)}
-                                            className="form-input"
-                                            style={{ width: '100%', padding: '12px', borderRadius: '12px', background: 'var(--bg-color)', color: 'var(--text-main)', fontSize: '0.9rem' }}
-                                        >
-                                            <option value="pt">Português</option>
-                                            <option value="en">English</option>
-                                            <option value="es">Español</option>
-                                            <option value="fr">Français</option>
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-                                            <div style={{ width: '36px', height: '36px', flexShrink: 0, background: 'var(--primary-light)', borderRadius: '10px', color: 'var(--primary-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><DollarSign size={18} /></div>
-                                            <span style={{ fontWeight: '600' }}>Moeda</span>
-                                        </div>
-                                        <select 
-                                            value={currency} 
-                                            onChange={(e) => changeCurrency(e.target.value)}
-                                            className="form-input"
-                                            style={{ width: '100%', padding: '12px', borderRadius: '12px', background: 'var(--bg-color)', color: 'var(--text-main)', fontSize: '0.9rem' }}
-                                        >
-                                            <option value="BRL">R$ Real</option>
-                                            <option value="USD">$ Dollar</option>
-                                            <option value="EUR">€ Euro</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                {/* Logout & Delete Account Area */}
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: 'auto', paddingTop: '40px', paddingBottom: '40px' }}>
-                                    <button 
-                                        onClick={logout}
-                                        style={{ 
-                                            display: 'flex', alignItems: 'center', gap: '14px', padding: '18px 20px', 
-                                            background: 'var(--surface-color)', borderRadius: '20px', 
-                                            border: '1px solid var(--glass-border)', cursor: 'pointer',
-                                            color: 'var(--text-main)', fontWeight: '700', fontSize: '0.95rem'
-                                        }}
-                                    >
-                                        <div style={{ background: 'var(--bg-color)', padding: '8px', borderRadius: '10px' }}><LogOut size={20} /></div>
-                                        {t('logout')}
-                                    </button>
-
-                                    <button 
-                                        onClick={() => setShowDeleteConfirm(true)}
-                                        style={{ 
-                                            display: 'flex', alignItems: 'center', gap: '14px', padding: '18px 20px', 
-                                            background: 'rgba(239, 68, 68, 0.1)', borderRadius: '20px', 
-                                            border: '1px solid rgba(239, 68, 68, 0.1)', cursor: 'pointer',
-                                            color: 'var(--danger-color)', fontWeight: '700', fontSize: '0.95rem'
-                                        }}
-                                    >
-                                        <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '8px', borderRadius: '10px' }}><Trash2 size={20} /></div>
-                                        Excluir Conta
-                                    </button>
-
-                                    <div 
-                                        onClick={() => alert("Deitou-se e dormiu debaixo do zimbro; eis que um anjo o tocou e lhe disse: Levanta-te e come. (1 Reis 19.5)")}
-                                        style={{ marginTop: '24px', textAlign: 'center', cursor: 'pointer', userSelect: 'none' }}
-                                    >
-                                        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '4px', opacity: 0.6 }}>v1.8.4 • Feito no Brasil 🇧🇷</p>
-
-                                    </div>
-                                </div>
-                            </div>
+                             {sidebarView === 'settings' ? (
+                                 <ProfileContent 
+                                     onOpenNotion={() => setSidebarView('notion')} 
+                                     onClose={closeSidebar} 
+                                 />
+                             ) : (
+                                 <NotionImportContent 
+                                     onBack={() => setSidebarView('settings')}
+                                     onFinish={() => {
+                                         setSidebarView('settings');
+                                         closeSidebar();
+                                     }}
+                                 />
+                             )}
                         </div>
                     </>
                 )}

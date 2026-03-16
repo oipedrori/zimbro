@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Mic, X, Keyboard, Home as HomeIcon, BarChart2, Shield, Wallet as WalletIcon, User as UserIcon } from 'lucide-react';
+import { Plus, Mic, X, Keyboard, Home as HomeIcon, BarChart2, Shield, Wallet as WalletIcon } from 'lucide-react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import AiPanel from './AiPanel';
 import DynamicIslandHint from './DynamicIslandHint';
@@ -77,13 +77,6 @@ const Layout = () => {
         setIsTextMode(false);
     };
 
-    const NavLinks = [
-        { path: '/', icon: <HomeIcon size={20} />, label: t('home', { defaultValue: 'Início' }) },
-        { path: '/statistics', icon: <BarChart2 size={20} />, label: t('statistics', { defaultValue: 'Estatísticas' }) },
-        { path: '/limits', icon: <Shield size={20} />, label: t('limits', { defaultValue: 'Limites' }) },
-        { path: '/wallet', icon: <WalletIcon size={20} />, label: t('wallet', { defaultValue: 'Carteira' }) },
-        { path: '/profile', icon: <UserIcon size={20} />, label: t('profile', { defaultValue: 'Perfil' }) },
-    ];
 
     return (
         <div className="app-container">

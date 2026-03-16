@@ -30,8 +30,6 @@ const Statistics = lazyWithRetry(() => import('./pages/Statistics'));
 const Limits = lazyWithRetry(() => import('./pages/Limits'));
 const Wallet = lazyWithRetry(() => import('./pages/Wallet'));
 const Onboarding = lazyWithRetry(() => import('./pages/Onboarding'));
-const Profile = lazyWithRetry(() => import('./pages/Profile'));
-const NotionImport = lazyWithRetry(() => import('./pages/NotionImport'));
 
 const PrivateRoute = ({ children }) => {
   const { currentUser, loading } = useAuth();
@@ -63,9 +61,7 @@ const AppRoutes = () => {
           <Route path="statistics" element={<Statistics />} />
           <Route path="limits" element={<Limits />} />
           <Route path="wallet" element={<Wallet />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="notion-import" element={<NotionImport />} />
-          <Route path="notion-callback" element={<NotionImport />} />
+          <Route path="notion-callback" element={<Home />} />
           <Route path="mic" element={<Home />} />
         </Route>
       </Routes>
