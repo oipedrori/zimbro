@@ -857,14 +857,15 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
             align-items: center;
             font-family: 'Solway', serif;
             color: white;
-            line-height: 0.5;
             font-weight: 800;
+            gap: 0px;
         }
 
         .ai-eyes-row {
             display: flex;
             gap: 12px;
-            margin-bottom: -15px;
+            height: 30px;
+            align-items: center;
         }
 
         .ai-eye {
@@ -874,8 +875,8 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
 
         .ai-mouth {
             font-size: 1.8rem;
-            transform: rotate(90deg) translateX(4px);
-            margin-top: 10px;
+            transform: rotate(90deg);
+            margin-top: -5px;
             animation: smileNod 4s ease-in-out infinite;
         }
 
