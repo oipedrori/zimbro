@@ -405,7 +405,15 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
     };
 
     return (
-        <div className={`ai-overlay ${isActive ? 'active' : ''}`}>
+        <div 
+            className={`ai-overlay ${isActive ? 'active' : ''}`}
+            style={{ 
+                height: `${viewportHeight}px`,
+                position: 'fixed',
+                top: 0,
+                left: 0
+            }}
+        >
             {/* Close Button - Only in TEXT mode */}
             {isManualTextMode && (
                 <button 
@@ -427,9 +435,9 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
                 </button>
             )}
 
-            {/* Mic Toggle (Center) - In voice mode, this BECOMES the close button if not listening? Or just as requested: X replaces mic button when open. */}
+            {/* Mic Toggle (Center) */}
             {!isManualTextMode && (
-                <div style={{ position: 'fixed', bottom: '60px', left: '0', right: '0', zIndex: 3001, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <div style={{ position: 'absolute', bottom: '60px', left: '0', right: '0', zIndex: 3001, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     {isListening ? (
                         <button
                             className={`ai-mic-btn listening active`}
@@ -500,13 +508,9 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
                                     className="messaging-input-container"
                                     style={{
                                         position: 'relative',
-                                        bottom: 'auto',
-                                        left: 'auto',
-                                        right: 'auto',
                                         width: '100%',
                                         marginTop: 'auto',
-                                        marginBottom: viewportOffset > 0 ? `${viewportOffset + 20}px` : 'max(20px, env(safe-area-inset-bottom))',
-                                        transition: 'margin-bottom 0.1s ease-out'
+                                        marginBottom: 'max(20px, env(safe-area-inset-bottom))',
                                     }}
                                 >
                                     <textarea
