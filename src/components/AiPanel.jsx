@@ -242,7 +242,7 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
 
     const toggleListen = () => {
         if (isListening) {
-            recognitionRef.current?.stop();
+            onClose();
         } else {
             setTranscript('');
             recognitionRef.current?.start();
