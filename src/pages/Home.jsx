@@ -687,7 +687,7 @@ const Home = () => {
                                                 justifyContent: 'space-between', 
                                                 alignItems: 'center', 
                                                 padding: '12px 16px', 
-                                                borderBottom: i === filteredTransactions.length - 1 ? 'none' : '1px solid var(--glass-border)'
+                                                background: i % 2 === 0 ? 'transparent' : 'rgba(255, 255, 255, 0.02)'
                                             }}
                                         >
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
@@ -825,7 +825,7 @@ const Home = () => {
                                                         justifyContent: 'space-between', 
                                                         alignItems: 'center', 
                                                         padding: '16px 32px', 
-                                                        borderBottom: i === filteredTransactions.length - 1 ? 'none' : '1px solid var(--glass-border)', 
+                                                        background: i % 2 === 0 ? 'transparent' : 'rgba(255, 255, 255, 0.02)',
                                                         transition: 'background 0.2s', 
                                                         marginBottom: i === filteredTransactions.length - 1 ? (isDesktop ? '24px' : '80px') : '0'
                                                     }} 
