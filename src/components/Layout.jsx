@@ -110,51 +110,47 @@ const Layout = () => {
                 defaultType="expense"
             />
 
-            {location.pathname === '/' && (
-                <div className={`bottom-blur-layer ${isManualModalOpen || isAiActive ? 'hidden-state' : ''}`} />
-            )}
+            {/* Fixed FAB - Now renders globally to allow smooth slide animations */}
+            <div className={`bottom-blur-layer ${(location.pathname !== '/' || isManualModalOpen || isAiActive) ? 'hidden-state' : ''}`} />
 
-            {/* Navegação Simplificada - Botão Místico de IA e Balão */}
-            {location.pathname === '/' && (
-                <nav className={`bottom-nav ${isManualModalOpen || isAiActive ? 'hidden-state' : ''}`}>
-                    {showAiInsight && (
-                        <div style={{ position: 'absolute', bottom: '100%', left: 0, right: 0, zIndex: 3000 }}>
-                            <AiInsightBubble 
-                                preFetchedMessage={insightMessage} 
-                                onClose={() => setShowAiInsight(false)} 
-                            />
-                        </div>
-                    )}
-                    
-                    <div className="nav-items-wrapper">
-                        <button 
-                            className="nav-side-btn" 
-                            onClick={() => setIsManualModalOpen(true)}
-                            aria-label={t('add_transaction')}
+            <nav className={`bottom-nav ${(location.pathname !== '/' || isManualModalOpen || isAiActive) ? 'hidden-state' : ''}`}>
+                {showAiInsight && location.pathname === '/' && (
+                    <div style={{ position: 'absolute', bottom: '100%', left: 0, right: 0, zIndex: 3000 }}>
+                        <AiInsightBubble 
+                            preFetchedMessage={insightMessage} 
+                            onClose={() => setShowAiInsight(false)} 
+                        />
+                    </div>
+                )}
+                
+                <div className="nav-items-wrapper">
+                    <button 
+                        className="nav-side-btn" 
+                        onClick={() => setIsManualModalOpen(true)}
+                        aria-label={t('add_transaction')}
+                    >
+                        <Plus size={24} />
+                    </button>
+
+                    <div className="nav-center-item">
+                        <button
+                            className={`ai-mic-btn ${isListening ? 'active' : ''}`}
+                            onClick={() => handleAiClick('voice')}
+                            aria-label={t('ai_mic_label')}
                         >
-                            <Plus size={24} />
-                        </button>
-
-                        <div className="nav-center-item">
-                            <button
-                                className={`ai-mic-btn ${isListening ? 'active' : ''}`}
-                                onClick={() => handleAiClick('voice')}
-                                aria-label={t('ai_mic_label')}
-                            >
-                                <Mic size={32} color="white" strokeWidth={2.5} />
-                            </button>
-                        </div>
-
-                        <button 
-                            className="nav-side-btn" 
-                            onClick={() => handleAiClick('text')}
-                            aria-label={t('type_text')}
-                        >
-                            <Keyboard size={24} />
+                            <Mic size={32} color="white" strokeWidth={2.5} />
                         </button>
                     </div>
-                </nav>
-            )}
+
+                    <button 
+                        className="nav-side-btn" 
+                        onClick={() => handleAiClick('text')}
+                        aria-label={t('type_text')}
+                    >
+                        <Keyboard size={24} />
+                    </button>
+                </div>
+            </nav>
 
             {/* Se o painel de IA estiver ativo, mostramos o botão de fechar flutuando aqui caso não queira usar o handleAiClick do layout */}
         </div>
