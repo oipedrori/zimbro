@@ -110,11 +110,13 @@ const Layout = () => {
                 defaultType="expense"
             />
 
-            {location.pathname === '/' && !isManualModalOpen && !isAiActive && <div className="bottom-blur-layer" />}
+            {location.pathname === '/' && (
+                <div className={`bottom-blur-layer ${isManualModalOpen || isAiActive ? 'hidden-state' : ''}`} />
+            )}
 
             {/* Navegação Simplificada - Botão Místico de IA e Balão */}
-            {location.pathname === '/' && !isManualModalOpen && !isAiActive && (
-                <nav className="bottom-nav">
+            {location.pathname === '/' && (
+                <nav className={`bottom-nav ${isManualModalOpen || isAiActive ? 'hidden-state' : ''}`}>
                     {showAiInsight && (
                         <div style={{ position: 'absolute', bottom: '100%', left: 0, right: 0, zIndex: 3000 }}>
                             <AiInsightBubble 
