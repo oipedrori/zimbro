@@ -532,8 +532,8 @@ const Home = () => {
                     justifyContent: 'space-between', 
                     alignItems: isDesktop ? 'center' : 'flex-start', 
                     paddingTop: '10px', 
-                    marginBottom: isDesktop ? '24px' : '8px',
-                    gap: isDesktop ? '0' : '8px'
+                    marginBottom: isDesktop ? '24px' : '16px',
+                    gap: isDesktop ? '0' : '16px'
                 }}>
                     <div 
                         onClick={() => setIsSidebarOpen(true)}
