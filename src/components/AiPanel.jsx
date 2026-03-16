@@ -62,6 +62,16 @@ const AI_SUGGESTIONS = [
     "Faça um balanço da minha conta"
 ];
 
+const AiFace = () => (
+    <div className="ai-face-container">
+        <div className="ai-face">
+            <div className="ai-eye">.</div>
+            <div className="ai-eye">.</div>
+            <div className="ai-mouth">)</div>
+        </div>
+    </div>
+);
+
 const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onListeningChange }) => {
     const [isListening, setIsListening] = useState(false);
     const { currentUser } = useAuth();
@@ -452,8 +462,10 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
                     transition: 'opacity 0.2s',
                     paddingTop: isManualTextMode ? '20px' : '0' 
                 }}>
+                    <AiFace />
+
                     {isProcessing && (
-                       <div style={{ marginBottom: '20px' }}><LoadingDots style={{ color: 'white' }} /></div>
+                       <div style={{ marginBottom: '20px', marginTop: '10px' }}><LoadingDots style={{ color: 'white' }} /></div>
                     )}
                     
                     {aiMessage && (
@@ -831,6 +843,53 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
             justify-content: center;
             align-items: center;
             font-weight: 500;
+        }
+
+        .ai-face-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 24px;
+            animation: floatingFace 4s ease-in-out infinite;
+            filter: drop-shadow(0 0 15px rgba(255,255,255,0.2));
+            user-select: none;
+        }
+
+        .ai-face {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Solway', serif;
+            color: white;
+            line-height: 0.5;
+            font-weight: 800;
+        }
+
+        .ai-eye {
+            font-size: 2.2rem;
+            animation: blinkEye 5s infinite;
+        }
+
+        .ai-mouth {
+            font-size: 1.8rem;
+            transform: rotate(90deg) translateX(4px);
+            margin-top: 10px;
+            animation: smileNod 4s ease-in-out infinite;
+        }
+
+        @keyframes floatingFace {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        @keyframes blinkEye {
+            0%, 45%, 55%, 100% { transform: scaleY(1); opacity: 1; }
+            50% { transform: scaleY(0.1); opacity: 0.5; }
+        }
+
+        @keyframes smileNod {
+            0%, 100% { transform: rotate(90deg) translateX(4px) scale(1); }
+            50% { transform: rotate(90deg) translateX(6px) scale(1.1); }
         }
 
         @keyframes verticalRoulette {
