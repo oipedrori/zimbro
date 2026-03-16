@@ -88,6 +88,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+body.no-scroll {
+  overflow: hidden !important;
+  height: 100dvh !important;
+  position: fixed;
+  width: 100%;
+}
+
 #root {
   min-height: 100vh;
   min-height: 100dvh;

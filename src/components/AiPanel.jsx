@@ -189,13 +189,19 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
                 }
             }
             if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
+            document.body.classList.add('no-scroll');
         } else {
             if (recognitionRef.current) {
                 recognitionRef.current.stop();
             }
             if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
             setIsListening(false);
+            document.body.classList.remove('no-scroll');
         }
+        
+        return () => {
+            document.body.classList.remove('no-scroll');
+        };
     }, [isActive, isTextMode]); // Add isTextMode dependency
 
     // Visual Viewport logic to handle keyboard
@@ -505,7 +511,7 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
                                         right: 'auto',
                                         width: '100%',
                                         marginTop: 'auto',
-                                        marginBottom: viewportOffset > 0 ? `${viewportOffset + 100}px` : 'max(40px, env(safe-area-inset-bottom))',
+                                        marginBottom: viewportOffset > 0 ? `${viewportOffset + 50}px` : 'max(30px, env(safe-area-inset-bottom))',
                                         transition: 'margin-bottom 0.1s ease-out'
                                     }}
                                 >
