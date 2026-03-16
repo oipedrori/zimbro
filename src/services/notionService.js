@@ -9,10 +9,12 @@ const API_BASE = '/notion-api';
  * Notion API Helper - Centralizes requests and avoids malformed URLs
  */
 const notionRequest = async (secret, endpoint, method = 'GET', body = null) => {
-    // Sanitize endpoint and ensure base URL doesn't have trailing slash
+    // Ensure we don't have double slashes and the endpoint is valid
     const cleanBase = API_BASE.replace(/\/$/, '');
-    const cleanEndpoint = endpoint.replace(/^\//, '').replace(/\/$/, '');
+    const cleanEndpoint = endpoint.replace(/^\//, '');
     const url = `${cleanBase}/${cleanEndpoint}`;
+
+    if (!endpoint) throw new Error("Endpoint da API Notion não definido.");
 
     console.log(`[NotionRequest] ${method} ${url}`);
 
@@ -46,7 +48,7 @@ const notionRequest = async (secret, endpoint, method = 'GET', body = null) => {
                 const errData = await response.json();
                 errMsg = errData.message || errMsg;
             } catch (e) { /* fallback */ }
-            throw new Error(`Erro API Notion (${response.status}): ${errMsg}`);
+            throw new Error(`Erro API Notion (${response.status}) ao chamar [${endpoint}]: ${errMsg}. URL final: ${url}`);
         }
 
         return response.json();
@@ -208,37 +210,22 @@ export const createNotionTransaction = async (secret, databaseId, tx) => {
  */
 export const fetchNotionTransactions = async (secret, databaseId) => {
     try {
-        const currentYear = new Date().getFullYear();
-        const startOfYear = `${currentYear}-01-01`;
-
-        // Filter for transactions in the current year
-        const data = await notionRequest(secret, `databases/${databaseId}/query`, 'POST', {
-            filter: {
-                property: "Data", // Considers standard data name, but will fallback if not found
-                date: {
-                    on_or_after: startOfYear
-                }
-            }
-        });
-
-        // If filtering by "Data" fails because it doesn't exist, try without filter
-        // or attempt to find the date property first.
-        // For simplicity and resilience, we'll try to find any date property if the "Data" filter fails in mapping.
+        const cleanId = databaseId.replace(/-/g, '');
+        // We fetch all transactions first and filter by year in JS for maximum robustness
+        // Filtering by "Data" via API often fails with 400 if the property name is different.
+        const data = await notionRequest(secret, `databases/${cleanId}/query`, 'POST', {});
         
-        return mapNotionToZimbroo(data.results || []);
+        const currentYear = new Date().getFullYear();
+        const transactions = mapNotionToZimbroo(data.results || []);
+        
+        // Filter by current year in frontend
+        return transactions.filter(tx => {
+            const txYear = new Date(tx.date).getFullYear();
+            return txYear === currentYear;
+        });
     } catch (error) {
-        console.error("Fetch Error, retrying without filter...: ", error);
-        // Fallback: fetch all and filter in JS if the API filter fails due to schema mismatch
-        try {
-            const data = await notionRequest(secret, `databases/${databaseId}/query`, 'POST');
-            const currentYear = new Date().getFullYear();
-            return mapNotionToZimbroo(data.results || []).filter(tx => {
-                const txYear = new Date(tx.date).getFullYear();
-                return txYear === currentYear;
-            });
-        } catch (e) {
-            throw e;
-        }
+        console.error("Fetch Error: ", error);
+        throw error;
     }
 };
 
