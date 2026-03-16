@@ -62,17 +62,28 @@ const AI_SUGGESTIONS = [
     "Faça um balanço da minha conta"
 ];
 
-const AiFace = () => (
-    <div className="ai-face-container">
-        <div className="ai-face">
-            <div className="ai-eyes-row">
-                <div className="ai-eye">.</div>
-                <div className="ai-eye">.</div>
-            </div>
-            <div className="ai-mouth">)</div>
+const AiFace = () => {
+    return (
+        <div className="ai-face-container">
+            <svg viewBox="0 0 100 60" className="ai-face-svg">
+                {/* Eyes Group for blinking */}
+                <g className="ai-eyes">
+                    <circle cx="35" cy="20" r="4" fill="white" className="ai-eye-left" />
+                    <circle cx="65" cy="20" r="4" fill="white" className="ai-eye-right" />
+                </g>
+                {/* Mouth - Organic Path */}
+                <path 
+                    d="M 35 45 Q 50 55 65 45" 
+                    fill="none" 
+                    stroke="white" 
+                    strokeWidth="5" 
+                    strokeLinecap="round" 
+                    className="ai-mouth-path"
+                />
+            </svg>
         </div>
-    </div>
-);
+    );
+};
 
 const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onListeningChange }) => {
     const [isListening, setIsListening] = useState(false);
