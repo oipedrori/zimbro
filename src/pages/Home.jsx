@@ -1260,12 +1260,12 @@ const Home = () => {
                                         onClick={logout}
                                         style={{ 
                                             display: 'flex', alignItems: 'center', gap: '14px', padding: '18px 20px', 
-                                            background: 'rgba(239, 68, 68, 0.05)', borderRadius: '20px', 
-                                            border: '1px solid rgba(239, 68, 68, 0.1)', cursor: 'pointer',
-                                            color: 'var(--danger-color)', fontWeight: '700'
+                                            background: 'var(--surface-color)', borderRadius: '20px', 
+                                            border: '1px solid var(--glass-border)', cursor: 'pointer',
+                                            color: 'var(--text-main)', fontWeight: '700', fontSize: '0.95rem'
                                         }}
                                     >
-                                        <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '8px', borderRadius: '10px' }}><LogOut size={20} /></div>
+                                        <div style={{ background: 'var(--bg-color)', padding: '8px', borderRadius: '10px' }}><LogOut size={20} /></div>
                                         {t('logout')}
                                     </button>
 
@@ -1273,12 +1273,12 @@ const Home = () => {
                                         onClick={() => setShowDeleteConfirm(true)}
                                         style={{ 
                                             display: 'flex', alignItems: 'center', gap: '14px', padding: '18px 20px', 
-                                            background: 'transparent', borderRadius: '20px', 
-                                            border: '1px solid var(--glass-border)', cursor: 'pointer',
-                                            color: 'var(--danger-color)', fontWeight: '600', fontSize: '0.9rem'
+                                            background: 'rgba(239, 68, 68, 0.1)', borderRadius: '20px', 
+                                            border: '1px solid rgba(239, 68, 68, 0.1)', cursor: 'pointer',
+                                            color: 'var(--danger-color)', fontWeight: '700', fontSize: '0.95rem'
                                         }}
                                     >
-                                        <div style={{ padding: '8px', borderRadius: '10px' }}><Trash2 size={20} /></div>
+                                        <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '8px', borderRadius: '10px' }}><Trash2 size={20} /></div>
                                         Excluir Conta
                                     </button>
 
