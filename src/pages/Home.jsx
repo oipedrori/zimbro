@@ -1274,6 +1274,11 @@ const Home = () => {
                                         <div style={{ padding: '8px', borderRadius: '10px' }}><Trash2 size={20} /></div>
                                         Excluir Conta
                                     </button>
+
+                                    <div style={{ marginTop: '24px', textAlign: 'center' }}>
+                                        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '4px', opacity: 0.6 }}>v1.8.4</p>
+                                        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600', opacity: 0.8 }}>Feito no Brasil 🇧🇷</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
