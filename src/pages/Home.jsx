@@ -1282,7 +1282,10 @@ const Home = () => {
                                         Excluir Conta
                                     </button>
 
-                                    <div style={{ marginTop: '24px', textAlign: 'center' }}>
+                                    <div 
+                                        onClick={() => alert("Porque onde estiver o teu tesouro, aí estará também o teu coração. (Mateus 6:21)")}
+                                        style={{ marginTop: '24px', textAlign: 'center', cursor: 'pointer', userSelect: 'none' }}
+                                    >
                                         <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '4px', opacity: 0.6 }}>v1.8.4</p>
                                         <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600', opacity: 0.8 }}>Feito no Brasil 🇧🇷</p>
                                     </div>

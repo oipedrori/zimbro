@@ -317,9 +317,12 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
                                 setIsConfirmOpen(true);
                             }}
                             style={{
-                                marginTop: '4px', width: '100%', padding: '12px',
+                                marginTop: '12px', width: '100%', padding: '16px',
                                 border: '1px solid var(--danger-color)', color: 'var(--danger-color)',
-                                borderRadius: 'var(--border-radius-lg)', fontWeight: '600', fontSize: '1rem'
+                                background: 'transparent',
+                                borderRadius: 'var(--border-radius-lg)', fontWeight: '700', fontSize: '1rem',
+                                height: '56px', display: 'flex', justifyContent: 'center', alignItems: 'center',
+                                cursor: 'pointer', transition: 'all 0.2s'
                             }}
                         >
                             {t('delete_transaction', { defaultValue: 'Excluir Movimentação' })}
