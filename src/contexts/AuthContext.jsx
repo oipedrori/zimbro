@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { auth, googleProvider } from '../config/firebase';
 import { signInWithPopup, signOut, onAuthStateChanged, deleteUser } from 'firebase/auth';
+import LoadingDots from '../components/LoadingDots';
 
 const AuthContext = createContext();
 
@@ -91,9 +92,7 @@ export const AuthProvider = ({ children }) => {
         loading
     };
 
-import LoadingDots from '../components/LoadingDots';
 
-// ... inside AuthProvider's if (loading) block ...
 
     if (loading) {
         return (
