@@ -368,7 +368,7 @@ body.modal-open .bottom-nav {
 .typing-indicator span {
   width: 6px;
   height: 6px;
-  background-color: var(--text-muted);
+  background-color: currentColor;
   border-radius: 50%;
   animation: bounce 1.4s infinite ease-in-out both;
 }
