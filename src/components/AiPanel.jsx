@@ -449,7 +449,6 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
                             {t('listening_now', { defaultValue: 'OUVINDO...' })}
                         </p>
                     )}
-                    )}
                 </div>
             )}
 
