@@ -4,8 +4,8 @@
     "description": "Seu assistente financeiro inteligente.",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#0E2210",
-    "theme_color": "#1B4520",
+    "background_color": "#FBFEFB",
+    "theme_color": "#FBFEFB",
     "icons": [
         {
             "src": "/favicon.png",
