@@ -3,60 +3,36 @@
  * Handles interaction with Notion API (proxied via Vite for dev)
  */
 
-const API_BASE = '/notion-api';
+const API_BASE = '/api/notion';
 
 /**
- * Notion API Helper - Centralizes requests and avoids malformed URLs
+ * Notion API Helper - Now routes through our serverless proxy /api/notion
  */
 const notionRequest = async (secret, endpoint, method = 'GET', body = null) => {
-    // Ensure we don't have double slashes and the endpoint is valid
-    const cleanBase = API_BASE.replace(/\/$/, '');
-    const cleanEndpoint = endpoint.replace(/^\//, '');
-    const url = `${cleanBase}/${cleanEndpoint}`;
-
-    if (!endpoint) throw new Error("Endpoint da API Notion não definido.");
-
-    console.log(`[NotionRequest] ${method} ${url}`);
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
-
     try {
-        const options = {
-            method,
-            signal: controller.signal,
+        const response = await fetch(API_BASE, {
+            method: 'POST', // The proxy always uses POST to receive our request details
             headers: {
-                'Authorization': `Bearer ${secret}`,
-                'Notion-Version': '2022-06-28',
                 'Content-Type': 'application/json'
-            }
-        };
+            },
+            body: JSON.stringify({
+                secret,
+                endpoint,
+                method,
+                body: body || (['POST', 'PATCH'].includes(method) ? {} : null)
+            })
+        });
 
-        // Notion POST/PATCH requests usually REQUIRE a body, even if empty {}
-        if (method === 'POST' || method === 'PATCH') {
-            options.body = JSON.stringify(body || {});
-        } else if (body) {
-            options.body = JSON.stringify(body);
-        }
-
-        const response = await fetch(url, options);
-        clearTimeout(timeoutId);
+        const data = await response.json();
 
         if (!response.ok) {
-            let errMsg = 'Erro na comunicação';
-            try {
-                const errData = await response.json();
-                errMsg = errData.message || errMsg;
-            } catch (e) { /* fallback */ }
-            throw new Error(`Erro API Notion (${response.status}) ao chamar [${endpoint}]: ${errMsg}. URL final: ${url}`);
+            const errMsg = data.message || 'Erro na comunicação';
+            throw new Error(`Erro API Notion (${response.status}) em [${endpoint}]: ${errMsg}`);
         }
 
-        return response.json();
+        return data;
     } catch (error) {
-        clearTimeout(timeoutId);
-        if (error.name === 'AbortError') {
-            throw new Error('Timeout: O Notion demorou demais para responder.');
-        }
+        console.error("[notionRequest] Error:", error);
         throw error;
     }
 };
