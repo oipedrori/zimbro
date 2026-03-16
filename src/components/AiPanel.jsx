@@ -494,7 +494,7 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
                                     </p>
                                 </div>
 
-                                <div style={{ flex: 1, minHeight: '20px' }}></div> {/* Flexible space absorbs the keyboard height */}
+
 
                                 <div 
                                     className="messaging-input-container"
@@ -505,7 +505,7 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
                                         right: 'auto',
                                         width: '100%',
                                         marginTop: 'auto',
-                                        marginBottom: viewportOffset > 0 ? `${viewportOffset + 110}px` : 'max(20px, env(safe-area-inset-bottom))',
+                                        marginBottom: viewportOffset > 0 ? `${viewportOffset + 410}px` : 'max(150px, env(safe-area-inset-bottom))',
                                         transition: 'margin-bottom 0.1s ease-out'
                                     }}
                                 >
@@ -678,7 +678,7 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
         .ai-minimal-content {
           width: 100%; height: 100%;
           display: flex; flex-direction: column;
-          justify-content: flex-start;
+          justify-content: center;
           align-items: center;
           padding: 80px 24px;
           /* Relative for sticky child */
@@ -700,7 +700,6 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
           margin-top: 40px;
           text-align: center;
           width: 100%;
-          flex: 1; /* Take space to push input down */
         }
 
         .ai-greeting { 
