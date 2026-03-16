@@ -91,6 +91,10 @@ export const AuthProvider = ({ children }) => {
         loading
     };
 
+import LoadingDots from '../components/LoadingDots';
+
+// ... inside AuthProvider's if (loading) block ...
+
     if (loading) {
         return (
             <div style={{
@@ -99,11 +103,11 @@ export const AuthProvider = ({ children }) => {
                 flexDirection: 'column',
                 justifyContent: 'center',
                 alignItems: 'center',
-                background: 'var(--primary-darker)',
-                color: 'white',
+                background: 'var(--bg-color)',
+                color: 'var(--primary-color)',
                 fontFamily: 'sans-serif'
             }}>
-                <div className="loader" style={{ marginBottom: '20px' }}></div>
+                <LoadingDots />
             </div>
         );
     }
