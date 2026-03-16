@@ -548,9 +548,6 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
                                     <h3 style={{ color: 'white', fontSize: '1.4rem', fontWeight: '600', marginBottom: '8px', opacity: 0.9 }}>
                                         {isListening ? t('listening_now', { defaultValue: 'Ouvindo...' }) : t('ai_ready', { defaultValue: 'Zimbro está pronto para te ajudar' })}
                                     </h3>
-                                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem' }}>
-                                        {isListening ? t('ai_speak_now', { defaultValue: 'Fale os detalhes da movimentação' }) : t('ai_hint_voice', { defaultValue: 'Toque para falar ou digite os detalhes' })}
-                                    </p>
                                 </div>
 
                                 {/* Frases Flutuantes Refinadas */}
