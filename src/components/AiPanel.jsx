@@ -62,28 +62,7 @@ const AI_SUGGESTIONS = [
     "Faça um balanço da minha conta"
 ];
 
-const AiFace = () => {
-    return (
-        <div className="ai-face-container">
-            <svg viewBox="0 0 100 60" className="ai-face-svg">
-                {/* Eyes Group for blinking */}
-                <g className="ai-eyes">
-                    <circle cx="35" cy="20" r="4" fill="white" className="ai-eye-left" />
-                    <circle cx="65" cy="20" r="4" fill="white" className="ai-eye-right" />
-                </g>
-                {/* Mouth - Organic Path */}
-                <path 
-                    d="M 35 45 Q 50 55 65 45" 
-                    fill="none" 
-                    stroke="white" 
-                    strokeWidth="5" 
-                    strokeLinecap="round" 
-                    className="ai-mouth-path"
-                />
-            </svg>
-        </div>
-    );
-};
+
 
 const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onListeningChange }) => {
     const [isListening, setIsListening] = useState(false);
@@ -483,7 +462,7 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
                     transition: 'opacity 0.2s',
                     paddingTop: isManualTextMode ? '20px' : '0' 
                 }}>
-                    <AiFace />
+
 
                     {isProcessing && (
                        <div style={{ marginBottom: '20px', marginTop: '10px' }}><LoadingDots style={{ color: 'white' }} /></div>
@@ -866,85 +845,7 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
             font-weight: 500;
         }
 
-        .ai-face-container {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 24px;
-            animation: floatingFace 4s ease-in-out infinite;
-            filter: drop-shadow(0 0 15px rgba(255,255,255,0.2));
-            user-select: none;
-        }
 
-        .ai-face-container {
-            width: 100px;
-            height: 60px;
-            margin: 0 auto 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            /* animation: floatOrganic 6s ease-in-out infinite; */
-        }
-
-        .ai-face-svg {
-            width: 100%;
-            height: 100%;
-        }
-
-        .ai-eyes {
-            /* animation: eyesMove 8s ease-in-out infinite; */
-        }
-
-        .ai-eye-left, .ai-eye-right {
-           transform-origin: center;
-           /* animation: blinkOrganic 4s linear infinite; */
-        }
-
-        .ai-eye-right {
-            /* animation-delay: 0.1s; */
-        }
-
-        .ai-mouth-path {
-            stroke-dasharray: 100;
-            stroke-dashoffset: 0;
-            /* animation: mouthBreath 6s ease-in-out infinite; */
-        }
-
-        @keyframes floatOrganic {
-            0%, 100% { transform: translateY(0) rotate(-1deg); }
-            50% { transform: translateY(-8px) rotate(1deg); }
-        }
-
-        @keyframes blinkOrganic {
-            0%, 90%, 95%, 100% { transform: scaleY(1); }
-            92.5% { transform: scaleY(0.1); }
-        }
-
-        @keyframes eyesMove {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(1px); }
-            75% { transform: translateX(-1px); }
-        }
-
-        @keyframes mouthBreath {
-            0%, 100% { d: path("M 35 45 Q 50 55 65 45"); }
-            50% { d: path("M 32 46 Q 50 58 68 46"); }
-        }
-
-        @keyframes floatingFace {
-            0% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-10px) rotate(2deg); }
-            100% { transform: translateY(0px) rotate(0deg); }
-        }
-
-        @keyframes blinkEye {
-            0%, 45%, 55%, 100% { transform: scaleY(1); opacity: 1; }
-            50% { transform: scaleY(0.1); opacity: 0.5; }
-        }
-
-        @keyframes smileNod {
-            0%, 100% { transform: rotate(90deg) translateX(4px) scale(1); }
-            50% { transform: rotate(90deg) translateX(6px) scale(1.1); }
-        }
 
         @keyframes verticalRoulette {
             0% { opacity: 0; transform: translateY(60px); }
