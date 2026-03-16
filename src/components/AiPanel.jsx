@@ -464,8 +464,8 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
 
                     {(!aiMessage || (conversationContext && !isProcessing)) ? (
                         (isTextMode || isManualTextMode) ? (
-                            <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'center', height: '100%', justifyContent: 'space-between' }}>
-                                <div style={{ textAlign: 'center', marginTop: '10px' }}>
+                            <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'center', height: '100%' }}>
+                                <div style={{ textAlign: 'center', marginTop: '10px', flexShrink: 0 }}>
                                     <h3 style={{ color: 'white', fontSize: '1.4rem', fontWeight: '600', marginBottom: '8px', opacity: 0.9 }}>
                                         {t('ai_type_details', { defaultValue: 'Detalhes da movimentação' })}
                                     </h3>
@@ -474,11 +474,19 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
                                     </p>
                                 </div>
 
+                                <div style={{ flex: 1, minHeight: '20px' }}></div> {/* Flexible space absorbs the keyboard height */}
+
                                 <div 
                                     className="messaging-input-container"
                                     style={{
-                                        bottom: viewportOffset > 0 ? `${viewportOffset + 10}px` : 'max(20px, env(safe-area-inset-bottom))',
-                                        transition: 'bottom 0.1s ease-out'
+                                        position: 'relative',
+                                        bottom: 'auto',
+                                        left: 'auto',
+                                        right: 'auto',
+                                        width: '100%',
+                                        marginTop: 'auto',
+                                        marginBottom: viewportOffset > 0 ? `${viewportOffset + 10}px` : 'max(20px, env(safe-area-inset-bottom))',
+                                        transition: 'margin-bottom 0.1s ease-out'
                                     }}
                                 >
                                     <textarea
