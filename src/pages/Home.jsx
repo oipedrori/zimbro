@@ -696,7 +696,22 @@ const Home = () => {
                                                 </div>
                                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                                                     <p style={{ fontWeight: '500', margin: 0 }}>{tx.dynamicDescription || tx.description}</p>
-                                                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>{tx.virtualDate.split('-').slice(1).reverse().join('/')}</p>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>{tx.virtualDate.split('-').slice(1).reverse().join('/')}</p>
+                                                        {tx.repeatType && (
+                                                            <span style={{ 
+                                                                fontSize: '0.65rem', 
+                                                                padding: '1px 6px', 
+                                                                borderRadius: '6px', 
+                                                                background: 'rgba(75, 180, 90, 0.1)',
+                                                                color: '#4BB45A',
+                                                                fontWeight: '700',
+                                                                textTransform: 'uppercase'
+                                                            }}>
+                                                                {tx.repeatType === 'recurring' ? t('tag_recurring') : tx.repeatType === 'installment' ? t('tag_installment') : t('tag_variable')}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                             <p style={{ fontWeight: '600', color: tx.type === 'income' ? 'var(--success-color)' : 'var(--danger-color)', margin: 0 }}>
@@ -829,8 +844,8 @@ const Home = () => {
                                                                         fontSize: '0.65rem', 
                                                                         padding: '1px 6px', 
                                                                         borderRadius: '6px', 
-                                                                        background: tx.repeatType === 'recurring' ? 'rgba(67, 56, 202, 0.1)' : tx.repeatType === 'installment' ? 'rgba(180, 83, 9, 0.1)' : 'rgba(75, 85, 99, 0.1)',
-                                                                        color: tx.repeatType === 'recurring' ? '#4338CA' : tx.repeatType === 'installment' ? '#B45309' : '#4B5563',
+                                                                        background: 'rgba(75, 180, 90, 0.1)',
+                                                                        color: '#4BB45A',
                                                                         fontWeight: '700',
                                                                         textTransform: 'uppercase'
                                                                     }}>

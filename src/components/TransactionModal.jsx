@@ -72,60 +72,57 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
     const categories = type === 'expense' ? CATEGORIAS_DESPESA : CATEGORIAS_RECEITA;
 
     const handleDelete = async (option = 'all') => {
-        setLoading(true);
-        try {
-            const skipMonth = option === 'skip' ? format(new Date(date), 'yyyy-MM') : null;
-            await deleteTx(initialData.id, skipMonth);
-            haptic.success();
-            onSuccess?.();
-            onClose();
-        } catch (e) {
-            console.error(e);
-            alert("Erro ao excluir transação");
-        } finally {
-            setLoading(false);
-            setIsConfirmOpen(false);
-        }
+        setIsConfirmOpen(false);
+        const skipMonth = option === 'skip' ? format(new Date(date), 'yyyy-MM') : null;
+        
+        // Execute background delete but provide instant feedback
+        deleteTx(initialData.id, skipMonth).catch(err => {
+            console.error("Delete failed:", err);
+            alert("Erro ao excluir transação no servidor. O estado foi revertido.");
+        });
+
+        haptic.success();
+        onSuccess?.();
+        onClose();
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
-        try {
-            // Ajuste de valores numéricos
-            const numericAmount = parseFloat(amount.replace(',', '.'));
-            if (isNaN(numericAmount) || numericAmount <= 0) {
-                alert("Digite um valor válido");
-                setLoading(false);
-                return;
-            }
-
-            const txData = {
-                type,
-                amount: repeatType === 'installment' ? numericAmount / Number(installments) : numericAmount,
-                totalAmount: repeatType === 'installment' ? numericAmount : null, // Store total for reference
-                description,
-                category,
-                date,
-                repeatType,
-                installments: repeatType === 'installment' ? Number(installments) : 1
-            };
-
-            if (initialData?.id) {
-                await updateTx(initialData.id, txData);
-            } else {
-                await addTx(txData);
-            }
-
-            onSuccess?.();
-            haptic.success();
-            onClose();
-        } catch (error) {
-            console.error(error);
-            alert("Erro ao adicionar transação");
-        } finally {
-            setLoading(false);
+        
+        // Ajuste de valores numéricos
+        const numericAmount = parseFloat(amount.replace(',', '.'));
+        if (isNaN(numericAmount) || numericAmount <= 0) {
+            alert("Digite um valor válido");
+            return;
         }
+
+        const txData = {
+            type,
+            amount: repeatType === 'installment' ? numericAmount / Number(installments) : numericAmount,
+            totalAmount: repeatType === 'installment' ? numericAmount : null, // Store total for reference
+            description,
+            category,
+            date,
+            repeatType,
+            installments: repeatType === 'installment' ? Number(installments) : 1
+        };
+
+        // Execute background sync but provide instant feedback
+        if (initialData?.id) {
+            updateTx(initialData.id, txData).catch(err => {
+                console.error("Update failed:", err);
+                alert("Erro ao atualizar transação no servidor. O estado foi revertido.");
+            });
+        } else {
+            addTx(txData).catch(err => {
+                console.error("Add failed:", err);
+                alert("Erro ao adicionar transação no servidor. O estado foi revertido.");
+            });
+        }
+
+        haptic.success();
+        onSuccess?.();
+        onClose();
     };
 
     return createPortal(

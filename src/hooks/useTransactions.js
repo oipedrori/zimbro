@@ -45,27 +45,77 @@ export const useTransactions = (currentMonth) => { // format 'YYYY-MM'
 
     const addTx = async (data) => {
         if (!currentUser) return;
+        
+        // Optimistic Update
+        const tempId = `temp-${Date.now()}`;
+        const newTx = { id: tempId, ...data, userId: currentUser.uid, createdAt: new Date().toISOString() };
+        
+        const previousAll = [...allTransactions];
+        const previousProcessed = [...transactions];
+        
+        setAllTransactions(prev => [newTx, ...prev]);
+        setTransactions(prev => prepareMonthlyTransactions([newTx, ...allTransactions], currentMonth));
+
         try {
             await addTransaction(currentUser.uid, data);
         } catch (err) {
+            // Rollback
+            setAllTransactions(previousAll);
+            setTransactions(previousProcessed);
             throw err;
         }
     };
 
     const updateTx = async (id, data) => {
         if (!currentUser) return;
+
+        // Optimistic Update
+        const previousAll = [...allTransactions];
+        const previousProcessed = [...transactions];
+
+        const updatedAll = allTransactions.map(tx => tx.id === id ? { ...tx, ...data } : tx);
+        setAllTransactions(updatedAll);
+        setTransactions(prepareMonthlyTransactions(updatedAll, currentMonth));
+
         try {
             await updateTransaction(currentUser.uid, id, data);
         } catch (err) {
+            // Rollback
+            setAllTransactions(previousAll);
+            setTransactions(previousProcessed);
             throw err;
         }
     };
 
     const deleteTx = async (id, monthToSkip = null) => {
         if (!currentUser) return;
+
+        // Optimistic Update
+        const previousAll = [...allTransactions];
+        const previousProcessed = [...transactions];
+
+        let updatedAll;
+        if (monthToSkip) {
+            updatedAll = allTransactions.map(tx => {
+                if (tx.id === id) {
+                    const excludedMonths = tx.excludedMonths || [];
+                    return { ...tx, excludedMonths: [...excludedMonths, monthToSkip] };
+                }
+                return tx;
+            });
+        } else {
+            updatedAll = allTransactions.filter(tx => tx.id !== id);
+        }
+
+        setAllTransactions(updatedAll);
+        setTransactions(prepareMonthlyTransactions(updatedAll, currentMonth));
+
         try {
             await deleteTransaction(currentUser.uid, id, monthToSkip);
         } catch (err) {
+            // Rollback
+            setAllTransactions(previousAll);
+            setTransactions(previousProcessed);
             throw err;
         }
     };
