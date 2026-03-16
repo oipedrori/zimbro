@@ -49,11 +49,53 @@ export const extractNotionId = (input) => {
 };
 
 /**
- * Search all databases accessible by the integration
+ * Advanced Orchestrated Discovery
+ * Starts with a search, then automatically dives into discovered pages to find inline databases
+ */
+export const orchestratedDiscovery = async (secret, onPageScanned) => {
+    try {
+        console.log("[OrchestratedDiscovery] Iniciando busca global...");
+        const searchResults = await searchNotionDatabases(secret);
+        
+        const directDbs = searchResults.filter(item => item.object === 'database');
+        const pages = searchResults.filter(item => item.object === 'page');
+        
+        console.log(`[OrchestratedDiscovery] Busca direta: ${directDbs.length} bases, ${pages.length} páginas.`);
+        
+        const discovered = [...directDbs];
+        const visitedIds = new Set(directDbs.map(db => db.id.replace(/-/g, '')));
+        
+        // Deep scan each page for child databases
+        for (const page of pages) {
+            const pageId = page.id.replace(/-/g, '');
+            if (onPageScanned) onPageScanned(page.properties?.title?.title?.[0]?.plain_text || 'Página');
+            
+            try {
+                const childDbs = await findDatabasesOnPage(secret, pageId);
+                for (const db of childDbs) {
+                    const cleanId = db.id.replace(/-/g, '');
+                    if (!visitedIds.has(cleanId)) {
+                        discovered.push(db);
+                        visitedIds.add(cleanId);
+                    }
+                }
+            } catch (err) {
+                console.warn(`[OrchestratedDiscovery] Falha ao escanear página ${pageId}:`, err);
+            }
+        }
+        
+        return discovered;
+    } catch (error) {
+        console.error("[OrchestratedDiscovery] Erro crítico:", error);
+        throw error;
+    }
+};
+
+/**
+ * Search all items accessible by the integration
  */
 export const searchNotionDatabases = async (secret) => {
     try {
-        console.log("Iniciando discovery no Notion...");
         // Usamos uma busca simples sem filtros para evitar erro 400 por parâmetros inválidos
         const data = await notionRequest(secret, 'search', 'POST', {
             page_size: 100

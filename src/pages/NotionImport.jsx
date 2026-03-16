@@ -3,7 +3,7 @@ import LoadingDots from '../components/LoadingDots';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ChevronLeft, Database, ArrowRight, CheckCircle2, AlertCircle, FileText, Loader2, Link, Lock, TrendingUp, TrendingDown, RefreshCcw, Trash2, HelpCircle } from 'lucide-react';
 import { useI18n } from '../contexts/I18nContext';
-import { getNotionDatabaseInfo, fetchNotionTransactions, searchNotionDatabases, extractNotionId, findDatabasesOnPage, getNotionWorkspaceInfo } from '../services/notionService';
+import { getNotionDatabaseInfo, fetchNotionTransactions, orchestratedDiscovery, extractNotionId, findDatabasesOnPage, getNotionWorkspaceInfo } from '../services/notionService';
 import { addTransaction } from '../services/transactionService';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -27,6 +27,7 @@ const NotionImport = () => {
     const [debugItems, setDebugItems] = useState([]); // Itens crus retornados pelo Notion
     const [workspaceInfo, setWorkspaceInfo] = useState(null);
     const [searchingBackground, setSearchingBackground] = useState(false);
+    const [scanningPage, setScanningPage] = useState('');
     const [hasInitialSearchDone, setHasInitialSearchDone] = useState(false);
 
     // Check if connected on mount
@@ -80,16 +81,19 @@ const NotionImport = () => {
     const refreshDatabases = async () => {
         setLoading(true);
         setError(null);
+        setScanningPage('');
 
         try {
-            console.log("Buscando bases no Notion...");
+            console.log("Iniciando descoberta automática profunda...");
             const ws = await getNotionWorkspaceInfo(notionToken).catch(() => null);
             setWorkspaceInfo(ws);
 
-            const results = await searchNotionDatabases(notionToken);
-            setDebugItems(results);
-
-            const directDbs = results.filter(item => item.object === 'database');
+            const discovered = await orchestratedDiscovery(notionToken, (pageName) => {
+                setScanningPage(pageName);
+            });
+            
+            setDebugItems(discovered);
+            const directDbs = discovered.filter(item => item.object === 'database');
             
             // Auto identification
             directDbs.forEach(db => {
@@ -104,13 +108,14 @@ const NotionImport = () => {
             setFoundDbs(directDbs);
 
             if (directDbs.length === 0) {
-                setError("Nenhuma tabela encontrada. Certifique-se de que autorizou o acesso às tabelas corretas no Notion.");
+                setError("Nenhuma tabela encontrada automaticamente. Tente colar o link da página principal ou verifique se autorizou o acesso às tabelas corretas no Notion.");
             }
         } catch (e) {
             console.error("Discovery failed:", e);
             setError(`Erro na conexão: ${e.message}`);
         } finally {
             setLoading(false);
+            setScanningPage('');
         }
     };
 
@@ -385,6 +390,11 @@ const NotionImport = () => {
                         {loading && !foundDbs.length && !error && (
                             <div style={{ textAlign: 'center', padding: '40px', opacity: 0.6 }}>
                                 <LoadingDots />
+                                {scanningPage && (
+                                    <p style={{ marginTop: '16px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                                        Procurando tabelas em: <span style={{ fontWeight: '700', color: 'var(--primary-color)' }}>{scanningPage}</span>
+                                    </p>
+                                )}
                             </div>
                         )}
 
