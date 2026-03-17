@@ -40,6 +40,9 @@
 
   --transition-fast: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   --transition-normal: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+
+  --notion-btn-bg: #000000;
+  --notion-btn-text: #ffffff;
 }
 
 /* Dark mode basic variables */
@@ -51,6 +54,8 @@
     --text-muted: #b8dfc4;
     --glass-bg: rgba(5, 10, 6, 0.85);
     --glass-border: rgba(255, 255, 255, 0.1);
+    --notion-btn-bg: #ffffff;
+    --notion-btn-text: #000000;
   }
 }
 
@@ -61,6 +66,8 @@
   --text-muted: #b8dfc4;
   --glass-bg: rgba(5, 10, 6, 0.85);
   --glass-border: rgba(255, 255, 255, 0.1);
+  --notion-btn-bg: #ffffff;
+  --notion-btn-text: #000000;
 }
 
 :root.theme-light {

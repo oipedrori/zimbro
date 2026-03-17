@@ -91,9 +91,9 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
             <button
                 onClick={onOpenNotion}
                 style={{
-                    width: '100%', background: '#000', padding: '16px 20px', borderRadius: '20px',
+                    width: '100%', background: 'var(--notion-btn-bg)', padding: '16px 20px', borderRadius: '20px',
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    color: 'white', cursor: 'pointer', border: 'none', marginBottom: '24px',
+                    color: 'var(--notion-btn-text)', cursor: 'pointer', border: 'none', marginBottom: '24px',
                     boxShadow: '0 8px 15px rgba(0,0,0,0.1)'
                 }}
             >

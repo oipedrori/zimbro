@@ -288,7 +288,7 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
                         }}
                         disabled={loading}
                         style={{
-                            width: '100%', padding: '18px', backgroundColor: 'white', color: 'black',
+                            width: '100%', padding: '18px', backgroundColor: 'var(--notion-btn-bg)', color: 'var(--notion-btn-text)',
                             borderRadius: '20px', border: 'none', display: 'flex', alignItems: 'center',
                             justifyContent: 'center', gap: '12px', cursor: 'pointer', fontWeight: '800', fontSize: '1rem'
                         }}
@@ -296,7 +296,7 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
                         <img src="/notion_logo.png" style={{ width: '22px', height: '22px' }} alt="" />
                         {loading ? (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <div style={{ width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                                <div style={{ width: '16px', height: '16px', border: '2px solid rgba(128,128,128,0.3)', borderTopColor: 'var(--notion-btn-text)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
                                 <span>Conectando...</span>
                             </div>
                         ) : 'Conectar Agora'}
