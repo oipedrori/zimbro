@@ -25,7 +25,7 @@ const AI_SUGGESTIONS = [
     "Esqueci de anotar o almoço de 30 reais",
     "Recebi meu salário hoje, 5000 reais",
     "Quanto falta para atingir meu limite?",
-    "Delete a última transação que fiz",
+    "Delete a última movimentação que fiz",
     "Mude o valor da conta de internet para 90 reais",
     "Fiz uma transferência de 200 reais",
     "Gastei 15 reais na farmácia",

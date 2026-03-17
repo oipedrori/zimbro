@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import { ptBR, enUS, es, fr } from 'date-fns/locale';
 import { ChevronUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { CATEGORIAS_DESPESA } from '../utils/categories';
+import { CATEGORIAS_DESPESA, getCategoryInfo } from '../utils/categories';
 import { getYearlyStats } from '../services/transactionService';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
@@ -50,7 +50,7 @@ const Statistics = () => {
         // Ordena para colocar os maiores gastos primeiro visualmente
         const sortedCats = Object.entries(expensesByCategory).sort(([, a], [, b]) => b - a);
         sortedCats.forEach(([catId, amount]) => {
-            const category = CATEGORIAS_DESPESA.find(c => c.id === catId) || { color: '#999' };
+            const category = getCategoryInfo(catId, 'expense');
             const pct = (amount / totalExpenses) * 100;
             conicStops.push(`${category.color} ${cumPercent}% ${cumPercent + pct}%`);
             cumPercent += pct;
@@ -183,12 +183,12 @@ const Statistics = () => {
                         {/* Legenda Dinâmica */}
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center', marginTop: '16px' }}>
                             {Object.entries(expensesByCategory).sort(([, a], [, b]) => b - a).map(([catId, amount]) => {
-                                const category = CATEGORIAS_DESPESA.find(c => c.id === catId) || { label: catId, color: '#999', icon: '📌' };
+                                const category = getCategoryInfo(catId, 'expense');
                                 const pct = (amount / totalExpenses) * 100;
                                 return (
                                     <div key={catId} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem', color: 'var(--text-main)', background: 'var(--bg-color)', padding: '6px 12px', borderRadius: '20px', border: `1px solid ${category.color}40`, boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
                                         <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: category.color }}></div>
-                                        <span>{category.icon} {category.label}</span>
+                                        <span>{category.icon} {t(category.label, { defaultValue: category.label })}</span>
                                         <span style={{ fontWeight: '600', opacity: 0.8 }}>({pct.toFixed(0)}%)</span>
                                     </div>
                                 );

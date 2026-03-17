@@ -65,6 +65,8 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
             setRepeatType('none');
             setInstallments(1);
         }
+        // Ao fechar (isOpen false), NÃO resetamos imediatamente. 
+        // O reset natural acontecerá na próxima vez que abrir (isOpen && !initialData).
     }, [isOpen, initialData, defaultType]);
 
     if (!shouldRender && !isOpen) return null;
@@ -78,7 +80,7 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
         // Execute background delete but provide instant feedback
         deleteTx(initialData.id, skipMonth).catch(err => {
             console.error("Delete failed:", err);
-            alert("Erro ao excluir transação no servidor. O estado foi revertido.");
+            alert("Erro ao excluir movimentação no servidor. O estado foi revertido.");
         });
 
         haptic.success();

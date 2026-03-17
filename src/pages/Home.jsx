@@ -664,25 +664,81 @@ const Home = () => {
                             <h3 style={{ fontSize: '1.2rem', fontWeight: '600' }}>{t('transactions')}</h3>
                         </div>
 
-                        <div className="filters-row" style={{ display: 'flex', overflowX: 'auto', gap: '10px', marginBottom: '20px', padding: '4px 0', scrollbarWidth: 'none' }}>
-                            {[
-                                { id: 'all', label: 'filter_all' },
-                                { id: 'income', label: 'filter_incomes' },
-                                { id: 'expense', label: 'filter_expenses' },
-                            ].map(f => (
-                                <button
-                                    key={f.id}
-                                    onClick={() => setActiveFilter(f.id)}
-                                    style={{
-                                        whiteSpace: 'nowrap', padding: '8px 16px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: '600',
-                                        background: activeFilter === f.id ? 'var(--primary-color)' : 'var(--surface-color)',
-                                        color: activeFilter === f.id ? 'white' : 'var(--text-muted)',
-                                        border: '1px solid var(--glass-border)', flexShrink: 0
-                                    }}
-                                >
-                                    {t(f.label)}
-                                </button>
-                            ))}
+                        {/* Contêiner de Filtros com Fade */}
+                        <div style={{ position: 'relative', width: 'calc(100% + 40px)', margin: '0 -20px 20px -20px' }}>
+                            <style>{`
+                                .filters-fade-container::after {
+                                    content: '';
+                                    position: absolute;
+                                    top: 0;
+                                    right: 0;
+                                    width: 40px;
+                                    height: 100%;
+                                    background: linear-gradient(to right, transparent, var(--bg-color));
+                                    pointer-events: none;
+                                    z-index: 2;
+                                }
+                                .filters-fade-container::before {
+                                    content: '';
+                                    position: absolute;
+                                    top: 0;
+                                    left: 0;
+                                    width: 40px;
+                                    height: 100%;
+                                    background: linear-gradient(to left, transparent, var(--bg-color));
+                                    pointer-events: none;
+                                    z-index: 2;
+                                    opacity: 0; /* Começa invisível */
+                                    transition: opacity 0.3s;
+                                }
+                            `}</style>
+                            <div 
+                                className="filters-fade-container"
+                                style={{
+                                    display: 'flex',
+                                    overflowX: 'auto',
+                                    gap: '10px',
+                                    padding: '4px 24px',
+                                    scrollbarWidth: 'none',
+                                    msOverflowStyle: 'none',
+                                    WebkitOverflowScrolling: 'touch'
+                                }}
+                                onScroll={(e) => {
+                                    const container = e.currentTarget;
+                                    const before = container.parentElement.querySelector('.filters-fade-container::before');
+                                    // Hack simples para borda esquerda aparecer ao rolar
+                                    if (container.scrollLeft > 10) {
+                                        container.classList.add('scrolled');
+                                    } else {
+                                        container.classList.remove('scrolled');
+                                    }
+                                }}
+                            >
+                                <style>{`
+                                    .filters-fade-container.scrolled::before { opacity: 1 !important; }
+                                `}</style>
+                                {[
+                                    { id: 'all', label: 'filter_all' },
+                                    { id: 'income', label: 'filter_incomes' },
+                                    { id: 'expense', label: 'filter_expenses' },
+                                    { id: 'installment', label: 'filter_installment' },
+                                    { id: 'recurring', label: 'filter_recurring' },
+                                ].map(f => (
+                                    <button
+                                        key={f.id}
+                                        onClick={() => { haptic.light(); setActiveFilter(f.id); }}
+                                        style={{
+                                            whiteSpace: 'nowrap', padding: '8px 16px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: '600',
+                                            background: activeFilter === f.id ? 'var(--primary-color)' : 'var(--surface-color)',
+                                            color: activeFilter === f.id ? 'white' : 'var(--text-muted)',
+                                            border: '1px solid var(--glass-border)', flexShrink: 0,
+                                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+                                        }}
+                                    >
+                                        {t(f.label)}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
 
                         {loading ? (

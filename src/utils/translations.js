@@ -15,9 +15,9 @@ export const translations = {
         good_night: "Boa noite, {name}",
         user: "Usuário",
         monthly_balance: "Saldo Mensal",
-        transactions: "Últimas Transações",
+        transactions: "Últimas Movimentações",
         see_all: "Ver Todas",
-        no_transactions: "Nenhuma transação este mês.",
+        no_transactions: "Nenhuma movimentação este mês.",
 
         // Stats
         statistics: "Estatísticas",
@@ -35,8 +35,8 @@ export const translations = {
         filter_incomes: "Receitas",
         filter_expenses: "Despesas",
         filter_variable: "Móvel",
-        filter_installment: "Parcelado",
-        filter_recurring: "Recorrente",
+        filter_installment: "Parceladas",
+        filter_recurring: "Recorrentes",
         
         // Tags
         tag_variable: "Móvel",
@@ -88,8 +88,8 @@ export const translations = {
         cookie_accept_btn: "Aceitar",
 
         // Modals & Panels
-        add_transaction: "Adicionar Transação",
-        edit_transaction: "Editar Transação",
+        add_transaction: "Adicionar Movimentação",
+        edit_transaction: "Editar Movimentação",
         expense: "Despesa",
         income: "Receita",
         value: "Valor",
@@ -176,9 +176,9 @@ export const translations = {
         good_night: "Good evening, {name}",
         user: "User",
         monthly_balance: "Monthly Balance",
-        transactions: "Recent Transactions",
+        transactions: "Recent Activities",
         see_all: "See All",
-        no_transactions: "No transactions this month.",
+        no_transactions: "No movements this month.",
 
         statistics: "Statistics",
         expenses_by_category: "Expenses by Category",
@@ -197,6 +197,7 @@ export const translations = {
         filter_variable: "Variable",
         filter_installment: "Installments",
         filter_recurring: "Recurring",
+        income_this_month: "Received this month",
 
         wallet_title: "My Accounts",
         wallet_subtitle: "Where your money is kept.",
@@ -239,8 +240,8 @@ export const translations = {
         cookie_desc: "We use local storage to improve your experience and save your preferences securely.",
         cookie_accept_btn: "Accept",
 
-        add_transaction: "Add Transaction",
-        edit_transaction: "Edit Transaction",
+        add_transaction: "Add Movement",
+        edit_transaction: "Edit Movement",
         expense: "Expense",
         income: "Income",
         value: "Amount",
@@ -324,9 +325,9 @@ export const translations = {
         good_night: "¡Buenas noches!, {name}",
         user: "Usuario",
         monthly_balance: "Saldo Mensual",
-        transactions: "Transacciones Recientes",
+        transactions: "Movimentaciones Recientes",
         see_all: "Ver Todas",
-        no_transactions: "No hay transacciones este mes.",
+        no_transactions: "No hay movimientos este mes.",
 
         statistics: "Estadísticas",
         expenses_by_category: "Gastos por Categoría",
@@ -345,6 +346,7 @@ export const translations = {
         filter_variable: "Variables",
         filter_installment: "Cuotas",
         filter_recurring: "Recurrentes",
+        income_this_month: "Recibido este mes",
 
         wallet_title: "Mis Cuentas",
         wallet_subtitle: "Donde se guarda tu dinero.",
@@ -354,7 +356,7 @@ export const translations = {
         account_name: "Nombre de la Cuenta",
         current_balance: "Saldo Actual",
         account_type: "Tipo de Cuenta",
-        bank_acc: "Cuenta Corrente / Banco",
+        bank_acc: "Cuenta Corriente / Banco",
         credit_card: "Tarjeta de Crédito",
         cash_acc: "Efectivo",
         investment_acc: "Inversión / Corretaje",
@@ -387,8 +389,8 @@ export const translations = {
         cookie_desc: "Utilizamos el almacenamiento local para mejorar su experiencia y guardar sus preferencias de forma segura.",
         cookie_accept_btn: "Aceptar",
 
-        add_transaction: "Añadir Transacción",
-        edit_transaction: "Editar Transacción",
+        add_transaction: "Añadir Movimentación",
+        edit_transaction: "Editar Movimentación",
         expense: "Gasto",
         income: "Ingreso",
         value: "Valor",
@@ -472,9 +474,9 @@ export const translations = {
         good_night: "Bonsoir, {name}",
         user: "Utilisateur",
         monthly_balance: "Solde Mensuel",
-        transactions: "Transactions Récentes",
+        transactions: "Mouvements Récents",
         see_all: "Voir Tout",
-        no_transactions: "Aucune transaction ce mois-ci.",
+        no_transactions: "Aucun mouvement ce mois-ci.",
 
         statistics: "Statistiques",
         expenses_by_category: "Dépenses par Catégorie",
@@ -493,6 +495,7 @@ export const translations = {
         filter_variable: "Variables",
         filter_installment: "Mensualités",
         filter_recurring: "Récurrentes",
+        income_this_month: "Reçu ce mois-ci",
 
         wallet_title: "Mes Comptes",
         wallet_subtitle: "Où votre argent est gardé.",
@@ -535,8 +538,8 @@ export const translations = {
         cookie_desc: "Nous utilisons le stockage local pour améliorer votre expérience et enregistrer vos préférences en toute sécurité.",
         cookie_accept_btn: "Accepter",
 
-        add_transaction: "Ajouter une Transaction",
-        edit_transaction: "Modifier la Transaction",
+        add_transaction: "Ajouter un Mouvement",
+        edit_transaction: "Modifier le Mouvement",
         expense: "Dépense",
         income: "Revenu",
         value: "Montant",

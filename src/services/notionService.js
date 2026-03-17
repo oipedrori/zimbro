@@ -336,15 +336,19 @@ const mapNotionToZimbroo = (results) => {
                 else if (p.type === 'created_time') mapped.date = p.created_time.split('T')[0];
             }
 
-            // 5. Category
-            const catProp = Object.entries(props).find(([name, p]) => {
-                const lowName = name.toLowerCase();
-                return (p.type === 'select' || p.type === 'multi_select') && (lowName.includes('categ') || lowName.includes('tag'));
-            });
+            // 5. Category (Prioritiza nome exato "Categoria")
+            const catProp = Object.entries(props).find(([name]) => name.toLowerCase() === 'categoria') ||
+                           Object.entries(props).find(([name]) => {
+                               const lowName = name.toLowerCase();
+                               return lowName.includes('categ') || lowName.includes('tag');
+                           });
+
             if (catProp) {
                 const p = catProp[1];
                 if (p.type === 'select') mapped.category = p.select?.name || 'Outros';
                 else if (p.type === 'multi_select') mapped.category = p.multi_select[0]?.name || 'Outros';
+                else if (p.type === 'formula') mapped.category = p.formula?.string || 'Outros';
+                else if (p.type === 'rich_text') mapped.category = p.rich_text?.[0]?.plain_text || 'Outros';
             }
 
             // 6. Type (Income/Expense detection)

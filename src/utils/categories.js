@@ -28,5 +28,12 @@ export const CATEGORIAS_RECEITA = [
 
 export const getCategoryInfo = (id, type = 'expense') => {
     const list = type === 'income' ? CATEGORIAS_RECEITA : CATEGORIAS_DESPESA;
-    return list.find(c => c.id === id) || list[list.length - 1];
+    if (!id) return list[list.length - 1]; // Fallback para "Outros"
+    
+    const lowerId = id.toString().toLowerCase();
+    
+    // Tenta por ID primeiro, depois por Label
+    return list.find(c => c.id.toLowerCase() === lowerId) || 
+           list.find(c => c.label.toLowerCase() === lowerId) || 
+           list[list.length - 1]; // Fallback para "Outros"
 };

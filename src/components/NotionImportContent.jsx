@@ -132,13 +132,13 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
     };
 
     const handleResetData = async () => {
-        if (window.confirm("ISSO APAGARÁ TODAS AS TRANSAÇÕES DO ZIMBROO. Deseja continuar?")) {
+        if (window.confirm("ISSO APAGARÁ TODAS AS MOVIMENTAÇÕES DO ZIMBROO. Deseja continuar?")) {
             setLoading(true);
             setStatusMessage('Limpando todos os dados...');
             try {
                 await deleteAllUserTransactions(currentUser.uid);
                 haptic.success();
-                setError("Todos os dados foram apagados com sucesso.");
+                setError("Todas as movimentações foram apagadas com sucesso.");
                 setTimeout(() => setError(null), 3000);
             } catch (err) {
                 setError("Erro ao apagar dados.");
@@ -190,9 +190,9 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
             }
 
             const total = txsE.length + txsI.length;
-            if (total === 0) throw new Error("Sem transações pendentes.");
+            if (total === 0) throw new Error("Sem movimentações pendentes.");
 
-            setStatusMessage('Importando transações...');
+            setStatusMessage('Importando movimentações...');
             let current = 0;
             for (let tx of txsE) {
                 await addTransaction(currentUser.uid, { ...tx, type: 'expense' });
