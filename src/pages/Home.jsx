@@ -1070,26 +1070,54 @@ const Home = () => {
                         {chartType === 'bar' ? (
                             yearlyStats.map((stat, i) => {
                                 const maxVal = Math.max(...yearlyStats.map(s => Math.abs(s.balance)), 5000);
-                                const h = Math.max(4, (Math.abs(stat.balance) / maxVal) * 100);
+                                const h = Math.max(2, (Math.abs(stat.balance) / maxVal) * 50); 
                                 const isCurrent = stat.month === (currentDate.getMonth() + 1);
+                                const isNeg = stat.balance < 0;
+
                                 return (
-                                    <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', height: '100%', justifyContent: 'flex-end', position: 'relative' }}>
+                                    <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', position: 'relative' }}>
+                                        {/* Value Label Label */}
                                         <span style={{ 
-                                            position: 'absolute', bottom: `${h + 2}%`, fontSize: '0.7rem', fontWeight: '700', 
-                                            color: stat.balance >= 0 ? 'var(--primary-dark)' : 'var(--danger-color)',
-                                            whiteSpace: 'nowrap'
+                                            position: 'absolute', 
+                                            top: isNeg ? 'calc(50% + ' + (h * 2) + '% + 4px)' : 'auto',
+                                            bottom: !isNeg ? 'calc(50% + ' + (h * 2) + '% + 4px)' : 'auto',
+                                            fontSize: '0.7rem', fontWeight: '800', 
+                                            color: isNeg ? 'var(--danger-color)' : 'var(--primary-dark)',
+                                            whiteSpace: 'nowrap',
+                                            zIndex: 5
                                         }}>
                                             {formatCurrency(stat.balance).split(',')[0]}
                                         </span>
-                                        <div style={{ 
-                                            width: '100%', height: `${h}%`, 
-                                            background: stat.balance >= 0 ? 'var(--primary-color)' : 'var(--danger-color)',
-                                            borderRadius: '8px 8px 0 0',
-                                            opacity: isCurrent ? 1 : 0.4,
-                                            boxShadow: isCurrent ? '0 0 20px rgba(var(--primary-rgb), 0.2)' : 'none',
-                                            transition: 'height 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                                        }} />
-                                        <span style={{ fontSize: '0.8rem', color: isCurrent ? 'var(--primary-dark)' : 'var(--text-muted)', fontWeight: isCurrent ? '700' : '500' }}>
+
+                                        <div style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                                            {/* Top Half (Positive) */}
+                                            <div style={{ height: '50%', width: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+                                                {!isNeg && stat.balance > 0 && (
+                                                    <div style={{
+                                                        width: '100%', height: `${h * 2}%`,
+                                                        background: 'var(--primary-color)',
+                                                        borderRadius: '6px 6px 0 0',
+                                                        opacity: isCurrent ? 1 : 0.4,
+                                                        boxShadow: isCurrent ? '0 0 20px rgba(var(--primary-rgb), 0.2)' : 'none',
+                                                        transition: 'height 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+                                                    }} />
+                                                )}
+                                            </div>
+                                            {/* Bottom Half (Negative) */}
+                                            <div style={{ height: '50%', width: '100%', display: 'flex', alignItems: 'flex-start', justifyContent: 'center' }}>
+                                                {isNeg && (
+                                                    <div style={{
+                                                        width: '100%', height: `${h * 2}%`,
+                                                        background: 'var(--danger-color)',
+                                                        borderRadius: '0 0 6px 6px',
+                                                        opacity: isCurrent ? 1 : 0.4,
+                                                        transition: 'height 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+                                                    }} />
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <span style={{ fontSize: '0.8rem', color: isCurrent ? 'var(--primary-dark)' : 'var(--text-muted)', fontWeight: isCurrent ? '700' : '500', marginTop: '12px' }}>
                                             {format(new Date(2024, stat.month - 1, 1), 'MMM', { locale: { pt: ptBR, en: enUS, es: es, fr: fr }[locale] || ptBR }).substring(0, 3).toUpperCase()}
                                         </span>
                                     </div>
