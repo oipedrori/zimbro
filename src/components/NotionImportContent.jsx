@@ -161,11 +161,15 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
         try {
             if (expenseDbId) {
                 setStatusMessage('Buscando despesas...');
-                txsE = await fetchNotionTransactions(notionToken, expenseDbId);
+                txsE = await fetchNotionTransactions(notionToken, expenseDbId, (count) => {
+                    setStatusMessage(`Buscando despesas: ${count} carregadas`);
+                });
             }
             if (incomeDbId) {
                 setStatusMessage('Buscando ganhos...');
-                txsI = await fetchNotionTransactions(notionToken, incomeDbId);
+                txsI = await fetchNotionTransactions(notionToken, incomeDbId, (count) => {
+                    setStatusMessage(`Buscando ganhos: ${count} carregados`);
+                });
             }
 
             const total = txsE.length + txsI.length;
@@ -330,9 +334,9 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
                         onClick={startSync}
                         disabled={(!expenseDbId && !incomeDbId) || loading}
                         style={{
-                            width: '100%', padding: '20px', borderRadius: '20px',
+                            width: '100%', padding: '24px', borderRadius: '20px',
                             background: 'white', color: 'black',
-                            fontWeight: '800', fontSize: '1.1rem', border: 'none',
+                            fontWeight: '900', fontSize: '1.3rem', border: 'none',
                             opacity: (!expenseDbId && !incomeDbId) ? 0.6 : 1,
                             boxShadow: '0 8px 30px rgba(255,255,255,0.1)'
                         }}

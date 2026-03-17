@@ -226,27 +226,31 @@ export const createNotionTransaction = async (secret, databaseId, tx) => {
 /**
  * Fetch and Map Transactions from Notion (Filtered by current year)
  */
-export const fetchNotionTransactions = async (secret, databaseId) => {
+export const fetchNotionTransactions = async (secret, databaseId, onProgress) => {
     try {
         const cleanId = databaseId.replace(/-/g, '');
-        // We fetch all transactions first and filter by year in JS for maximum robustness
-        // Filtering by "Data" via API often fails with 400 if the property name is different.
-        const data = await notionRequest(secret, `databases/${cleanId}/query`, 'POST', {});
-        
-        const currentYear = new Date().getFullYear();
-        const transactions = mapNotionToZimbroo(data.results || []);
-        
-        // Filter by current year in frontend
-        return transactions.filter(tx => {
-            const txYear = new Date(tx.date).getFullYear();
-            return txYear === currentYear;
-        });
+        let allResults = [];
+        let hasMore = true;
+        let nextCursor = undefined;
+
+        while (hasMore) {
+            const body = { page_size: 100 };
+            if (nextCursor) body.start_cursor = nextCursor;
+
+            const data = await notionRequest(secret, `databases/${cleanId}/query`, 'POST', body);
+            allResults = [...allResults, ...(data.results || [])];
+            hasMore = data.has_more;
+            nextCursor = data.next_cursor;
+
+            if (onProgress) onProgress(allResults.length);
+        }
+
+        return mapNotionToZimbroo(allResults);
     } catch (error) {
         console.error("Fetch Error: ", error);
         throw error;
     }
 };
-
 /**
  * Heuristics to map various Notion property names to Zimbroo
  */
@@ -258,101 +262,91 @@ const mapNotionToZimbroo = (results) => {
             amount: 0,
             date: new Date().toISOString().split('T')[0],
             category: 'Outros',
-            type: 'expense'
+            type: 'expense',
+            repeatType: 'none',
+            installments: 1
         };
 
         try {
-            // 1. Description / Title (Strict priority)
+            // 1. Description / Title
             const titleProp = Object.values(props).find(p => p.type === 'title');
             if (titleProp?.title?.[0]?.plain_text) {
                 mapped.description = titleProp.title[0].plain_text;
             }
 
-            // 2. Amount / Valor (Heuristics with strict fallback)
+            // 2. Amount / Valor / Balancete
+            // Prioridade para "Valor para balancete" (Balancete) ou "Valor"
+            const balanceteProp = Object.entries(props).find(([name]) => 
+                name.toLowerCase().includes('balancete') || name.toLowerCase().includes('valor para balan')
+            );
             const amountProp = Object.entries(props).find(([name, p]) => {
                 const lowName = name.toLowerCase();
-                return p.type === 'number' || 
-                       lowName.includes('valor') || 
-                       lowName.includes('amount') ||
-                       lowName.includes('preço') ||
-                       lowName.includes('price') ||
-                       lowName.includes('dinheiro') ||
-                       lowName.includes('cost');
+                return p.type === 'number' || lowName === 'valor' || lowName === 'amount';
             });
 
-            if (amountProp) {
-                const p = amountProp[1];
-                if (p.type === 'number') {
-                    mapped.amount = p.number || 0;
-                } else if (p.type === 'formula') {
-                    mapped.amount = p.formula?.number || 0;
-                }
+            // Usar balancete se disponível, senão usar o valor cheio
+            const p = (balanceteProp?.[1] || amountProp?.[1]);
+            if (p) {
+                if (p.type === 'number') mapped.amount = p.number || 0;
+                else if (p.type === 'formula') mapped.amount = p.formula?.number || 0;
             }
 
             // 3. Date / Data
             const dateProp = Object.entries(props).find(([name, p]) => {
                 const lowName = name.toLowerCase();
-                return p.type === 'date' || 
-                       p.type === 'created_time' ||
-                       lowName.includes('data') || 
-                       lowName.includes('date') ||
-                       lowName.includes('dia') ||
-                       lowName.includes('compra') ||
-                       lowName.includes('vencimento') ||
-                       lowName.includes('quando');
+                return p.type === 'date' || p.type === 'created_time' || lowName.includes('data') || lowName.includes('date');
             });
 
             if (dateProp) {
                 const p = dateProp[1];
-                if (p.type === 'date' && p.date?.start) {
-                    mapped.date = p.date.start;
-                } else if (p.type === 'created_time') {
-                    mapped.date = p.created_time.split('T')[0];
-                } else if (p.type === 'formula' && p.formula?.date?.start) {
-                    mapped.date = p.formula.date.start;
-                }
+                if (p.type === 'date' && p.date?.start) mapped.date = p.date.start;
+                else if (p.type === 'created_time') mapped.date = p.created_time.split('T')[0];
             }
 
-            // 4. Category / Categoria
+            // 4. Category
             const catProp = Object.entries(props).find(([name, p]) => {
                 const lowName = name.toLowerCase();
-                return p.type === 'select' || p.type === 'multi_select' ||
-                       lowName.includes('categoria') || 
-                       lowName.includes('category') ||
-                       lowName.includes('tipo') ||
-                       lowName.includes('tag');
+                return (p.type === 'select' || p.type === 'multi_select') && (lowName.includes('categ') || lowName.includes('tag'));
             });
-
             if (catProp) {
                 const p = catProp[1];
-                if (p.type === 'select') {
-                    mapped.category = p.select?.name || 'Outros';
-                } else if (p.type === 'multi_select' && p.multi_select?.[0]) {
-                    mapped.category = p.multi_select[0].name || 'Outros';
+                if (p.type === 'select') mapped.category = p.select?.name || 'Outros';
+                else if (p.type === 'multi_select') mapped.category = p.multi_select[0]?.name || 'Outros';
+            }
+
+            // 5. Advanced Mapping: Installments & Recurring
+            const typeProp = Object.entries(props).find(([name]) => name.toLowerCase().includes('tipo de despesa'));
+            if (typeProp) {
+                const val = (typeProp[1].select?.name || typeProp[1].multi_select?.[0]?.name || '').toLowerCase();
+                if (val.includes('parcela')) {
+                    mapped.repeatType = 'installment';
+                    const installmentsProp = Object.entries(props).find(([name]) => name.toLowerCase().includes('parcela') && name.toLowerCase().includes('nº'));
+                    if (installmentsProp) {
+                        mapped.installments = installmentsProp[1].number || 1;
+                    }
+                } else if (val.includes('recorrente')) {
+                    mapped.repeatType = 'recurring';
                 }
             }
 
-            // 5. Type (Income/Expense detection)
-            const catName = mapped.category.toLowerCase();
-            const isRec = catName.includes('receita') || 
-                         catName.includes('ganho') ||
-                         catName.includes('lucro') ||
-                         catName.includes('venda') ||
-                         catName.includes('income');
-                         
+            // 6. Type (Income/Expense detection)
+            const catName = (mapped.category || '').toLowerCase();
+            const descName = (mapped.description || '').toLowerCase();
+            const isRec = catName.includes('receita') || catName.includes('ganho') || descName.includes('receita');
             mapped.type = isRec ? 'income' : 'expense';
 
         } catch (err) {
-            console.warn("[mapNotionToZimbroo] Erro ao mapear linha, usando defaults:", err);
+            console.warn("[mapNotionToZimbroo] Erro ao mapear:", err);
         }
 
-        // Final safety check: ensure NO field is undefined or null (critical for Firebase)
         return {
-            description: String(mapped.description || 'Sem descrição'),
-            amount: Number(mapped.amount || 0),
-            date: String(mapped.date || new Date().toISOString().split('T')[0]),
-            category: String(mapped.category || 'Outros'),
-            type: String(mapped.type || 'expense')
+            description: String(mapped.description),
+            amount: Number(mapped.amount),
+            date: String(mapped.date),
+            category: String(mapped.category),
+            type: String(mapped.type),
+            repeatType: String(mapped.repeatType),
+            installments: Number(mapped.installments)
         };
     });
 };
