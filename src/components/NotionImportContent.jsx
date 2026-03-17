@@ -20,6 +20,7 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
     const [syncStats, setSyncStats] = useState({ expenses: 0, incomes: 0 });
     const [workspaceInfo, setWorkspaceInfo] = useState(null);
     const [scanningPage, setScanningPage] = useState('');
+    const [statusMessage, setStatusMessage] = useState('');
     const [hasInitialSearchDone, setHasInitialSearchDone] = useState(false);
 
     const NOTION_CLIENT_ID = import.meta.env.VITE_NOTION_CLIENT_ID;
@@ -27,6 +28,7 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
 
     const handleExchangeCode = async (code) => {
         setLoading(true);
+        setStatusMessage('Autenticando com Notion...');
         setError(null);
         try {
             const response = await fetch('/api/notion-token', {
@@ -64,6 +66,7 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
     const refreshDatabases = async () => {
         if (!notionToken) return;
         setLoading(true);
+        setStatusMessage('Buscando bases de dados...');
         setError(null);
         setScanningPage('');
 
@@ -73,6 +76,7 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
 
             const discovered = await orchestratedDiscovery(notionToken, (pageName) => {
                 setScanningPage(pageName);
+                setStatusMessage(`Escanear: ${pageName}`);
             });
             
             const directDbs = discovered.filter(item => item.object === 'database');
@@ -148,18 +152,26 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
         }
 
         setLoading(true);
+        setStatusMessage('Preparando importação...');
         setError(null);
         setProgress(0);
         let txsE = [];
         let txsI = [];
 
         try {
-            if (expenseDbId) txsE = await fetchNotionTransactions(notionToken, expenseDbId);
-            if (incomeDbId) txsI = await fetchNotionTransactions(notionToken, incomeDbId);
+            if (expenseDbId) {
+                setStatusMessage('Buscando despesas...');
+                txsE = await fetchNotionTransactions(notionToken, expenseDbId);
+            }
+            if (incomeDbId) {
+                setStatusMessage('Buscando ganhos...');
+                txsI = await fetchNotionTransactions(notionToken, incomeDbId);
+            }
 
             const total = txsE.length + txsI.length;
             if (total === 0) throw new Error("Sem transações pendentes.");
 
+            setStatusMessage('Importando transações...');
             let current = 0;
             for (let tx of txsE) {
                 await addTransaction(currentUser.uid, { ...tx, type: 'expense' });
@@ -202,6 +214,28 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
                     </button>
                 )}
             </div>
+
+            {loading && (
+                <div style={{ 
+                    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, 
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    background: 'var(--bg-color)', zIndex: 100, borderRadius: '24px', padding: '24px',
+                    textAlign: 'center'
+                }}>
+                    <LoadingDots style={{ marginBottom: '24px', transform: 'scale(1.5)' }} />
+                    <p style={{ color: 'var(--text-main)', fontWeight: '700', fontSize: '1.1rem', marginBottom: '8px' }}>
+                        {statusMessage}
+                    </p>
+                    {progress > 0 && (
+                        <div style={{ width: '100%', maxWidth: '200px', height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', marginTop: '12px', overflow: 'hidden' }}>
+                            <div style={{ width: `${progress}%`, height: '100%', background: 'var(--primary-color)', transition: 'width 0.3s ease' }} />
+                        </div>
+                    )}
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '16px' }}>
+                        Por favor, não feche o app.
+                    </p>
+                </div>
+            )}
 
             {error && <div style={{ color: '#ef4444', marginBottom: '24px', fontSize: '0.85rem', fontWeight: '600', textAlign: 'center', background: 'rgba(239, 68, 68, 0.1)', padding: '12px', borderRadius: '12px' }}>⚠️ {error}</div>}
 
@@ -273,8 +307,6 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
                             <div style={{ fontSize: '0.75rem', fontWeight: '900', color: incomeDbId ? 'var(--success-color)' : 'var(--text-muted)' }}>GANHOS</div>
                         </div>
                     </div>
-
-                    {loading && <LoadingDots style={{ marginBottom: '20px' }} />}
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '32px', overflowY: 'visible', paddingRight: '4px' }}>
                         {foundDbs.map(db => {
