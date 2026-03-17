@@ -470,60 +470,58 @@ const Home = () => {
                                 
                                 {yearlyStats.map((stat, i) => {
                                     const isNegative = stat.balance < 0;
-                                    const maxVal = 5000; // Valor máximo para escala visual
-                                    const heightPct = Math.max(2, Math.min(50, (Math.abs(stat.balance) / maxVal) * 50)); 
+                                    const maxVal = Math.max(...yearlyStats.map(s => Math.abs(s.balance)), 2000); 
+                                    const h = Math.max(2, (Math.abs(stat.balance) / maxVal) * 45); 
                                     
                                     return (
-                                        <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', position: 'relative', zIndex: 1 }}>
+                                        <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', position: 'relative' }}>
                                             
-                                            {/* Container dividido ao meio (50% topo positivo, 50% bottom negativo) */}
-                                            <div style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                                                
-                                                {/* Metade Positiva */}
+                                            {/* Value Label Label Outside Bar */}
+                                            <span style={{ 
+                                                position: 'absolute', 
+                                                top: isNegative ? 'calc(50% + ' + (h * 2) + '% + 4px)' : 'auto',
+                                                bottom: !isNegative ? 'calc(50% + ' + (h * 2) + '% + 4px)' : 'auto',
+                                                fontSize: '0.6rem', fontWeight: '800', 
+                                                color: isNegative ? 'var(--danger-color)' : 'var(--primary-dark)',
+                                                whiteSpace: 'nowrap',
+                                                writingMode: 'vertical-rl',
+                                                transform: 'rotate(180deg)',
+                                                zIndex: 5
+                                            }}>
+                                                {Math.abs(stat.balance) >= 1000 ? `${(stat.balance/1000).toFixed(1)}k` : stat.balance}
+                                            </span>
+
+                                            <div style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                                                {/* Top Half (Positive) */}
                                                 <div style={{ height: '50%', width: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
                                                     {!isNegative && stat.balance > 0 && (
                                                         <div style={{
-                                                            width: '100%',
-                                                            height: `${heightPct * 2}%`,
+                                                            width: '12px', height: `${h * 2}%`,
                                                             background: 'var(--primary-dark)',
                                                             borderRadius: '4px 4px 0 0',
                                                             opacity: stat.month === (currentDate.getMonth() + 1) ? 1 : 0.4,
-                                                            display: 'flex',
-                                                            justifyContent: 'center',
-                                                            alignItems: 'center',
-                                                            overflow: 'hidden'
-                                                        }}>
-                                                            <span style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.9)', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
-                                                                {Math.abs(stat.balance) >= 1000 ? `${(stat.balance/1000).toFixed(1)}k` : stat.balance}
-                                                            </span>
-                                                        </div>
+                                                            transition: 'height 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+                                                        }} />
                                                     )}
                                                 </div>
-
-                                                {/* Metade Negativa */}
+                                                {/* Bottom Half (Negative) */}
                                                 <div style={{ height: '50%', width: '100%', display: 'flex', alignItems: 'flex-start', justifyContent: 'center' }}>
-                                                     {isNegative && (
+                                                    {isNegative && (
                                                         <div style={{
-                                                            width: '100%',
-                                                            height: `${heightPct * 2}%`,
+                                                            width: '12px', height: `${h * 2}%`,
                                                             background: 'var(--danger-color)',
                                                             borderRadius: '0 0 4px 4px',
                                                             opacity: stat.month === (currentDate.getMonth() + 1) ? 1 : 0.4,
-                                                            display: 'flex',
-                                                            justifyContent: 'center',
-                                                            alignItems: 'center',
-                                                            overflow: 'hidden'
-                                                        }}>
-                                                            <span style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.9)', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
-                                                                {Math.abs(stat.balance) >= 1000 ? `${(Math.abs(stat.balance)/1000).toFixed(1)}k` : Math.abs(stat.balance)}
-                                                            </span>
-                                                        </div>
+                                                            transition: 'height 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+                                                        }} />
                                                     )}
                                                 </div>
                                             </div>
 
                                             {/* Rótulo do Mês na Base */}
-                                            <span style={{ fontSize: '0.7rem', marginTop: '6px', color: 'var(--text-muted)' }}>{stat.label.charAt(0)}</span>
+                                            <span style={{ fontSize: '0.7rem', marginTop: '6px', color: 'var(--text-muted)', fontWeight: '600' }}>
+                                                {stat.label.charAt(0)}
+                                            </span>
                                         </div>
                                     );
                                 })}
