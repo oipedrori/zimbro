@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
-import { User, LogOut, Trash2, Moon, Globe, DollarSign, ArrowRight, RefreshCcw } from 'lucide-react';
+import { User, LogOut, Trash2, Moon, Globe, DollarSign, ArrowRight, RefreshCcw, X } from 'lucide-react';
 import { deleteAllUserTransactions } from '../services/transactionService';
 import { haptic } from '../utils/haptic';
 
@@ -60,6 +60,22 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
 
     return (
         <div className="animate-fade-in" style={{ paddingBottom: '40px' }}>
+            {/* Header with Close Button */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: '800', margin: 0, color: 'var(--text-main)' }}>{t('profile')}</h2>
+                <button 
+                    onClick={onClose}
+                    style={{ 
+                        width: '44px', height: '44px', borderRadius: '50%', 
+                        background: 'var(--surface-color)', border: '1px solid var(--glass-border)',
+                        color: 'var(--text-main)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        cursor: 'pointer', transition: 'all 0.2s', flexShrink: 0
+                    }}
+                >
+                    <X size={24} />
+                </button>
+            </div>
+
             {/* Profile Info Summary */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px', background: 'var(--surface-color)', padding: '16px', borderRadius: '20px', border: '1px solid var(--glass-border)' }}>
                 <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'var(--bg-color)', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--primary-color)', border: '1px solid var(--glass-border)' }}>
