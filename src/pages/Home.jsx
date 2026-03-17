@@ -540,8 +540,8 @@ const Home = () => {
                                             {/* Value Label Label Outside Bar */}
                                             <span style={{ 
                                                 position: 'absolute', 
-                                                top: isNegative ? 'calc(50% + ' + (h * 2) + '% + 1px)' : 'auto',
-                                                bottom: !isNegative ? 'calc(50% + ' + (h * 2) + '% + 1px)' : 'auto',
+                                                top: isNegative ? 'calc(50% + ' + h + '% + 1px)' : 'auto',
+                                                bottom: !isNegative ? 'calc(50% + ' + h + '% + 1px)' : 'auto',
                                                 fontSize: '0.6rem', fontWeight: '800', 
                                                 color: isNegative ? 'var(--danger-color)' : 'var(--primary-dark)',
                                                 whiteSpace: 'nowrap',
