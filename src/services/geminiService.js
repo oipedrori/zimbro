@@ -11,7 +11,8 @@ const callBackendAi = async (type, payload) => {
 
     if (!response.ok) {
       const errData = await response.json();
-      throw new Error(errData.error || 'Erro no servidor de IA');
+      const detailedError = errData.details ? `${errData.error} (${errData.details})` : (errData.error || 'Erro no servidor de IA');
+      throw new Error(detailedError);
     }
 
     return await response.json();

@@ -26,7 +26,7 @@ export default async function handler(req, res) {
         const genAI = new GoogleGenerativeAI(API_KEY);
 
         if (type === 'analyze') {
-            const { prompt, model: modelName = "gemini-2.0-flash" } = payload;
+            const { prompt, model: modelName = "gemini-1.5-flash" } = payload;
             const model = genAI.getGenerativeModel({ model: modelName });
             
             const result = await model.generateContent(prompt);
