@@ -15,7 +15,7 @@ export const translations = {
         good_night: "Boa noite, {name}",
         user: "Usuário",
         monthly_balance: "Saldo Mensal",
-        transactions: "Últimas Movimentações",
+        transactions: "Movimentações",
         see_all: "Ver Todas",
         no_transactions: "Nenhuma movimentação este mês.",
 
