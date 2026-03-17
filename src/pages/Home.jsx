@@ -466,14 +466,14 @@ const Home = () => {
                                                 setSelectedPieCat(null);
                                             }}
                                             style={{ 
-                                                width: '220px', height: '220px', borderRadius: '50%', background: pieBg, 
+                                                width: '260px', height: '260px', borderRadius: '50%', background: pieBg, 
                                                 display: 'flex', justifyContent: 'center', alignItems: 'center', 
                                                 position: 'relative', overflow: 'hidden', transform: 'translateZ(0)', 
                                                 boxShadow: '0 8px 32px rgba(0,0,0,0.1)', cursor: 'pointer',
                                                 transition: 'all 0.3s ease'
                                             }}
                                         >
-                                            <div style={{ width: '150px', height: '150px', background: 'var(--bg-color)', borderRadius: '50%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '10px', textAlign: 'center' }}>
+                                            <div style={{ width: '180px', height: '180px', background: 'var(--bg-color)', borderRadius: '50%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '10px', textAlign: 'center' }}>
                                                 {selectedPieCat ? (() => {
                                                     const cat = getCategoryInfo(selectedPieCat, 'expense');
                                                     const amount = expensesByCategory[selectedPieCat];
@@ -540,8 +540,8 @@ const Home = () => {
                                             {/* Value Label Label Outside Bar */}
                                             <span style={{ 
                                                 position: 'absolute', 
-                                                top: isNegative ? 'calc(50% + ' + (h * 2) + '% + 2px)' : 'auto',
-                                                bottom: !isNegative ? 'calc(50% + ' + (h * 2) + '% + 2px)' : 'auto',
+                                                top: isNegative ? 'calc(50% + ' + (h * 2) + '% + 1px)' : 'auto',
+                                                bottom: !isNegative ? 'calc(50% + ' + (h * 2) + '% + 1px)' : 'auto',
                                                 fontSize: '0.6rem', fontWeight: '800', 
                                                 color: isNegative ? 'var(--danger-color)' : 'var(--primary-dark)',
                                                 whiteSpace: 'nowrap',
@@ -549,7 +549,7 @@ const Home = () => {
                                                 transform: 'rotate(180deg)',
                                                 zIndex: 5
                                             }}>
-                                                {Math.abs(stat.balance) >= 1000 ? `${(stat.balance/1000).toFixed(2)}k` : Number(stat.balance).toFixed(2)}
+                                                {Math.abs(stat.balance) >= 10000 ? `${(stat.balance/1000).toFixed(2)}k` : Number(stat.balance).toFixed(2)}
                                             </span>
 
                                             <div style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
