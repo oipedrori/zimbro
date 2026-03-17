@@ -274,24 +274,57 @@ const mapNotionToZimbroo = (results) => {
                 mapped.description = titleProp.title[0].plain_text;
             }
 
-            // 2. Amount / Valor / Balancete
-            // Prioridade para "Valor para balancete" (Balancete) ou "Valor"
+            // 2. Identification of Type, Installments and Recurrence
+            const typeProp = Object.entries(props).find(([name]) => 
+                name.toLowerCase().includes('tipo de despesa') || name.toLowerCase().includes('tipo')
+            );
+            const instProp = Object.entries(props).find(([name]) => 
+                name.toLowerCase().includes('parcela') && (name.toLowerCase().includes('nº') || name.toLowerCase().includes('numero'))
+            );
+
+            if (typeProp) {
+                const val = (typeProp[1].select?.name || typeProp[1].multi_select?.[0]?.name || typeProp[1].formula?.string || '').toLowerCase();
+                if (val.includes('parcela')) {
+                    mapped.repeatType = 'installment';
+                    mapped.installments = instProp?.[1]?.number || 1;
+                } else if (val.includes('recorrente')) {
+                    mapped.repeatType = 'recurring';
+                    // User said recurring divides by 12, so we treat it as 12 installments or infinite recurring
+                    // Consistent with current Zimbroo architecture, we use 'recurring'
+                }
+            }
+
+            // 3. Amount Logic (Total vs Balancete)
             const balanceteProp = Object.entries(props).find(([name]) => 
                 name.toLowerCase().includes('balancete') || name.toLowerCase().includes('valor para balan')
             );
-            const amountProp = Object.entries(props).find(([name, p]) => {
+            const totalProp = Object.entries(props).find(([name, p]) => {
                 const lowName = name.toLowerCase();
-                return p.type === 'number' || lowName === 'valor' || lowName === 'amount';
+                return (p.type === 'number' || p.type === 'formula') && (lowName === 'valor' || lowName === 'amount');
             });
 
-            // Usar balancete se disponível, senão usar o valor cheio
-            const p = (balanceteProp?.[1] || amountProp?.[1]);
-            if (p) {
-                if (p.type === 'number') mapped.amount = p.number || 0;
-                else if (p.type === 'formula') mapped.amount = p.formula?.number || 0;
+            let baseAmount = 0;
+            const tp = totalProp?.[1];
+            if (tp?.type === 'number') baseAmount = tp.number || 0;
+            else if (tp?.type === 'formula') baseAmount = tp.formula?.number || 0;
+
+            const bp = balanceteProp?.[1];
+            let balanceteAmount = 0;
+            if (bp?.type === 'number') balanceteAmount = bp.number || 0;
+            else if (bp?.type === 'formula') balanceteAmount = bp.formula?.number || 0;
+
+            // Decision: Use balancete if available, otherwise do the math
+            if (balanceteAmount > 0) {
+                mapped.amount = balanceteAmount;
+            } else if (mapped.repeatType === 'installment') {
+                mapped.amount = baseAmount / (mapped.installments || 1);
+            } else if (mapped.repeatType === 'recurring') {
+                mapped.amount = baseAmount / 12;
+            } else {
+                mapped.amount = baseAmount;
             }
 
-            // 3. Date / Data
+            // 4. Date / Data
             const dateProp = Object.entries(props).find(([name, p]) => {
                 const lowName = name.toLowerCase();
                 return p.type === 'date' || p.type === 'created_time' || lowName.includes('data') || lowName.includes('date');
@@ -303,7 +336,7 @@ const mapNotionToZimbroo = (results) => {
                 else if (p.type === 'created_time') mapped.date = p.created_time.split('T')[0];
             }
 
-            // 4. Category
+            // 5. Category
             const catProp = Object.entries(props).find(([name, p]) => {
                 const lowName = name.toLowerCase();
                 return (p.type === 'select' || p.type === 'multi_select') && (lowName.includes('categ') || lowName.includes('tag'));
@@ -312,21 +345,6 @@ const mapNotionToZimbroo = (results) => {
                 const p = catProp[1];
                 if (p.type === 'select') mapped.category = p.select?.name || 'Outros';
                 else if (p.type === 'multi_select') mapped.category = p.multi_select[0]?.name || 'Outros';
-            }
-
-            // 5. Advanced Mapping: Installments & Recurring
-            const typeProp = Object.entries(props).find(([name]) => name.toLowerCase().includes('tipo de despesa'));
-            if (typeProp) {
-                const val = (typeProp[1].select?.name || typeProp[1].multi_select?.[0]?.name || '').toLowerCase();
-                if (val.includes('parcela')) {
-                    mapped.repeatType = 'installment';
-                    const installmentsProp = Object.entries(props).find(([name]) => name.toLowerCase().includes('parcela') && name.toLowerCase().includes('nº'));
-                    if (installmentsProp) {
-                        mapped.installments = installmentsProp[1].number || 1;
-                    }
-                } else if (val.includes('recorrente')) {
-                    mapped.repeatType = 'recurring';
-                }
             }
 
             // 6. Type (Income/Expense detection)

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import LoadingDots from './LoadingDots';
 import { Database, CheckCircle2, AlertCircle, Trash2, TrendingUp, TrendingDown, ChevronLeft } from 'lucide-react';
 import { getNotionDatabaseInfo, fetchNotionTransactions, orchestratedDiscovery, extractNotionId, findDatabasesOnPage, getNotionWorkspaceInfo } from '../services/notionService';
-import { addTransaction } from '../services/transactionService';
+import { addTransaction, deleteAllUserTransactions } from '../services/transactionService';
 import { useAuth } from '../contexts/AuthContext';
 import { haptic } from '../utils/haptic';
 
@@ -131,6 +131,23 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
         setError(null);
     };
 
+    const handleResetData = async () => {
+        if (window.confirm("ISSO APAGARÁ TODAS AS TRANSAÇÕES DO ZIMBROO. Deseja continuar?")) {
+            setLoading(true);
+            setStatusMessage('Limpando todos os dados...');
+            try {
+                await deleteAllUserTransactions(currentUser.uid);
+                haptic.success();
+                setError("Todos os dados foram apagados com sucesso.");
+                setTimeout(() => setError(null), 3000);
+            } catch (err) {
+                setError("Erro ao apagar dados.");
+            } finally {
+                setLoading(false);
+            }
+        }
+    };
+
     const handleDisconnect = () => {
         if (window.confirm("Deseja realmente excluir a integração?")) {
             localStorage.removeItem('zimbroo_notion_token');
@@ -210,12 +227,20 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
                 </button>
                 <h2 style={{ fontSize: '1.2rem', fontWeight: '700', margin: 0, flex: 1 }}>{step === 4 ? 'Sucesso!' : 'Importar Notion'}</h2>
                 {notionToken && step !== 4 && (
-                    <button
-                        onClick={handleDisconnect}
-                        style={{ background: 'rgba(239, 68, 68, 0.1)', border: 'none', borderRadius: '12px', padding: '8px 12px', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
-                    >
-                        <Trash2 size={16} />
-                    </button>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <button
+                            onClick={handleResetData}
+                            style={{ background: 'rgba(239, 68, 68, 0.1)', border: 'none', borderRadius: '12px', padding: '8px 12px', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', fontWeight: '700' }}
+                        >
+                            Limpar Tudo
+                        </button>
+                        <button
+                            onClick={handleDisconnect}
+                            style={{ background: 'var(--surface-color)', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '8px 12px', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+                        >
+                            <Trash2 size={16} />
+                        </button>
+                    </div>
                 )}
             </div>
 
