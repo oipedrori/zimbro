@@ -362,7 +362,6 @@ const Onboarding = () => {
                         <option value="pt" style={{ color: 'black' }}>PT</option>
                         <option value="en" style={{ color: 'black' }}>EN</option>
                         <option value="es" style={{ color: 'black' }}>ES</option>
-                        <option value="fr" style={{ color: 'black' }}>FR</option>
                     </select>
                 </div>
             )}

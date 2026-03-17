@@ -61,7 +61,7 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
     return (
         <div className="animate-fade-in" style={{ paddingBottom: '40px' }}>
             {/* Header with Close Button */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
                 <h2 style={{ fontSize: '1.5rem', fontWeight: '800', margin: 0, color: 'var(--text-main)' }}>{t('profile')}</h2>
                 <button 
                     onClick={onClose}
@@ -93,7 +93,7 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                 style={{
                     width: '100%', background: 'var(--notion-btn-bg)', padding: '16px 20px', borderRadius: '20px',
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    color: 'var(--notion-btn-text)', cursor: 'pointer', border: 'none', marginBottom: '24px',
+                    color: 'var(--notion-btn-text)', cursor: 'pointer', border: 'none', marginBottom: '32px',
                     boxShadow: '0 8px 15px rgba(0,0,0,0.1)'
                 }}
             >
@@ -177,7 +177,7 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
             </div>
 
             {/* Destructive Actions */}
-            <div style={{ paddingTop: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ paddingTop: '32px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <button
                     onClick={() => logout()}
                     style={{ 
