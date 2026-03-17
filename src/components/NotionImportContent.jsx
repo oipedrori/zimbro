@@ -225,9 +225,9 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
                         }}
                         disabled={loading}
                         style={{
-                            width: '100%', padding: '18px', backgroundColor: 'black', color: 'white',
+                            width: '100%', padding: '18px', backgroundColor: 'white', color: 'black',
                             borderRadius: '20px', border: 'none', display: 'flex', alignItems: 'center',
-                            justifyContent: 'center', gap: '12px', cursor: 'pointer', fontWeight: '700', fontSize: '1rem'
+                            justifyContent: 'center', gap: '12px', cursor: 'pointer', fontWeight: '800', fontSize: '1rem'
                         }}
                     >
                         <img src="/notion_logo.png" style={{ width: '22px', height: '22px' }} alt="" />
@@ -299,10 +299,10 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
                         disabled={(!expenseDbId && !incomeDbId) || loading}
                         style={{
                             width: '100%', padding: '20px', borderRadius: '20px',
-                            background: 'var(--primary-color)', color: 'white',
+                            background: 'white', color: 'black',
                             fontWeight: '800', fontSize: '1.1rem', border: 'none',
                             opacity: (!expenseDbId && !incomeDbId) ? 0.6 : 1,
-                            boxShadow: '0 8px 20px rgba(0,210,140,0.2)'
+                            boxShadow: '0 8px 30px rgba(255,255,255,0.1)'
                         }}
                     >
                         {loading ? `${progress}% Importando...` : 'Importar Agora'}
@@ -319,7 +319,7 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
                     </p>
                     <button
                         onClick={onFinish}
-                        style={{ width: '100%', padding: '18px', borderRadius: '18px', background: 'black', color: 'white', fontWeight: '700' }}
+                        style={{ width: '100%', padding: '18px', borderRadius: '18px', background: 'white', color: 'black', fontWeight: '800', border: 'none' }}
                     >
                         Concluído
                     </button>
