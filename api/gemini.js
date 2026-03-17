@@ -11,35 +11,47 @@ export default async function handler(req, res) {
     }
 
     const { type, payload } = req.body;
-    // Tenta pegar a chave de ambas as nomenclaturas comuns
     const API_KEY = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
 
     if (!API_KEY) {
-        console.error("[GeminiAPI] GEMINI_API_KEY is not set in environment variables.");
         return res.status(500).json({ 
             error: 'Erro de Configuração', 
-            details: 'Chave de API não encontrada no servidor. Verifique as variáveis de ambiente.' 
+            details: 'Chave de API não encontrada no servidor (GEMINI_API_KEY).' 
         });
     }
 
     try {
-        const genAI = new GoogleGenerativeAI(API_KEY);
+        const model = "gemini-1.5-flash";
+        const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${API_KEY}`;
+        
+        const geminiResponse = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: payload.prompt }] }]
+            })
+        });
 
-        if (type === 'analyze' || type === 'suggest_limit') {
-            // Forçamos o modelo flash 1.5 que é o mais compatível globalmente
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-            
-            const { prompt } = payload;
-            const result = await model.generateContent(prompt);
-            const responseText = result.response.text();
-            
-            return res.status(200).json({ text: responseText });
+        const data = await geminiResponse.json();
+
+        if (!geminiResponse.ok) {
+            console.error("[GeminiAPI] Error from Google:", data);
+            return res.status(geminiResponse.status).json({ 
+                error: 'Erro na API do Google', 
+                details: data.error?.message || JSON.stringify(data)
+            });
         }
 
-        return res.status(400).json({ error: 'Invalid request type' });
+        const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        
+        if (!responseText) {
+            return res.status(500).json({ error: 'Resposta vazia da IA', details: 'Nenhum conteúdo gerado.' });
+        }
+
+        return res.status(200).json({ text: responseText });
 
     } catch (error) {
-        console.error("[GeminiAPI] Error:", error);
-        return res.status(500).json({ error: 'Erro ao processar requisição na IA.', details: error.message });
+        console.error("[GeminiAPI] Critical Exception:", error);
+        return res.status(500).json({ error: 'Erro crítico no servidor de IA', details: error.message });
     }
 }
