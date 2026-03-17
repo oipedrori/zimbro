@@ -81,6 +81,11 @@ export const translations = {
         install_android_btn: "Instalar Agora",
         install_android_step1: "Toque no menu {icon} no canto superior.",
         install_android_step2: "Selecione Adicionar à tela inicial.",
+        
+        // Cookie Notice
+        cookie_title: "Privacidade & Cookies",
+        cookie_desc: "Utilizamos armazenamento local para melhorar sua experiência e salvar suas preferências de forma segura.",
+        cookie_accept_btn: "Aceitar",
 
         // Modals & Panels
         add_transaction: "Adicionar Transação",
@@ -229,6 +234,11 @@ export const translations = {
         install_android_step1: "Tap the {icon} menu in the top corner.",
         install_android_step2: "Select Add to home screen.",
 
+        // Cookie Notice
+        cookie_title: "Privacy & Cookies",
+        cookie_desc: "We use local storage to improve your experience and save your preferences securely.",
+        cookie_accept_btn: "Accept",
+
         add_transaction: "Add Transaction",
         edit_transaction: "Edit Transaction",
         expense: "Expense",
@@ -372,6 +382,11 @@ export const translations = {
         install_android_step1: "Toca el menú {icon} en la esquina superior.",
         install_android_step2: "Selecciona Añadir a la pantalla de inicio.",
 
+        // Cookie Notice
+        cookie_title: "Privacidad y Cookies",
+        cookie_desc: "Utilizamos el almacenamiento local para mejorar su experiencia y guardar sus preferencias de forma segura.",
+        cookie_accept_btn: "Aceptar",
+
         add_transaction: "Añadir Transacción",
         edit_transaction: "Editar Transacción",
         expense: "Gasto",
@@ -514,6 +529,11 @@ export const translations = {
         install_android_btn: "Installer maintenant",
         install_android_step1: "Appuyez sur le menu {icon} dans le coin supérieur.",
         install_android_step2: "Sélectionnez Ajouter à l'écran d'accueil.",
+
+        // Cookie Notice
+        cookie_title: "Confidentialité et Cookies",
+        cookie_desc: "Nous utilisons le stockage local pour améliorer votre expérience et enregistrer vos préférences en toute sécurité.",
+        cookie_accept_btn: "Accepter",
 
         add_transaction: "Ajouter une Transaction",
         edit_transaction: "Modifier la Transaction",

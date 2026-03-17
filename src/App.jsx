@@ -5,6 +5,7 @@ import { I18nProvider } from './contexts/I18nContext';
 import Layout from './components/Layout';
 import LoadingDots from './components/LoadingDots';
 import InstallPrompt from './components/InstallPrompt';
+import CookieNotice from './components/CookieNotice';
 import './index.css';
 
 // Helper for lazy loading with retry logic
@@ -74,6 +75,7 @@ function App() {
     <I18nProvider>
       <AuthProvider>
         <InstallPrompt />
+        <CookieNotice />
         <BrowserRouter>
           <AppRoutes />
         </BrowserRouter>
