@@ -203,6 +203,8 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
                 )}
             </div>
 
+            {error && <div style={{ color: '#ef4444', marginBottom: '24px', fontSize: '0.85rem', fontWeight: '600', textAlign: 'center', background: 'rgba(239, 68, 68, 0.1)', padding: '12px', borderRadius: '12px' }}>⚠️ {error}</div>}
+
             {step === 1 && (
                 <div style={{ textAlign: 'center' }}>
                     <div style={{
@@ -229,8 +231,19 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
                         }}
                     >
                         <img src="/notion_logo.png" style={{ width: '22px', height: '22px' }} alt="" />
-                        {loading ? <LoadingDots style={{ color: 'white' }} /> : 'Conectar Agora'}
+                        {loading ? (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <div style={{ width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                                <span>Conectando...</span>
+                            </div>
+                        ) : 'Conectar Agora'}
                     </button>
+                    
+                    <style>{`
+                        @keyframes spin {
+                            to { transform: rotate(360deg); }
+                        }
+                    `}</style>
                 </div>
             )}
 
@@ -262,7 +275,6 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
                     </div>
 
                     {loading && <LoadingDots style={{ marginBottom: '20px' }} />}
-                    {error && <div style={{ color: '#ef4444', marginBottom: '20px', fontSize: '0.85rem', fontWeight: '600' }}>⚠️ {error}</div>}
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '32px', overflowY: 'visible', paddingRight: '4px' }}>
                         {foundDbs.map(db => {

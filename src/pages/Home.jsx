@@ -27,9 +27,10 @@ const Home = () => {
         const params = new URLSearchParams(window.location.search);
         const code = params.get('code');
         if (code) {
+            setPendingNotionCode(code);
             setSidebarView('notion');
             setIsSidebarOpen(true);
-            // Use replaceState to clean URL WITHOUT re-mounting Home (and losing state)
+            // Clean URL immediately
             window.history.replaceState({}, document.title, window.location.pathname);
         }
     }, []);
@@ -39,6 +40,7 @@ const Home = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isSidebarClosing, setIsSidebarClosing] = useState(false);
     const [sidebarView, setSidebarView] = useState('settings'); // 'settings' or 'notion'
+    const [pendingNotionCode, setPendingNotionCode] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalType, setModalType] = useState('expense');
     const [editingTx, setEditingTx] = useState(null);
@@ -1201,8 +1203,8 @@ const Home = () => {
                                          setSidebarView('settings');
                                          closeSidebar();
                                      }}
-                                     // Passing detecting code from current URL for reliable exchange
-                                     initialOAuthCode={new URLSearchParams(window.location.search).get('code')}
+                                     // Pass the captured code from state instead of reading directly from URL
+                                     initialOAuthCode={pendingNotionCode}
                                  />
                              )}
                         </div>
