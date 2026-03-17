@@ -11,11 +11,15 @@ export default async function handler(req, res) {
     }
 
     const { type, payload } = req.body;
-    const API_KEY = process.env.GEMINI_API_KEY;
+    // Tenta pegar a chave de ambas as nomenclaturas comuns
+    const API_KEY = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
 
     if (!API_KEY) {
         console.error("[GeminiAPI] GEMINI_API_KEY is not set in environment variables.");
-        return res.status(500).json({ error: 'Configuração do servidor incompleta. Chave de API ausente.' });
+        return res.status(500).json({ 
+            error: 'Erro de Configuração', 
+            details: 'Chave de API não encontrada no servidor. Verifique as variáveis de ambiente.' 
+        });
     }
 
     try {
