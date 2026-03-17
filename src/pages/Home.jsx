@@ -526,7 +526,7 @@ const Home = () => {
 
                         <section className="glass-panel" style={{ padding: '24px' }}>
                             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '24px' }}>{t('monthly_balances_current_year', { defaultValue: 'Saldos Mensais' })}</h3>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '180px', gap: '8px', borderBottom: '1px solid var(--glass-border)', paddingBottom: '10px', position: 'relative' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '240px', gap: '8px', borderBottom: '1px solid var(--glass-border)', paddingBottom: '10px', position: 'relative' }}>
                                 
                                 
                                 {yearlyStats.map((stat, i) => {
@@ -540,8 +540,8 @@ const Home = () => {
                                             {/* Value Label Label Outside Bar */}
                                             <span style={{ 
                                                 position: 'absolute', 
-                                                top: isNegative ? 'calc(50% + ' + h + '% + 1px)' : 'auto',
-                                                bottom: !isNegative ? 'calc(50% + ' + h + '% + 1px)' : 'auto',
+                                                top: isNegative ? 'calc(50% + ' + h + '% + 8px)' : 'auto',
+                                                bottom: !isNegative ? 'calc(50% + ' + h + '% + 8px)' : 'auto',
                                                 fontSize: '0.6rem', fontWeight: '800', 
                                                 color: isNegative ? 'var(--danger-color)' : 'var(--primary-dark)',
                                                 whiteSpace: 'nowrap',
