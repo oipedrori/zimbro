@@ -85,7 +85,7 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                     <div style={{ width: '32px', height: '32px', background: 'white', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                         <img src="/notion_logo.png" style={{ width: '18px', height: '18px' }} alt="" />
                     </div>
-                    <span style={{ fontWeight: '600' }}>Importar Hub Financeiro</span>
+                    <span style={{ fontWeight: '600', fontSize: '1rem' }}>Importar Hub Financeiro</span>
                 </div>
                 <ArrowRight size={18} opacity={0.5} />
             </button>
@@ -103,7 +103,7 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                                 key={t}
                                 onClick={() => setTheme(t)}
                                 style={{
-                                    flex: 1, padding: '8px', borderRadius: '8px', border: 'none', fontSize: '0.75rem', fontWeight: '700',
+                                    flex: 1, padding: '10px 8px', borderRadius: '12px', border: 'none', fontSize: '0.85rem', fontWeight: '700',
                                     background: theme === t ? 'var(--primary-color)' : 'transparent',
                                     color: theme === t ? 'white' : 'var(--text-muted)'
                                 }}
@@ -122,7 +122,7 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                     <select
                         value={locale}
                         onChange={(e) => changeLocale(e.target.value)}
-                        style={{ width: '100%', background: 'var(--bg-color)', border: '1px solid var(--glass-border)', padding: '12px', borderRadius: '12px', color: 'var(--text-main)', fontWeight: '600' }}
+                        style={{ width: '100%', background: 'var(--bg-color)', border: '1px solid var(--glass-border)', padding: '14px', borderRadius: '12px', color: 'var(--text-main)', fontWeight: '600', fontSize: '0.85rem' }}
                     >
                         <option value="pt">Português</option>
                         <option value="en">English</option>
@@ -138,17 +138,17 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                     onClick={() => setShowResetConfirm(true)}
                     style={{ width: '100%', padding: '16px', borderRadius: '16px', background: 'rgba(245, 158, 11, 0.05)', color: '#f59e0b', border: '1px solid rgba(245, 158, 11, 0.2)', fontWeight: '700', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
                 >
-                    <RefreshCcw size={18} /> Resetar Dados
+                    <RefreshCcw size={18} /> <span style={{ fontSize: '1rem' }}>Resetar Dados</span>
                 </button>
                 <button
                     onClick={() => logout()}
                     style={{ width: '100%', padding: '16px', borderRadius: '16px', background: 'var(--surface-color)', color: 'var(--text-main)', border: '1px solid var(--glass-border)', fontWeight: '700', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
                 >
-                    <LogOut size={18} /> Sair
+                    <LogOut size={18} /> <span style={{ fontSize: '1rem' }}>Sair</span>
                 </button>
                 <button
                     onClick={() => setShowDeleteConfirm(true)}
-                    style={{ width: '100%', padding: '16px', borderRadius: '16px', background: 'transparent', color: 'var(--danger-color)', border: 'none', fontWeight: '700', fontSize: '0.9rem', marginTop: '10px' }}
+                    style={{ width: '100%', padding: '16px', borderRadius: '16px', background: 'transparent', color: 'var(--danger-color)', border: 'none', fontWeight: '700', fontSize: '1rem', marginTop: '10px' }}
                 >
                     Excluir Conta
                 </button>
