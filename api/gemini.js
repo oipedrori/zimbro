@@ -1,11 +1,10 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { createClient } from '@google/genai/server';
 
 /**
- * Gemini AI Serverless Function - Zimbroo App
- * Protects the API Key by running AI logic on the server.
+ * Gemini AI Serverless Function - Zimbroo App (New GenAI SDK)
+ * Protects the API Key and uses the ultra-performant gemini-2.5-flash.
  */
 export default async function handler(req, res) {
-    // Only allow POST
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
@@ -16,42 +15,36 @@ export default async function handler(req, res) {
     if (!API_KEY) {
         return res.status(500).json({ 
             error: 'Erro de Configuração', 
-            details: 'Chave de API não encontrada no servidor (GEMINI_API_KEY).' 
+            details: 'Chave de API não encontrada no servidor.' 
         });
     }
 
     try {
-        const model = "gemini-1.5-flash";
-        const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${API_KEY}`;
+        const client = createClient({ apiKey: API_KEY });
         
-        const geminiResponse = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: payload.prompt }] }]
-            })
+        // Using gemini-2.5-flash by default as requested
+        const modelName = "gemini-2.5-flash";
+        
+        const response = await client.models.generateContent({
+            model: modelName,
+            contents: [{ parts: [{ text: payload.prompt }] }]
         });
 
-        const data = await geminiResponse.json();
-
-        if (!geminiResponse.ok) {
-            console.error("[GeminiAPI] Error from Google:", data);
-            return res.status(geminiResponse.status).json({ 
-                error: 'Erro na API do Google', 
-                details: data.error?.message || JSON.stringify(data)
-            });
-        }
-
-        const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        // The new SDK structure for response
+        const responseText = response.text || response.candidates?.[0]?.content?.parts?.[0]?.text;
         
         if (!responseText) {
-            return res.status(500).json({ error: 'Resposta vazia da IA', details: 'Nenhum conteúdo gerado.' });
+            console.error("[GeminiAPI] Empty response:", response);
+            return res.status(500).json({ error: 'Resposta vazia da IA', details: 'O modelo não gerou conteúdo.' });
         }
 
         return res.status(200).json({ text: responseText });
 
     } catch (error) {
-        console.error("[GeminiAPI] Critical Exception:", error);
-        return res.status(500).json({ error: 'Erro crítico no servidor de IA', details: error.message });
+        console.error("[GeminiAPI] SDK Error:", error);
+        return res.status(500).json({ 
+            error: 'Erro no novo SDK da IA', 
+            details: error.message 
+        });
     }
 }
