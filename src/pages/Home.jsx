@@ -587,7 +587,7 @@ const Home = () => {
                                                                 {/* Label Inside ou Outside */}
                                                                 <span style={{ 
                                                                     position: 'absolute', 
-                                                                    top: isBigEnough ? '6px' : '-22px', // pra fora (negativo) ou pra dentro
+                                                                    top: isBigEnough ? '10px' : '-28px', // pra fora ou pra dentro com mais respiro
                                                                     left: '50%', transform: 'translateX(-50%) rotate(-90deg)',
                                                                     transformOrigin: 'center center',
                                                                     fontSize: '0.6rem', fontWeight: '800', 
@@ -614,7 +614,7 @@ const Home = () => {
                                                             }}>
                                                                 <span style={{ 
                                                                     position: 'absolute', 
-                                                                    bottom: isBigEnough ? '6px' : '-22px',
+                                                                    bottom: isBigEnough ? '10px' : '-28px', // mais respiro
                                                                     left: '50%', transform: 'translateX(-50%) rotate(-90deg)',
                                                                     transformOrigin: 'center center',
                                                                     fontSize: '0.6rem', fontWeight: '800', 
@@ -626,6 +626,7 @@ const Home = () => {
                                                                 </span>
                                                             </div>
                                                         )}
+
                                                     </div>
                                                 </div>
 
