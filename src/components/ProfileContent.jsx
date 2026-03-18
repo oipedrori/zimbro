@@ -129,17 +129,17 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                         <span style={{ fontSize: '0.8rem', fontWeight: '700', letterSpacing: '0.5px' }}>{t('theme_caps')}</span>
                     </div>
                     <div style={{ display: 'flex', gap: '8px', background: 'var(--bg-color)', padding: '4px', borderRadius: '12px' }}>
-                        {['system', 'light', 'dark'].map(t => (
+                        {['system', 'light', 'dark'].map(themeOption => (
                             <button
-                                key={t}
-                                onClick={() => setTheme(t)}
+                                key={themeOption}
+                                onClick={() => setTheme(themeOption)}
                                 style={{
                                     flex: 1, padding: '10px 8px', borderRadius: '12px', border: 'none', fontSize: '0.85rem', fontWeight: '700',
-                                    background: theme === t ? 'var(--primary-color)' : 'transparent',
-                                    color: theme === t ? 'white' : 'var(--text-muted)'
+                                    background: theme === themeOption ? 'var(--primary-color)' : 'transparent',
+                                    color: theme === themeOption ? 'white' : 'var(--text-muted)'
                                 }}
                             >
-                                {t === 'system' ? t('theme_auto') : t === 'light' ? t('theme_light') : t('theme_dark')}
+                                {themeOption === 'system' ? t('theme_auto') : themeOption === 'light' ? t('theme_light') : t('theme_dark')}
                             </button>
                         ))}
                     </div>
