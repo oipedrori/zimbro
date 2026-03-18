@@ -444,7 +444,7 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
                             }}
                         >
                             <div className="mystical-aura"></div>
-                            <Mic size={32} color="white" />
+                            <Mic size={32} color="var(--btn-text)" />
                         </button>
                     ) : micPermission === 'denied' ? (
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
@@ -769,7 +769,7 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
 
         
         .send-transcript-btn {
-          background: var(--primary-darkest); color: white;
+          background: var(--primary-darkest); color: var(--btn-text);
           padding: 14px 32px; border-radius: var(--border-radius-full);
           font-weight: 600; font-size: 1.1rem; 
           animation: slideUp 0.3s forwards;

@@ -48,19 +48,19 @@ const Onboarding = () => {
         },
         {
             id: 1,
-            icon: <Mic size={54} color="white" />,
+            icon: <Mic size={54} color="var(--btn-text)" />,
             title: t('ob_ai_title'),
             desc: t('ob_ai_desc')
         },
         {
             id: 2,
-            icon: <MessageSquare size={54} color="white" />,
+            icon: <MessageSquare size={54} color="var(--btn-text)" />,
             title: t('ob_ask_title'),
             desc: t('ob_ask_desc')
         },
         {
             id: 3,
-            icon: <Zap size={54} color="white" />,
+            icon: <Zap size={54} color="var(--btn-text)" />,
             title: t('ob_fast_title'),
             desc: t('ob_fast_desc')
         }
@@ -108,7 +108,7 @@ const Onboarding = () => {
             flexDirection: 'column',
             height: '100dvh',
             backgroundColor: 'var(--bg-color)',
-            color: 'white',
+            color: 'var(--btn-text)',
             position: 'relative',
             overflow: 'hidden'
         }}>
@@ -138,7 +138,7 @@ const Onboarding = () => {
                         <div key={story.id} style={{
                             flex: 1,
                             height: '4px',
-                            background: 'rgba(255, 255, 255, 0.3)',
+                            background: 'rgba(14, 34, 16, 0.1)',
                             borderRadius: '2px',
                             overflow: 'hidden'
                         }}>
@@ -167,7 +167,7 @@ const Onboarding = () => {
                     flexDirection: 'column',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    color: 'white',
+                    color: 'var(--btn-text)',
                     fontWeight: 'sans-serif',
                     padding: '24px',
                     textAlign: 'center',
@@ -181,9 +181,9 @@ const Onboarding = () => {
 
 
                 <div style={{
-                    width: '120px', height: '120px', borderRadius: '40px', background: 'rgba(0,0,0,0.2)',
+                    width: '120px', height: '120px', borderRadius: '40px', background: 'rgba(255,255,255,0.2)',
                     display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '40px',
-                    backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)',
+                    backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.3)',
                     boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
                 }}>
                     {stories[currentStory].icon}
@@ -238,7 +238,7 @@ const Onboarding = () => {
                         onChange={(e) => setAcceptedTerms(e.target.checked)}
                         style={{
                             width: '24px', height: '24px', marginTop: '2px', cursor: 'pointer',
-                            accentColor: 'white', flexShrink: 0
+                            accentColor: 'var(--btn-text)', flexShrink: 0
                         }}
                     />
                     <div style={{ fontSize: '0.85rem', lineHeight: 1.4, opacity: 0.9 }}>
@@ -248,7 +248,7 @@ const Onboarding = () => {
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowDocs('terms'); }}
                             style={{
                                 background: 'transparent', border: 'none', padding: 0,
-                                textDecoration: 'underline', fontWeight: '700', cursor: 'pointer', color: 'white',
+                                textDecoration: 'underline', fontWeight: '700', cursor: 'pointer', color: 'var(--btn-text)',
                                 fontSize: 'inherit', display: 'inline'
                             }}
                         >
@@ -260,7 +260,7 @@ const Onboarding = () => {
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowDocs('privacy'); }}
                             style={{
                                 background: 'transparent', border: 'none', padding: 0,
-                                textDecoration: 'underline', fontWeight: '700', cursor: 'pointer', color: 'white',
+                                textDecoration: 'underline', fontWeight: '700', cursor: 'pointer', color: 'var(--btn-text)',
                                 fontSize: 'inherit', display: 'inline'
                             }}
                         >
@@ -273,7 +273,7 @@ const Onboarding = () => {
                     onClick={handleLogin}
                     disabled={isLoggingIn || !acceptedTerms}
                     style={{
-                        width: '100%', padding: '18px', backgroundColor: 'white', color: 'var(--primary-color)',
+                        width: '100%', padding: '18px', backgroundColor: 'var(--surface-color)', color: 'var(--text-main)',
                         borderRadius: 'var(--border-radius-lg)', fontSize: '1.1rem', fontWeight: '700',
                         display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px',
                         boxShadow: '0 8px 25px rgba(0,0,0,0.2)', transition: 'all 0.2s',
@@ -281,7 +281,7 @@ const Onboarding = () => {
                         zIndex: 10
                     }}
                 >
-                    {isLoggingIn ? <LoadingDots style={{ color: 'white' }} /> : (
+                    {isLoggingIn ? <LoadingDots style={{ color: 'var(--text-main)' }} /> : (
                         <>
                             <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -295,16 +295,15 @@ const Onboarding = () => {
                 </button>
             </div>
 
-            {/* Modal para Termos e Privacidade */}
             {showDocs && (
                 <div style={{
                     position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                    background: 'rgba(0,0,0,0.85)', zIndex: 100, display: 'flex',
-                    flexDirection: 'column', padding: '24px', backdropFilter: 'blur(10px)'
+                    background: 'var(--bg-color)', zIndex: 100, display: 'flex',
+                    flexDirection: 'column', padding: '24px'
                 }}>
                     <div style={{
                         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                        marginBottom: '20px', color: 'white'
+                        marginBottom: '20px', color: 'var(--text-main)'
                     }}>
                         <h3 style={{ fontSize: '1.2rem', fontWeight: '700' }}>
                             {showDocs === 'terms' ? t('ob_terms_label', { defaultValue: 'Termos de Uso' }) : t('ob_privacy_label', { defaultValue: 'Política de Privacidade' })}
@@ -313,8 +312,8 @@ const Onboarding = () => {
                             onClick={() => setShowDocs(null)}
                             style={{
                                 width: '36px', height: '36px', borderRadius: '50%',
-                                background: 'rgba(255,255,255,0.2)', display: 'flex',
-                                justifyContent: 'center', alignItems: 'center', color: 'white',
+                                background: 'var(--surface-color)', display: 'flex',
+                                justifyContent: 'center', alignItems: 'center', color: 'var(--text-main)', border: '1px solid var(--glass-border)',
                                 cursor: 'pointer'
                             }}
                         >
@@ -322,8 +321,9 @@ const Onboarding = () => {
                         </button>
                     </div>
                     <div style={{
-                        flex: 1, overflowY: 'auto', background: 'white', color: 'black',
-                        padding: '24px', borderRadius: '24px', lineHeight: 1.6, fontSize: '0.95rem'
+                        flex: 1, overflowY: 'auto', background: 'var(--surface-color)', color: 'var(--text-main)',
+                        padding: '24px', borderRadius: '24px', lineHeight: 1.6, fontSize: '0.95rem',
+                        border: '1px solid var(--glass-border)'
                     }}>
                         {loadingDoc ? (
                             <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '40px' }}>
@@ -346,22 +346,21 @@ const Onboarding = () => {
                     zIndex: 100,
                     display: 'flex',
                     alignItems: 'center',
-                    background: 'rgba(255, 255, 255, 0.2)',
-                    backdropFilter: 'blur(10px)',
+                    background: 'var(--surface-color)',
                     borderRadius: '20px',
                     padding: '4px 12px',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    border: '1px solid var(--glass-border)',
                     pointerEvents: 'auto'
                 }}>
-                    <Globe size={14} color="white" style={{ marginRight: '6px' }} />
+                    <Globe size={14} color="var(--text-main)" style={{ marginRight: '6px' }} />
                     <select
                         value={locale}
                         onChange={(e) => changeLocale(e.target.value)}
-                        style={{ background: 'transparent', border: 'none', color: 'white', fontSize: '0.85rem', fontWeight: 'bold', outline: 'none', cursor: 'pointer' }}
+                        style={{ background: 'transparent', border: 'none', color: 'var(--text-main)', fontSize: '0.85rem', fontWeight: 'bold', outline: 'none', cursor: 'pointer' }}
                     >
-                        <option value="pt" style={{ color: 'black' }}>PT</option>
-                        <option value="en" style={{ color: 'black' }}>EN</option>
-                        <option value="es" style={{ color: 'black' }}>ES</option>
+                        <option value="pt" style={{ color: 'var(--text-main)' }}>PT</option>
+                        <option value="en" style={{ color: 'var(--text-main)' }}>EN</option>
+                        <option value="es" style={{ color: 'var(--text-main)' }}>ES</option>
                     </select>
                 </div>
             )}
@@ -383,7 +382,7 @@ const Onboarding = () => {
 
                 .progress-fill {
                     height: 100%;
-                    background: white;
+                    background: var(--btn-text);
                 }
                 
                 .progress-fill.active {

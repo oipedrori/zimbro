@@ -284,12 +284,12 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
                         type="submit" disabled={loading}
                         style={{
                             marginTop: '10px', width: '100%', padding: '16px', background: 'var(--primary-gradient)',
-                            color: 'white', borderRadius: 'var(--border-radius-lg)', fontWeight: 'bold', fontSize: '1.1rem',
+                            color: 'var(--btn-text)', borderRadius: 'var(--border-radius-lg)', fontWeight: 'bold', fontSize: '1.1rem',
                             display: 'flex', justifyContent: 'center', alignItems: 'center', height: '56px',
                             boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                         }}
                     >
-                        {loading ? <LoadingDots style={{ color: 'white' }} /> : (initialData ? t('save') : t('add'))}
+                        {loading ? <LoadingDots style={{ color: 'var(--btn-text)' }} /> : (initialData ? t('save') : t('add'))}
                     </button>
 
                     {initialData && (

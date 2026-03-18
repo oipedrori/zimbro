@@ -67,7 +67,7 @@ const Wallet = () => {
             </header>
 
             {/* Total Wealth Panel */}
-            <section className="glass-panel" style={{ padding: '24px', background: 'var(--primary-darker)', color: 'white', border: 'none', position: 'relative', overflow: 'hidden', marginBottom: '30px' }}>
+            <section className="glass-panel" style={{ padding: '24px', background: 'var(--primary-darker)', color: 'var(--btn-text)', border: 'none', position: 'relative', overflow: 'hidden', marginBottom: '30px' }}>
                 <div style={{ position: 'absolute', top: '-50%', right: '-20%', width: '200px', height: '200px', background: 'rgba(255,255,255,0.05)', filter: 'blur(30px)', borderRadius: '50%' }}></div>
                 <p style={{ fontSize: '0.9rem', opacity: 0.8, marginBottom: '8px' }}>{t('total_wealth')}</p>
                 <h2 style={{ fontSize: '2.5rem', fontWeight: '700', letterSpacing: '-1px' }}>{formatCurrency(totalWealth)}</h2>

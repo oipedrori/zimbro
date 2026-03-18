@@ -104,7 +104,7 @@ const Limits = () => {
                 availableCategories.length > 0 && (
                     <button
                         onClick={() => setIsAdding(true)}
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', padding: '16px', borderRadius: '16px', background: 'var(--primary-color)', color: 'white', fontWeight: '700', marginBottom: '24px', transition: 'transform 0.2s', cursor: 'pointer', border: 'none', boxShadow: '0 8px 20px rgba(var(--primary-rgb), 0.2)' }}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', padding: '16px', borderRadius: '16px', background: 'var(--primary-color)', color: 'var(--btn-text)', fontWeight: '700', marginBottom: '24px', transition: 'transform 0.2s', cursor: 'pointer', border: 'none', boxShadow: '0 8px 20px rgba(var(--primary-rgb), 0.2)' }}
                     >
                         <Plus size={20} />
                         {t('set_new_limit')}

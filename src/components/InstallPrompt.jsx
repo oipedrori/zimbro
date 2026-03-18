@@ -129,7 +129,7 @@ const InstallPrompt = () => {
                     {deferredPrompt ? (
                         <button
                             onClick={handleInstallAndroid}
-                            style={{ width: '100%', padding: '12px', background: 'var(--primary-color)', color: 'white', borderRadius: '8px', fontWeight: '600' }}
+                            style={{ width: '100%', padding: '12px', background: 'var(--primary-color)', color: 'var(--btn-text)', borderRadius: '8px', fontWeight: '600' }}
                         >
                             {t('install_android_btn')}
                         </button>

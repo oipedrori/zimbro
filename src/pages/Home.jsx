@@ -427,55 +427,92 @@ const Home = () => {
                                     }, {});
 
                                 const totalExpenses = Object.values(expensesByCategory).reduce((acc, val) => acc + val, 0);
-                                const conicStops = [];
-                                let cumPercent = 0;
+                                const polarToCartesian = (centerX, centerY, radius, angleInDegrees) => {
+                                    const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
+                                    return {
+                                        x: centerX + (radius * Math.cos(angleInRadians)),
+                                        y: centerY + (radius * Math.sin(angleInRadians))
+                                    };
+                                };
 
-                                if (totalExpenses > 0) {
-                                    const sortedCats = Object.entries(expensesByCategory).sort(([, a], [, b]) => b - a);
-                                    sortedCats.forEach(([catId, amount]) => {
-                                        const category = getCategoryInfo(catId, 'expense');
-                                        const pct = (amount / totalExpenses) * 100;
-                                        conicStops.push(`${category.color} ${cumPercent}% ${cumPercent + pct}%`);
-                                        cumPercent += pct;
-                                    });
-                                }
-
-                                const pieBg = totalExpenses > 0 ? `conic-gradient(${conicStops.join(', ')})` : 'var(--glass-border)';
+                                const createPieSlice = (cx, cy, radius, startAngle, endAngle) => {
+                                    if (endAngle - startAngle >= 360) {
+                                        return `M ${cx}, ${cy} m -${radius}, 0 a ${radius},${radius} 0 1,0 ${radius*2},0 a ${radius},${radius} 0 1,0 -${radius*2},0`;
+                                    }
+                                    const start = polarToCartesian(cx, cy, radius, endAngle);
+                                    const end = polarToCartesian(cx, cy, radius, startAngle);
+                                    const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+                                    return [
+                                        "M", cx, cy,
+                                        "L", start.x, start.y,
+                                        "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y,
+                                        "Z"
+                                    ].join(" ");
+                                };
 
                                 return (
                                     <>
                                         <div 
-                                            onClick={(e) => {
-                                                const rect = e.currentTarget.getBoundingClientRect();
-                                                const x = e.clientX - rect.left - rect.width / 2;
-                                                const y = e.clientY - rect.top - rect.height / 2;
-                                                let angle = Math.atan2(y, x) * (180 / Math.PI) + 90;
-                                                if (angle < 0) angle += 360;
-
-                                                const sortedCats = Object.entries(expensesByCategory).sort(([, a], [, b]) => b - a);
-                                                let cumulativePct = 0;
-                                                for (const [id, amount] of sortedCats) {
-                                                    const pct = (amount / totalExpenses) * 100;
-                                                    const startAngle = (cumulativePct / 100) * 360;
-                                                    const endAngle = ((cumulativePct + pct) / 100) * 360;
-                                                    if (angle >= startAngle && angle < endAngle) {
-                                                        setSelectedPieCat(id);
-                                                        haptic.light();
-                                                        return;
-                                                    }
-                                                    cumulativePct += pct;
-                                                }
-                                                setSelectedPieCat(null);
-                                            }}
                                             style={{ 
-                                                width: '260px', height: '260px', borderRadius: '50%', background: pieBg, 
+                                                width: '280px', height: '280px', 
                                                 display: 'flex', justifyContent: 'center', alignItems: 'center', 
-                                                position: 'relative', overflow: 'hidden', transform: 'translateZ(0)', 
-                                                boxShadow: '0 8px 32px rgba(0,0,0,0.1)', cursor: 'pointer',
-                                                transition: 'all 0.3s ease'
+                                                position: 'relative', transform: 'translateZ(0)', 
                                             }}
                                         >
-                                            <div style={{ width: '180px', height: '180px', background: 'var(--bg-color)', borderRadius: '50%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '10px', textAlign: 'center' }}>
+                                            {/* SVG Pie Slices */}
+                                            {totalExpenses > 0 ? (
+                                                <svg width="280" height="280" viewBox="0 0 280 280" style={{ position: 'absolute', top: 0, left: 0 }}>
+                                                    {(() => {
+                                                        const sortedCats = Object.entries(expensesByCategory).sort(([, a], [, b]) => b - a);
+                                                        let currentAngle = 0;
+                                                        return sortedCats.map(([catId, amount]) => {
+                                                            const pct = amount / totalExpenses;
+                                                            const angle = pct * 360;
+                                                            const startAngle = currentAngle;
+                                                            const endAngle = currentAngle + angle;
+                                                            currentAngle += angle;
+                                                            
+                                                            const cat = getCategoryInfo(catId, 'expense');
+                                                            const isSelected = selectedPieCat === catId;
+                                                            const d = createPieSlice(140, 140, 130, startAngle, endAngle);
+                                                            
+                                                            return (
+                                                                <path 
+                                                                    key={catId} 
+                                                                    d={d} 
+                                                                    fill={cat.color} 
+                                                                    onClick={(e) => { 
+                                                                        e.stopPropagation(); 
+                                                                        setSelectedPieCat(isSelected ? null : catId); 
+                                                                        haptic.light(); 
+                                                                    }}
+                                                                    style={{
+                                                                        transform: isSelected ? 'scale(1.06)' : 'scale(1)',
+                                                                        transformOrigin: '140px 140px',
+                                                                        transition: 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                                                                        cursor: 'pointer',
+                                                                        filter: isSelected ? 'drop-shadow(0px 8px 16px rgba(0,0,0,0.3))' : 'none'
+                                                                    }}
+                                                                />
+                                                            );
+                                                        });
+                                                    })()}
+                                                </svg>
+                                            ) : (
+                                                <div style={{ position: 'absolute', width: '260px', height: '260px', borderRadius: '50%', border: '4px dashed var(--glass-border)' }} />
+                                            )}
+
+                                            {/* Donut Hole */}
+                                            <div style={{ 
+                                                width: '180px', height: '180px', 
+                                                background: 'var(--bg-color)', 
+                                                borderRadius: '50%', 
+                                                display: 'flex', flexDirection: 'column', 
+                                                justifyContent: 'center', alignItems: 'center', 
+                                                padding: '10px', textAlign: 'center',
+                                                position: 'absolute', zIndex: 10,
+                                                boxShadow: 'inset 0 4px 12px rgba(0,0,0,0.2)'
+                                            }}>
                                                 {selectedPieCat ? (() => {
                                                     const cat = getCategoryInfo(selectedPieCat, 'expense');
                                                     const amount = expensesByCategory[selectedPieCat];
@@ -489,7 +526,7 @@ const Home = () => {
                                                         </div>
                                                     );
                                                 })() : (
-                                                    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                    <div className="animate-fade-in" onClick={() => setSelectedPieCat(null)} style={{ display: 'flex', flexDirection: 'column', gap: '2px', cursor: 'pointer' }}>
                                                         <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600' }}>{t('total')}</span>
                                                         <span style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{formatCurrency(totalExpenses)}</span>
                                                     </div>
@@ -713,7 +750,7 @@ const Home = () => {
                         onTouchMove={onTouchMove}
                         onTouchEnd={onTouchEnd}
                         style={{ 
-                            flexShrink: 0, padding: '24px', background: cardGradient, color: 'white', border: 'none', 
+                            flexShrink: 0, padding: '24px', background: cardGradient, color: 'var(--btn-text)', border: 'none', 
                             position: 'relative', overflow: 'hidden', cursor: isDesktop ? 'default' : 'pointer',
                             touchAction: 'pan-y',
                             transform: `translateX(${swipeOffset}px)`,
@@ -919,7 +956,7 @@ const Home = () => {
                                     key={`card-${monthPrefix}`}
                                     className="glass-panel"
                                     style={{ 
-                                        padding: '32px', background: cardGradient, color: 'white', border: 'none', 
+                                        padding: '32px', background: cardGradient, color: 'var(--btn-text)', border: 'none', 
                                         position: 'relative', overflow: 'hidden', borderRadius: '24px'
                                     }}
                                 >
@@ -1161,7 +1198,7 @@ const Home = () => {
                                         setIsLimitModalOpen(true);
                                     }}
                                     style={{ 
-                                        padding: '8px 14px', borderRadius: '12px', background: 'var(--primary-color)', color: 'white',
+                                        padding: '8px 14px', borderRadius: '12px', background: 'var(--primary-color)', color: 'var(--btn-text)',
                                         fontSize: '0.85rem', fontWeight: '700', border: 'none', cursor: 'pointer'
                                     }}
                                 >
@@ -1598,7 +1635,7 @@ const Home = () => {
                                                 onClick={() => setTempLimit({ ...tempLimit, amount: aiSuggestion.amount.toString() })}
                                                 style={{
                                                     position: 'absolute', bottom: '110%', left: '0', right: '0',
-                                                    background: 'var(--primary-color)', color: 'white', padding: '12px 16px',
+                                                    background: 'var(--primary-color)', color: 'var(--btn-text)', padding: '12px 16px',
                                                     borderRadius: '16px 16px 16px 4px', fontSize: '0.85rem', fontWeight: '600',
                                                     boxShadow: '0 10px 25px rgba(var(--primary-rgb), 0.3)', cursor: 'pointer',
                                                     animation: 'bubbleBounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
@@ -1637,7 +1674,7 @@ const Home = () => {
                                             haptic.medium();
                                         }
                                     }}
-                                    style={{ flex: 2, padding: '16px', borderRadius: '16px', background: 'var(--primary-color)', border: 'none', color: 'white', fontWeight: '700', cursor: 'pointer', boxShadow: '0 8px 20px rgba(var(--primary-rgb), 0.3)' }}
+                                    style={{ flex: 2, padding: '16px', borderRadius: '16px', background: 'var(--primary-color)', border: 'none', color: 'var(--btn-text)', fontWeight: '700', cursor: 'pointer', boxShadow: '0 8px 20px rgba(var(--primary-rgb), 0.3)' }}
                                 >
                                     Salvar Limite
                                 </button>
