@@ -1,21 +1,37 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { auth, googleProvider } from '../config/firebase';
-import { signInWithPopup, signOut, onAuthStateChanged, deleteUser } from 'firebase/auth';
+import { 
+    signInWithPopup, 
+    signInWithRedirect,
+    getRedirectResult,
+    signOut, 
+    onAuthStateChanged, 
+    deleteUser 
+} from 'firebase/auth';
 import LoadingDots from '../components/LoadingDots';
 
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
+// Detecta se é dispositivo mobile/Android (onde popups são bloqueados)
+const isMobile = () => /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
 export const AuthProvider = ({ children }) => {
     const [currentUser, setCurrentUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // Login com Google
+    // Login com Google: Redirect no mobile, Popup no desktop
     const loginWithGoogle = async () => {
         try {
-            const result = await signInWithPopup(auth, googleProvider);
-            return result.user;
+            if (isMobile()) {
+                // No Android/mobile, usamos redirect (evita bloqueio de popup)
+                await signInWithRedirect(auth, googleProvider);
+                // A página vai recarregar e o resultado será capturado no useEffect abaixo
+            } else {
+                const result = await signInWithPopup(auth, googleProvider);
+                return result.user;
+            }
         } catch (error) {
             console.error("Erro no login com Google:", error);
             throw error;
@@ -45,7 +61,7 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    // Monitorar estado da autenticação
+    // Monitorar estado da autenticação + capturar resultado do redirect (Android)
     useEffect(() => {
         console.log("🎬 AuthProvider useEffect triggered (auth exists:", !!auth, ")");
 
@@ -63,6 +79,19 @@ export const AuthProvider = ({ children }) => {
             clearTimeout(timeout);
             return;
         }
+
+        // Captura resultado do signInWithRedirect (volta do redirect do Google no Android)
+        getRedirectResult(auth)
+            .then((result) => {
+                if (result?.user) {
+                    console.log("✅ Redirect result captured:", result.user.email);
+                }
+            })
+            .catch((error) => {
+                if (error.code !== 'auth/no-current-user') {
+                    console.error("❌ Redirect result error:", error);
+                }
+            });
 
         try {
             const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -84,7 +113,7 @@ export const AuthProvider = ({ children }) => {
             setLoading(false);
             clearTimeout(timeout);
         }
-    }, [auth]); // added auth as dependency just in case it re-initializes
+    }, [auth]);
 
 
     const value = {
@@ -94,8 +123,6 @@ export const AuthProvider = ({ children }) => {
         deleteAccount,
         loading
     };
-
-
 
     if (loading) {
         return (
