@@ -85,11 +85,12 @@ const InstallPrompt = () => {
             <div style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 10 }}>
                 <button
                     onClick={handleDismiss}
-                    className="glass-btn-close"
                     style={{ 
                         width: '44px', 
                         height: '44px', 
                         borderRadius: '50%', 
+                        background: 'rgba(0,0,0,0.05)', 
+                        border: '1px solid var(--glass-border)',
                         color: 'var(--text-main)', 
                         display: 'flex',
                         alignItems: 'center',
