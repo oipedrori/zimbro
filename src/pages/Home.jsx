@@ -529,66 +529,113 @@ const Home = () => {
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '260px', gap: '8px', borderBottom: '1px solid var(--glass-border)', paddingBottom: '10px', position: 'relative' }}>
                                 
                                 
-                                {yearlyStats.map((stat, i) => {
-                                    const isNegative = stat.balance < 0;
-                                    const maxVal = Math.max(...yearlyStats.map(s => Math.abs(s.balance)), 2000); 
-                                    const h = Math.max(2, (Math.abs(stat.balance) / maxVal) * 45); 
-                                    const isCurrent = stat.month === (currentDate.getMonth() + 1);
+                                {(() => {
+                                    // 1. Calculate max positive and min negative
+                                    const maxPos = Math.max(...yearlyStats.map(s => s.balance > 0 ? s.balance : 0), 0);
+                                    const maxNeg = Math.max(...yearlyStats.map(s => s.balance < 0 ? Math.abs(s.balance) : 0), 0);
                                     
-                                    return (
-                                        <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', position: 'relative' }}>
-                                            
-                                            {/* Value Label — só para o mês atual, position absolute não afeta layout */}
-                                            {isCurrent && (
-                                                <span style={{ 
-                                                    position: 'absolute', 
-                                                    top: isNegative ? 'calc(50% + ' + h + '% + 8px)' : 'auto',
-                                                    bottom: !isNegative ? 'calc(50% + ' + h + '% + 8px)' : 'auto',
-                                                    fontSize: '0.6rem', fontWeight: '800', 
-                                                    color: isNegative ? 'var(--danger-color)' : 'var(--primary-dark)',
-                                                    whiteSpace: 'nowrap',
-                                                    writingMode: 'vertical-rl',
-                                                    transform: 'rotate(180deg)',
-                                                    zIndex: 5
-                                                }}>
-                                                    {Math.abs(stat.balance) >= 10000 ? `${(stat.balance/1000).toFixed(2)}k` : Number(stat.balance).toFixed(2)}
+                                    // Avoid division by zero if all are 0
+                                    const totalRange = maxPos + maxNeg || 1;
+                                    
+                                    // 2. Set the 0-line percentage (from top)
+                                    // Clamp between 20% and 80% to always leave room for labels above/below
+                                    let zeroLinePct = (maxPos / totalRange) * 100;
+                                    if (maxNeg === 0) zeroLinePct = 80; 
+                                    if (maxPos === 0) zeroLinePct = 20;
+                                    zeroLinePct = Math.max(20, Math.min(80, zeroLinePct));
+
+                                    return yearlyStats.map((stat, i) => {
+                                        const isNegative = stat.balance < 0;
+                                        const rawVal = Math.abs(stat.balance);
+                                        const isCurrent = stat.month === (currentDate.getMonth() + 1);
+                                        
+                                        // Bar height in percentage relative to its available container
+                                        let barHeightPct = 0;
+                                        if (!isNegative && maxPos > 0) {
+                                            barHeightPct = (rawVal / maxPos) * 90; // max 90% of its area
+                                        } else if (isNegative && maxNeg > 0) {
+                                            barHeightPct = (rawVal / maxNeg) * 90;
+                                        }
+                                        if (rawVal > 0) barHeightPct = Math.max(4, barHeightPct);
+
+                                        // Format value string (currency symbol omitted for space, format to k)
+                                        let valStr = rawVal >= 1000 ? `${(rawVal/1000).toFixed(1)}k` : rawVal.toFixed(0);
+                                        if (rawVal === 0) valStr = '';
+
+                                        // Whether the label sits inside or outside (rotated text needs more space)
+                                        const isBigEnough = barHeightPct > 25;
+
+                                        return (
+                                            <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', position: 'relative' }}>
+                                                
+                                                <div style={{ flex: 1, width: '100%', position: 'relative' }}>
+                                                    {/* Zero Line visual guide */}
+                                                    <div style={{ position: 'absolute', top: `${zeroLinePct}%`, left: 0, right: 0, height: '1px', background: 'var(--text-muted)', opacity: 0.1 }} />
+
+                                                    {/* Positive Bar Container */}
+                                                    <div style={{ position: 'absolute', top: 0, bottom: `${100 - zeroLinePct}%`, left: 0, right: 0, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+                                                        {!isNegative && rawVal > 0 && (
+                                                            <div style={{
+                                                                width: '16px', height: `${barHeightPct}%`,
+                                                                background: 'var(--primary-dark)',
+                                                                borderRadius: '4px 4px 0 0',
+                                                                opacity: isCurrent ? 1 : 0.45,
+                                                                transition: 'height 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                                                                position: 'relative'
+                                                            }}>
+                                                                {/* Label Inside ou Outside */}
+                                                                <span style={{ 
+                                                                    position: 'absolute', 
+                                                                    top: isBigEnough ? '6px' : '-22px', // pra fora (negativo) ou pra dentro
+                                                                    left: '50%', transform: 'translateX(-50%) rotate(-90deg)',
+                                                                    transformOrigin: 'center center',
+                                                                    fontSize: '0.6rem', fontWeight: '800', 
+                                                                    color: isBigEnough ? '#fff' : 'var(--primary-dark)',
+                                                                    opacity: isCurrent ? 1 : 0.8,
+                                                                    whiteSpace: 'nowrap'
+                                                                }}>
+                                                                    {valStr}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Negative Bar Container */}
+                                                    <div style={{ position: 'absolute', top: `${zeroLinePct}%`, bottom: 0, left: 0, right: 0, display: 'flex', alignItems: 'flex-start', justifyContent: 'center' }}>
+                                                        {isNegative && rawVal > 0 && (
+                                                            <div style={{
+                                                                width: '16px', height: `${barHeightPct}%`,
+                                                                background: 'var(--danger-color)',
+                                                                borderRadius: '0 0 4px 4px',
+                                                                opacity: isCurrent ? 1 : 0.45,
+                                                                transition: 'height 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                                                                position: 'relative'
+                                                            }}>
+                                                                <span style={{ 
+                                                                    position: 'absolute', 
+                                                                    bottom: isBigEnough ? '6px' : '-22px',
+                                                                    left: '50%', transform: 'translateX(-50%) rotate(-90deg)',
+                                                                    transformOrigin: 'center center',
+                                                                    fontSize: '0.6rem', fontWeight: '800', 
+                                                                    color: isBigEnough ? '#fff' : 'var(--danger-color)',
+                                                                    opacity: isCurrent ? 1 : 0.8,
+                                                                    whiteSpace: 'nowrap'
+                                                                }}>
+                                                                    {valStr}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                {/* Rótulo do Mês na Base */}
+                                                <span style={{ fontSize: '0.7rem', marginTop: '6px', color: isCurrent ? 'var(--text-main)' : 'var(--text-muted)', fontWeight: isCurrent ? '800' : '600', opacity: isCurrent ? 1 : 0.6 }}>
+                                                    {stat.label.charAt(0)}
                                                 </span>
-                                            )}
-
-                                            <div style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                                                {/* Top Half (Positive) */}
-                                                <div style={{ height: '50%', width: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
-                                                    {!isNegative && stat.balance > 0 && (
-                                                        <div style={{
-                                                            width: '12px', height: `${h * 2}%`,
-                                                            background: 'var(--primary-dark)',
-                                                            borderRadius: '4px 4px 0 0',
-                                                            opacity: stat.month === (currentDate.getMonth() + 1) ? 1 : 0.4,
-                                                            transition: 'height 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
-                                                        }} />
-                                                    )}
-                                                </div>
-                                                {/* Bottom Half (Negative) */}
-                                                <div style={{ height: '50%', width: '100%', display: 'flex', alignItems: 'flex-start', justifyContent: 'center' }}>
-                                                    {isNegative && (
-                                                        <div style={{
-                                                            width: '12px', height: `${h * 2}%`,
-                                                            background: 'var(--danger-color)',
-                                                            borderRadius: '0 0 4px 4px',
-                                                            opacity: stat.month === (currentDate.getMonth() + 1) ? 1 : 0.4,
-                                                            transition: 'height 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
-                                                        }} />
-                                                    )}
-                                                </div>
                                             </div>
-
-                                            {/* Rótulo do Mês na Base */}
-                                            <span style={{ fontSize: '0.7rem', marginTop: '6px', color: 'var(--text-muted)', fontWeight: '600' }}>
-                                                {stat.label.charAt(0)}
-                                            </span>
-                                        </div>
-                                    );
-                                })}
+                                        );
+                                    });
+                                })()}
                             </div>
                         </section>
                     </div>
