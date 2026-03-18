@@ -346,7 +346,8 @@ const Home = () => {
     const expensesByCategory = transactions
         .filter(t => t.type === 'expense')
         .reduce((acc, t) => {
-            acc[t.category] = (acc[t.category] || 0) + t.amount;
+            const catId = getCategoryInfo(t.category, 'expense').id;
+            acc[catId] = (acc[catId] || 0) + t.amount;
             return acc;
         }, {});
 
@@ -420,7 +421,8 @@ const Home = () => {
                                 const expensesByCategory = transactions
                                     .filter(t => t.type === 'expense')
                                     .reduce((acc, t) => {
-                                        acc[t.category] = (acc[t.category] || 0) + t.amount;
+                                        const catId = getCategoryInfo(t.category, 'expense').id;
+                                        acc[catId] = (acc[catId] || 0) + t.amount;
                                         return acc;
                                     }, {});
 
