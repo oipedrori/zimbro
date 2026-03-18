@@ -526,31 +526,34 @@ const Home = () => {
 
                         <section className="glass-panel" style={{ padding: '24px' }}>
                             <h3 style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '24px' }}>{t('monthly_balances_current_year', { defaultValue: 'Saldos Mensais' })}</h3>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '240px', gap: '8px', borderBottom: '1px solid var(--glass-border)', paddingBottom: '10px', position: 'relative' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '260px', gap: '8px', borderBottom: '1px solid var(--glass-border)', paddingBottom: '10px', position: 'relative' }}>
                                 
                                 
                                 {yearlyStats.map((stat, i) => {
                                     const isNegative = stat.balance < 0;
                                     const maxVal = Math.max(...yearlyStats.map(s => Math.abs(s.balance)), 2000); 
                                     const h = Math.max(2, (Math.abs(stat.balance) / maxVal) * 45); 
+                                    const isCurrent = stat.month === (currentDate.getMonth() + 1);
                                     
                                     return (
                                         <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', position: 'relative' }}>
                                             
-                                            {/* Value Label Label Outside Bar */}
-                                            <span style={{ 
-                                                position: 'absolute', 
-                                                top: isNegative ? 'calc(50% + ' + h + '% + 8px)' : 'auto',
-                                                bottom: !isNegative ? 'calc(50% + ' + h + '% + 8px)' : 'auto',
-                                                fontSize: '0.6rem', fontWeight: '800', 
-                                                color: isNegative ? 'var(--danger-color)' : 'var(--primary-dark)',
-                                                whiteSpace: 'nowrap',
-                                                writingMode: 'vertical-rl',
-                                                transform: 'rotate(180deg)',
-                                                zIndex: 5
-                                            }}>
-                                                {Math.abs(stat.balance) >= 10000 ? `${(stat.balance/1000).toFixed(2)}k` : Number(stat.balance).toFixed(2)}
-                                            </span>
+                                            {/* Value Label — só para o mês atual, position absolute não afeta layout */}
+                                            {isCurrent && (
+                                                <span style={{ 
+                                                    position: 'absolute', 
+                                                    top: isNegative ? 'calc(50% + ' + h + '% + 8px)' : 'auto',
+                                                    bottom: !isNegative ? 'calc(50% + ' + h + '% + 8px)' : 'auto',
+                                                    fontSize: '0.6rem', fontWeight: '800', 
+                                                    color: isNegative ? 'var(--danger-color)' : 'var(--primary-dark)',
+                                                    whiteSpace: 'nowrap',
+                                                    writingMode: 'vertical-rl',
+                                                    transform: 'rotate(180deg)',
+                                                    zIndex: 5
+                                                }}>
+                                                    {Math.abs(stat.balance) >= 10000 ? `${(stat.balance/1000).toFixed(2)}k` : Number(stat.balance).toFixed(2)}
+                                                </span>
+                                            )}
 
                                             <div style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                                                 {/* Top Half (Positive) */}
