@@ -14,8 +14,8 @@ const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
-// Detecta mobile/Android (onde popups são bloqueados pelo Chrome)
-const isMobile = () => /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+// Detecta APENAS Android — iOS Safari funciona com popup (ITP bloqueia redirect no Safari)
+const isAndroid = () => /Android/i.test(navigator.userAgent);
 
 export const AuthProvider = ({ children }) => {
     const [currentUser, setCurrentUser] = useState(null);
@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
     // Login com Google: Redirect no mobile, Popup no desktop
     const loginWithGoogle = async () => {
         try {
-            if (isMobile()) {
+            if (isAndroid()) {
                 // No Android/mobile: redireciona para o Google (volta via getRedirectResult)
                 await signInWithRedirect(auth, googleProvider);
             } else {
