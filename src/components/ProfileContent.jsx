@@ -17,6 +17,14 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
     const [theme, setTheme] = useState(localStorage.getItem('zimbroo_theme') || 'system');
     const [showVerse, setShowVerse] = useState(false);
 
+    // Auto-dismiss do balão do versículo após 5s
+    useEffect(() => {
+        if (showVerse) {
+            const timer = setTimeout(() => setShowVerse(false), 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [showVerse]);
+
     useEffect(() => {
         const root = document.documentElement;
         if (theme === 'dark') {
@@ -215,23 +223,8 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
             </div>
 
             {/* Overlays (Inline for Sheet) */}
-            {(showResetConfirm || showDeleteConfirm || showVerse) && (
+            {(showResetConfirm || showDeleteConfirm) && (
                 <div style={{ position: 'absolute', inset: 0, background: 'var(--bg-color)', zIndex: 10, padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'center' }}>
-                    {showVerse && (
-                        <div className="animate-fade-in" onClick={() => setShowVerse(false)}>
-                            <Sparkles size={48} color="var(--primary-color)" style={{ margin: '0 auto 24px', opacity: 0.8 }} />
-                            <p style={{ fontSize: '1.2rem', fontWeight: '500', lineHeight: 1.6, color: 'var(--text-main)', fontStyle: 'italic', marginBottom: '16px' }}>
-                                "Deitou-se e dormiu debaixo do zimbro; eis que um anjo o tocou e lhe disse: Levanta-te e come."
-                            </p>
-                            <p style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--primary-color)' }}>1Reis 19.5</p>
-                            <button 
-                                onClick={() => setShowVerse(false)}
-                                style={{ marginTop: '40px', padding: '12px 24px', borderRadius: '12px', background: 'var(--surface-color)', border: '1px solid var(--glass-border)', color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: '600' }}
-                            >
-                                Fechar
-                            </button>
-                        </div>
-                    )}
                     {showResetConfirm && (
                         <>
                             <RefreshCcw size={48} color="#f59e0b" style={{ margin: '0 auto 20px' }} />
@@ -261,14 +254,52 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                 </div>
             )}
             
-            {/* App Version & Easter Egg */}
-            <div style={{ marginTop: '32px', textAlign: 'center', opacity: 0.3, paddingBottom: '20px' }}>
-                <button 
-                    onClick={() => { setShowVerse(true); haptic.medium(); }}
-                    style={{ fontSize: '0.75rem', fontWeight: '700', margin: 0, letterSpacing: '0.5px', color: 'inherit', border: 'none', background: 'none', cursor: 'pointer' }}
+            {/* App Version, Easter Egg e Feito no Brasil */}
+            <div style={{ marginTop: '32px', textAlign: 'center', paddingBottom: '20px', position: 'relative' }}>
+                {/* Balão do versículo */}
+                {showVerse && (
+                    <div
+                        className="animate-fade-in"
+                        onClick={() => setShowVerse(false)}
+                        style={{
+                            position: 'absolute', bottom: '100%', left: '50%',
+                            transform: 'translateX(-50%)',
+                            marginBottom: '12px',
+                            background: 'var(--surface-color)',
+                            border: '1px solid var(--glass-border)',
+                            borderRadius: '20px',
+                            padding: '16px 20px',
+                            width: '280px',
+                            boxShadow: '0 8px 30px rgba(0,0,0,0.15)',
+                            cursor: 'pointer',
+                            zIndex: 20,
+                            animation: 'fadeIn 0.25s ease-out forwards',
+                        }}
+                    >
+                        {/* Rabo do balão */}
+                        <div style={{
+                            position: 'absolute', bottom: '-8px', left: '50%',
+                            transform: 'translateX(-50%)',
+                            width: 0, height: 0,
+                            borderLeft: '8px solid transparent',
+                            borderRight: '8px solid transparent',
+                            borderTop: '8px solid var(--glass-border)'
+                        }} />
+                        <Sparkles size={18} color="var(--primary-color)" style={{ marginBottom: '8px', opacity: 0.8 }} />
+                        <p style={{ fontSize: '0.8rem', fontWeight: '500', lineHeight: 1.6, color: 'var(--text-main)', fontStyle: 'italic', margin: '0 0 8px' }}>
+                            "Deitou-se e dormiu debaixo do zimbro; eis que um anjo o tocou e lhe disse: Levanta-te e come."
+                        </p>
+                        <p style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--primary-color)', margin: 0 }}>1 Reis 19.5</p>
+                    </div>
+                )}
+
+                <button
+                    onClick={() => { setShowVerse(!showVerse); haptic.medium(); }}
+                    style={{ fontSize: '0.75rem', fontWeight: '700', letterSpacing: '0.5px', color: 'var(--text-muted)', border: 'none', background: 'none', cursor: 'pointer', opacity: 0.4 }}
                 >
                     ZIMBROO v1.8.4
                 </button>
+                <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.35, margin: '4px 0 0', letterSpacing: '0.3px' }}>Feito no Brasil 🇧🇷</p>
             </div>
         </div>
     );

@@ -24,16 +24,18 @@ export const AuthProvider = ({ children }) => {
     // Login com Google: Redirect no mobile, Popup no desktop
     const loginWithGoogle = async () => {
         try {
-            if (isAndroid()) {
-                // No Android/mobile: redireciona para o Google (volta via getRedirectResult)
+            // Tenta popup primeiro (funciona no Chrome moderno incluindo Android v100+)
+            const result = await signInWithPopup(auth, googleProvider);
+            return result.user;
+        } catch (error) {
+            if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user') {
+                // Fallback: redirect (usado quando popup é bloqueado pelo browser)
+                console.log("Popup bloqueado, usando redirect como fallback...");
                 await signInWithRedirect(auth, googleProvider);
             } else {
-                const result = await signInWithPopup(auth, googleProvider);
-                return result.user;
+                console.error("Erro no login com Google:", error);
+                throw error;
             }
-        } catch (error) {
-            console.error("Erro no login com Google:", error);
-            throw error;
         }
     };
 
