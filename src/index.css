@@ -213,6 +213,11 @@ p {
   to { opacity: 1; }
 }
 
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
 @keyframes slideUp {
   from {
     opacity: 0;
@@ -329,9 +334,7 @@ button {
   }
 }
 
-body.modal-open .bottom-nav {
-  display: none !important;
-}
+/* Rule removed to allow bottom-nav to slide up and down with CSS transitions */
 
 /* Indicador de carregamento iterativo (3 pontinhos) */
 .typing-indicator {
