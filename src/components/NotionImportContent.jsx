@@ -4,10 +4,12 @@ import { Database, CheckCircle2, AlertCircle, Trash2, TrendingUp, TrendingDown, 
 import { getNotionDatabaseInfo, fetchNotionTransactions, orchestratedDiscovery, extractNotionId, findDatabasesOnPage, getNotionWorkspaceInfo } from '../services/notionService';
 import { addTransaction, deleteAllUserTransactions } from '../services/transactionService';
 import { useAuth } from '../contexts/AuthContext';
+import { useI18n } from '../contexts/I18nContext';
 import { haptic } from '../utils/haptic';
 
 const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
     const { currentUser } = useAuth();
+    const { t } = useI18n();
     const [notionToken, setNotionToken] = useState(localStorage.getItem('zimbroo_notion_token') || '');
     const [expenseDbId, setExpenseDbId] = useState(localStorage.getItem('zimbroo_notion_expense_db_id') || '');
     const [incomeDbId, setIncomeDbId] = useState(localStorage.getItem('zimbroo_notion_income_db_id') || '');
@@ -76,7 +78,7 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
 
             const discovered = await orchestratedDiscovery(notionToken, (pageName) => {
                 setScanningPage(pageName);
-                setStatusMessage(`Escanear: ${pageName}`);
+                setStatusMessage(t('scanning_page', { pageName }));
             });
             
             const directDbs = discovered.filter(item => item.object === 'database');
@@ -177,22 +179,22 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
 
         try {
             if (expenseDbId) {
-                setStatusMessage('Buscando despesas...');
+                setStatusMessage(t('fetching_expenses_start'));
                 txsE = await fetchNotionTransactions(notionToken, expenseDbId, (count) => {
-                    setStatusMessage(`Buscando despesas: ${count} carregadas`);
+                    setStatusMessage(t('fetching_expenses', { count }));
                 });
             }
             if (incomeDbId) {
-                setStatusMessage('Buscando ganhos...');
+                setStatusMessage(t('fetching_incomes_start'));
                 txsI = await fetchNotionTransactions(notionToken, incomeDbId, (count) => {
-                    setStatusMessage(`Buscando ganhos: ${count} carregados`);
+                    setStatusMessage(t('fetching_incomes', { count }));
                 });
             }
 
             const total = txsE.length + txsI.length;
-            if (total === 0) throw new Error("Sem movimentações pendentes.");
+            if (total === 0) throw new Error(t('no_pending_txs'));
 
-            setStatusMessage('Importando movimentações...');
+            setStatusMessage(t('importing_txs'));
             let current = 0;
             for (let tx of txsE) {
                 await addTransaction(currentUser.uid, { ...tx, type: 'expense' });
@@ -225,14 +227,14 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
                 >
                     <ChevronLeft size={20} />
                 </button>
-                <h2 style={{ fontSize: '1.2rem', fontWeight: '700', margin: 0, flex: 1 }}>{step === 4 ? 'Sucesso!' : 'Importar Notion'}</h2>
+                <h2 style={{ fontSize: '1.2rem', fontWeight: '700', margin: 0, flex: 1 }}>{step === 4 ? t('success') : t('notion_import_title')}</h2>
                 {notionToken && step !== 4 && (
                     <div style={{ display: 'flex', gap: '8px' }}>
                         <button
                             onClick={handleResetData}
                             style={{ background: 'rgba(239, 68, 68, 0.1)', border: 'none', borderRadius: '12px', padding: '8px 12px', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', fontWeight: '700' }}
                         >
-                            Limpar Tudo
+                            {t('clear_all')}
                         </button>
                         <button
                             onClick={handleDisconnect}
@@ -261,7 +263,7 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
                         </div>
                     )}
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '16px' }}>
-                        Por favor, não feche o app.
+                        {t('do_not_close_app')}
                     </p>
                 </div>
             )}
@@ -277,9 +279,9 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
                     }}>
                         <Database size={32} color="white" />
                     </div>
-                    <h3 style={{ fontSize: '1.4rem', fontWeight: '800', marginBottom: '12px' }}>Conecte seu Notion</h3>
+                    <h3 style={{ fontSize: '1.4rem', fontWeight: '800', marginBottom: '12px' }}>{t('notion_connect_title')}</h3>
                     <p style={{ color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: '28px', fontSize: '0.95rem' }}>
-                        Traga seus registros financeiros e centralize tudo no Zimbroo.
+                        {t('notion_connect_desc')}
                     </p>
                     <button
                         onClick={() => {
@@ -297,9 +299,9 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
                         {loading ? (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <div style={{ width: '16px', height: '16px', border: '2px solid rgba(128,128,128,0.3)', borderTopColor: 'var(--notion-btn-text)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                                <span>Conectando...</span>
+                                <span>{t('connecting')}</span>
                             </div>
-                        ) : 'Conectar Agora'}
+                        ) : t('notion_connect_btn')}
                     </button>
                     
                     <style>{`
@@ -344,11 +346,11 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
                             return (
                                 <div key={db.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', background: 'var(--surface-color)', border: '1px solid var(--glass-border)', borderRadius: '18px' }}>
                                     <div style={{ flex: 1, fontWeight: '700', fontSize: '0.9rem', color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                        {db.title[0]?.plain_text || 'Sem nome'}
+                                        {db.title[0]?.plain_text || t('unnamed')}
                                     </div>
                                     <div style={{ display: 'flex', gap: '6px' }}>
-                                        <button onClick={() => assignDb(db.id, 'expense')} style={{ fontSize: '0.65rem', fontWeight: '800', padding: '6px 8px', borderRadius: '8px', background: isExpense ? 'var(--danger-color)' : 'var(--bg-color)', color: isExpense ? 'white' : 'var(--text-muted)', border: 'none' }}>Gasto</button>
-                                        <button onClick={() => assignDb(db.id, 'income')} style={{ fontSize: '0.65rem', fontWeight: '800', padding: '6px 8px', borderRadius: '8px', background: isIncome ? 'var(--success-color)' : 'var(--bg-color)', color: isIncome ? 'white' : 'var(--text-muted)', border: 'none' }}>Ganho</button>
+                                        <button onClick={() => assignDb(db.id, 'expense')} style={{ fontSize: '0.65rem', fontWeight: '800', padding: '6px 8px', borderRadius: '8px', background: isExpense ? 'var(--danger-color)' : 'var(--bg-color)', color: isExpense ? 'white' : 'var(--text-muted)', border: 'none' }}>{t('expense_btn')}</button>
+                                        <button onClick={() => assignDb(db.id, 'income')} style={{ fontSize: '0.65rem', fontWeight: '800', padding: '6px 8px', borderRadius: '8px', background: isIncome ? 'var(--success-color)' : 'var(--bg-color)', color: isIncome ? 'white' : 'var(--text-muted)', border: 'none' }}>{t('income_btn')}</button>
                                     </div>
                                 </div>
                             );
@@ -366,7 +368,7 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
                             boxShadow: '0 8px 30px rgba(255,255,255,0.1)'
                         }}
                     >
-                        {loading ? `${progress}% Importando...` : 'Importar Agora'}
+                        {loading ? `${progress}% ${t('importing_txs')}` : t('import_now')}
                     </button>
                 </div>
             )}
@@ -374,15 +376,15 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
             {step === 4 && (
                 <div style={{ textAlign: 'center' }}>
                     <CheckCircle2 size={60} color="#22c55e" style={{ margin: '0 auto 24px' }} />
-                    <h3 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '8px' }}>Sucesso!</h3>
+                    <h3 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '8px' }}>{t('success')}</h3>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '32px' }}>
-                        {syncStats.expenses + syncStats.incomes} itens importados.
+                        {t('items_imported', { count: syncStats.expenses + syncStats.incomes })}
                     </p>
                     <button
                         onClick={onFinish}
                         style={{ width: '100%', padding: '18px', borderRadius: '18px', background: 'white', color: 'black', fontWeight: '800', border: 'none' }}
                     >
-                        Concluído
+                        {t('done')}
                     </button>
                 </div>
             )}

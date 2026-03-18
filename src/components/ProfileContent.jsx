@@ -51,9 +51,9 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
             await deleteAllUserTransactions(currentUser.uid);
             haptic.success();
             setShowResetConfirm(false);
-            alert('Dados financeiros apagados.');
+            alert(t('success_reset_all'));
         } catch (error) {
-            alert('Erro ao apagar dados.');
+            alert('Error');
         } finally {
             setIsResettingData(false);
         }
@@ -116,7 +116,7 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                     <div style={{ width: '32px', height: '32px', background: 'white', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                         <img src="/notion_logo.png" style={{ width: '18px', height: '18px' }} alt="" />
                     </div>
-                    <span style={{ fontWeight: '600', fontSize: '1rem' }}>Importar Hub Financeiro</span>
+                    <span style={{ fontWeight: '600', fontSize: '1rem' }}>{t('import_hub')}</span>
                 </div>
                 <ArrowRight size={18} opacity={0.5} />
             </button>
@@ -126,7 +126,7 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                 <div style={{ background: 'var(--surface-color)', padding: '16px', borderRadius: '20px', border: '1px solid var(--glass-border)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px', opacity: 0.6 }}>
                         <Moon size={16} />
-                        <span style={{ fontSize: '0.8rem', fontWeight: '700', letterSpacing: '0.5px' }}>TEMA</span>
+                        <span style={{ fontSize: '0.8rem', fontWeight: '700', letterSpacing: '0.5px' }}>{t('theme_caps')}</span>
                     </div>
                     <div style={{ display: 'flex', gap: '8px', background: 'var(--bg-color)', padding: '4px', borderRadius: '12px' }}>
                         {['system', 'light', 'dark'].map(t => (
@@ -139,7 +139,7 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                                     color: theme === t ? 'white' : 'var(--text-muted)'
                                 }}
                             >
-                                {t === 'system' ? 'AUTO' : t === 'light' ? 'CLARO' : 'ESCURO'}
+                                {t === 'system' ? t('theme_auto') : t === 'light' ? t('theme_light') : t('theme_dark')}
                             </button>
                         ))}
                     </div>
@@ -148,7 +148,7 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                 <div style={{ background: 'var(--surface-color)', padding: '16px', borderRadius: '20px', border: '1px solid var(--glass-border)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px', opacity: 0.6 }}>
                         <Globe size={16} />
-                        <span style={{ fontSize: '0.8rem', fontWeight: '700', letterSpacing: '0.5px' }}>IDIOMA</span>
+                        <span style={{ fontSize: '0.8rem', fontWeight: '700', letterSpacing: '0.5px' }}>{t('language_caps')}</span>
                     </div>
                     <select
                         value={locale}
@@ -164,7 +164,7 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                 <div style={{ background: 'var(--surface-color)', padding: '16px', borderRadius: '20px', border: '1px solid var(--glass-border)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px', opacity: 0.6 }}>
                         <DollarSign size={16} />
-                        <span style={{ fontSize: '0.8rem', fontWeight: '700', letterSpacing: '0.5px' }}>MOEDA</span>
+                        <span style={{ fontSize: '0.8rem', fontWeight: '700', letterSpacing: '0.5px' }}>{t('currency_caps')}</span>
                     </div>
                     <select
                         value={currency}
@@ -202,7 +202,7 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' 
                     }}
                 >
-                    <LogOut size={18} /> <span style={{ fontSize: '1rem' }}>Sair</span>
+                    <LogOut size={18} /> <span style={{ fontSize: '1rem' }}>{t('logout')}</span>
                 </button>
                 <button
                     onClick={() => setShowResetConfirm(true)}
@@ -213,7 +213,7 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' 
                     }}
                 >
-                    <RefreshCcw size={18} /> <span style={{ fontSize: '1rem' }}>Resetar Dados</span>
+                    <RefreshCcw size={18} /> <span style={{ fontSize: '1rem' }}>{t('reset_data')}</span>
                 </button>
                 <button
                     onClick={() => setShowDeleteConfirm(true)}
@@ -224,7 +224,7 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' 
                     }}
                 >
-                    <Trash2 size={18} /> <span style={{ fontSize: '1rem' }}>Excluir Conta</span>
+                    <Trash2 size={18} /> <span style={{ fontSize: '1rem' }}>{t('delete_account')}</span>
                 </button>
             </div>
 
@@ -234,26 +234,26 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                     {showResetConfirm && (
                         <>
                             <RefreshCcw size={48} color="#f59e0b" style={{ margin: '0 auto 20px' }} />
-                            <h3 style={{ fontSize: '1.4rem', fontWeight: '800', marginBottom: '12px' }}>Apagar tudo?</h3>
-                            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '32px' }}>Isso removerá todas as transações, mas manterá sua conta. Ação irreversível.</p>
+                            <h3 style={{ fontSize: '1.4rem', fontWeight: '800', marginBottom: '12px' }}>{t('reset_data_confirm_title')}</h3>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '32px' }}>{t('reset_data_confirm_desc')}</p>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                <button onClick={handleResetData} style={{ height: '56px', borderRadius: '18px', background: '#f59e0b', color: 'white', fontWeight: '700', border: 'none' }}>Sim, apagar tudo</button>
-                                <button onClick={() => setShowResetConfirm(false)} style={{ height: '56px', borderRadius: '18px', background: 'var(--surface-color)', color: 'var(--text-main)', border: 'none' }}>Cancelar</button>
+                                <button onClick={handleResetData} style={{ height: '56px', borderRadius: '18px', background: '#f59e0b', color: 'white', fontWeight: '700', border: 'none' }}>{t('reset_data_confirm_btn')}</button>
+                                <button onClick={() => setShowResetConfirm(false)} style={{ height: '56px', borderRadius: '18px', background: 'var(--surface-color)', color: 'var(--text-main)', border: 'none' }}>{t('cancel')}</button>
                             </div>
                         </>
                     )}
                     {showDeleteConfirm && (
                         <>
                             <Trash2 size={48} color="var(--danger-color)" style={{ margin: '0 auto 20px' }} />
-                            <h3 style={{ fontSize: '1.4rem', fontWeight: '800', marginBottom: '12px' }}>Excluir Conta?</h3>
-                            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '24px' }}>Digite <b>DELETE</b> para confirmar a exclusão permanente:</p>
+                            <h3 style={{ fontSize: '1.4rem', fontWeight: '800', marginBottom: '12px' }}>{t('delete_account_confirm_title')}</h3>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '24px' }}>{t('delete_account_confirm_desc')}</p>
                             <input 
                                 type="text" value={deleteConfirmText} onChange={e => setDeleteConfirmText(e.target.value.toUpperCase())}
                                 style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1px solid var(--danger-color)', background: 'var(--bg-color)', color: 'var(--text-main)', textAlign: 'center', fontWeight: '700', marginBottom: '20px', outline: 'none' }}
                             />
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                <button onClick={handleDeleteAccount} disabled={deleteConfirmText !== 'DELETE'} style={{ height: '56px', borderRadius: '18px', background: deleteConfirmText === 'DELETE' ? 'var(--danger-color)' : 'var(--glass-border)', color: 'white', fontWeight: '700', border: 'none' }}>Confirmar Exclusão</button>
-                                <button onClick={() => { setShowDeleteConfirm(false); setDeleteConfirmText(''); }} style={{ height: '56px', borderRadius: '18px', background: 'var(--surface-color)', color: 'var(--text-main)', border: 'none' }}>Cancelar</button>
+                                <button onClick={handleDeleteAccount} disabled={deleteConfirmText !== 'DELETE'} style={{ height: '56px', borderRadius: '18px', background: deleteConfirmText === 'DELETE' ? 'var(--danger-color)' : 'var(--glass-border)', color: 'white', fontWeight: '700', border: 'none' }}>{t('delete_account_confirm_btn')}</button>
+                                <button onClick={() => { setShowDeleteConfirm(false); setDeleteConfirmText(''); }} style={{ height: '56px', borderRadius: '18px', background: 'var(--surface-color)', color: 'var(--text-main)', border: 'none' }}>{t('cancel')}</button>
                             </div>
                         </>
                     )}
@@ -298,9 +298,9 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                         }} />
                         <Sparkles size={18} color="var(--primary-color)" style={{ marginBottom: '8px', opacity: 0.8 }} />
                         <p style={{ fontSize: '0.8rem', fontWeight: '500', lineHeight: 1.6, color: 'var(--text-main)', fontStyle: 'italic', margin: '0 0 8px' }}>
-                            "Deitou-se e dormiu debaixo do zimbro; eis que um anjo o tocou e lhe disse: Levanta-te e come."
+                            {t('easter_egg_verse')}
                         </p>
-                        <p style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--primary-color)', margin: 0 }}>1 Reis 19.5</p>
+                        <p style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--primary-color)', margin: 0 }}>{t('easter_egg_ref')}</p>
                     </div>
                 )}
 
@@ -310,7 +310,7 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                 >
                     ZIMBROO v1.8.4
                 </button>
-                <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.35, margin: '4px 0 0', letterSpacing: '0.3px' }}>Feito no Brasil 🇧🇷</p>
+                <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.35, margin: '4px 0 0', letterSpacing: '0.3px' }}>{t('made_in_brazil')}</p>
             </div>
         </div>
     );
