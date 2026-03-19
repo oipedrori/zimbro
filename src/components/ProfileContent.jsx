@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
-import { User, LogOut, Trash2, Moon, Globe, DollarSign, ArrowRight, RefreshCcw, X, Sparkles } from 'lucide-react';
+import { User, LogOut, Trash2, Moon, Globe, DollarSign, ArrowRight, RefreshCcw, X, Sparkles, Bell } from 'lucide-react';
+import { requestNotificationPermission } from './NotificationHandler';
 import { deleteAllUserTransactions } from '../services/transactionService';
 import { haptic } from '../utils/haptic';
 
@@ -188,6 +189,41 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                         <option value="INR">Rupia (₹)</option>
                         <option value="JPY">Iene (¥)</option>
                     </select>
+                </div>
+
+                <div style={{ background: 'var(--surface-color)', padding: '16px', borderRadius: '20px', border: '1px solid var(--glass-border)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px', opacity: 0.6 }}>
+                        <Bell size={16} />
+                        <span style={{ fontSize: '0.8rem', fontWeight: '700', letterSpacing: '0.5px' }}>NOTIFICAÇÕES</span>
+                    </div>
+                    {Notification.permission === 'granted' ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--primary-color)', fontSize: '0.85rem', fontWeight: '600', padding: '10px 0' }}>
+                           <Sparkles size={16} /> Ativadas
+                        </div>
+                    ) : (
+                        <button
+                            onClick={async () => {
+                                haptic.medium();
+                                const token = await requestNotificationPermission();
+                                if (token) {
+                                    alert('Notificações ativadas com sucesso!');
+                                    // Força re-render para mostrar o status "Ativado"
+                                    onClose(); 
+                                }
+                            }}
+                            style={{ 
+                                width: '100%', padding: '14px', borderRadius: '12px', 
+                                background: 'var(--primary-color)', color: 'white', 
+                                border: 'none', fontWeight: '700', fontSize: '0.85rem',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Ativar Notificações
+                        </button>
+                    )}
+                    <p style={{ margin: '8px 0 0', fontSize: '0.7rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>
+                        Necessário para lembretes e avisos importantes.
+                    </p>
                 </div>
             </div>
 
