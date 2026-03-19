@@ -1,7 +1,11 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { registerSW } from 'virtual:pwa-register'
 import App from './App.jsx'
 import './index.css'
+
+// Atualiza o service worker automaticamente
+registerSW({ immediate: true })
 
 window.onerror = function (message, source, lineno, colno, error) {
   document.body.innerHTML = `

@@ -1,7 +1,8 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, enableMultiTabIndexedDbPersistence } from "firebase/firestore";
+import { getMessaging } from "firebase/messaging";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -20,6 +21,7 @@ let analytics;
 let auth;
 let googleProvider;
 let db;
+let messaging;
 
 console.log("🔥 Initializing Firebase with config:", {
   projectId: firebaseConfig.projectId,
@@ -46,6 +48,24 @@ try {
   });
   db = getFirestore(app);
 
+  // Ativa persistência offline (multi-tab)
+  enableMultiTabIndexedDbPersistence(db).catch((err) => {
+    if (err.code === 'failed-precondition') {
+      // Múltiplas abas abertas, a persistência só pode ser ativada em uma por vez
+      console.warn('Persistência Firestore: Falha (múltiplas abas)');
+    } else if (err.code === 'unimplemented') {
+      // O navegador não suporta todas as funcionalidades necessárias
+      console.warn('Persistência Firestore: Não suportada pelo navegador');
+    }
+  });
+
+  try {
+    messaging = getMessaging(app);
+    console.log("✅ FCM Messaging initialized");
+  } catch (e) {
+    console.warn("FCM Messaging initialization failed (likely not supported):", e);
+  }
+
   console.log("✅ Firebase initialized successfully");
 } catch (error) {
   console.error("❌ Firebase initialization failed CRITICALLY:", error);
@@ -53,4 +73,4 @@ try {
   googleProvider = new GoogleAuthProvider();
 }
 
-export { app, analytics, auth, googleProvider, db };
+export { app, analytics, auth, googleProvider, db, messaging };

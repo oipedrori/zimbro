@@ -6,6 +6,7 @@ import Layout from './components/Layout';
 import LoadingDots from './components/LoadingDots';
 import InstallPrompt from './components/InstallPrompt';
 import CookieNotice from './components/CookieNotice';
+import NotificationHandler from './components/NotificationHandler';
 import './index.css';
 
 // Helper for lazy loading with retry logic
@@ -76,6 +77,7 @@ function App() {
       <AuthProvider>
         <InstallPrompt />
         <CookieNotice />
+        <NotificationHandler />
         <BrowserRouter>
           <AppRoutes />
         </BrowserRouter>
