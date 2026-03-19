@@ -218,27 +218,50 @@ const Statistics = () => {
             </section>
 
             {/* Gráfico de Pizza */}
-            <section className="glass-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <section className="glass-panel" style={{ padding: '24px' }}>
                 <h3 style={{ width: '100%', fontSize: '1.2rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '8px' }}>
                     {t('expenses_of', { month: format(currentDate, 'MMMM', { locale: dateLocales[locale] || enUS }).replace(/^\w/, c => c.toUpperCase()), defaultValue: 'Despesas do mês' })}
                 </h3>
 
                 {totalExpenses > 0 ? (
-                    <>
+                    <div className="pie-chart-container">
+                        <style>{`
+                            .pie-chart-container {
+                                display: flex;
+                                flex-direction: column;
+                                align-items: center;
+                                gap: 32px;
+                                margin-top: 12px;
+                            }
+                            @media (min-width: 768px) {
+                                .pie-chart-container {
+                                    flex-direction: row;
+                                    justify-content: center;
+                                    align-items: flex-start;
+                                    padding: 20px 0;
+                                }
+                                .pie-chart-svg-wrapper {
+                                    flex-shrink: 0;
+                                }
+                                .pie-chart-legend {
+                                    flex: 1;
+                                    justify-content: flex-start !important;
+                                    max-width: 450px;
+                                }
+                            }
+                        `}</style>
+
                         {/* SVG Pie Chart interativo */}
-                        <div style={{ position: 'relative', width: '220px', height: '220px', margin: '24px 0' }}>
-                            <svg viewBox="0 0 200 200" width="220" height="220" style={{ overflow: 'visible' }}>
+                        <div className="pie-chart-svg-wrapper" style={{ position: 'relative', width: '220px', height: '220px' }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ overflow: 'visible' }}>
                                 {segments.map(seg => {
                                     const isSelected = selectedSlice === seg.catId;
-                                    // Math for popping the slice out
                                     const toRad = deg => (deg * Math.PI) / 180;
                                     const midAngle = toRad((seg.start + seg.pct / 2) / 100 * 360 - 90);
-                                    // Distance to pop out
-                                    const popOutDist = 12; 
+                                    const popOutDist = 14; // Aumentado levemente para ver melhor no desktop
                                     const tx = isSelected ? Math.cos(midAngle) * popOutDist : 0;
                                     const ty = isSelected ? Math.sin(midAngle) * popOutDist : 0;
-                                    // Slight extra scale for emphasis
-                                    const scale = isSelected ? 1.05 : 1;
+                                    const scale = isSelected ? 1.08 : 1; // Aumentado para 1.08
 
                                     return (
                                         <path
@@ -249,9 +272,9 @@ const Statistics = () => {
                                             onClick={() => setSelectedSlice(isSelected ? null : seg.catId)}
                                             style={{ 
                                                 transformOrigin: '100px 100px',
-                                                transition: 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                                                transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
                                                 transform: `translate(${tx}px, ${ty}px) scale(${scale})`,
-                                                filter: isSelected ? `drop-shadow(0px 4px 8px rgba(0,0,0,0.3))` : 'none'
+                                                filter: isSelected ? `drop-shadow(0px 8px 16px rgba(0,0,0,0.4))` : 'none'
                                             }}
                                         />
                                     );
@@ -274,8 +297,8 @@ const Statistics = () => {
                             </svg>
                         </div>
 
-                        {/* Legenda */}
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center', marginTop: '8px' }}>
+                        {/* Legenda (Chips) */}
+                        <div className="pie-chart-legend" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center' }}>
                             {segments.map(seg => {
                                 const category = getCategoryInfo(seg.catId, 'expense');
                                 const isActive = selectedSlice === seg.catId;
@@ -284,23 +307,25 @@ const Statistics = () => {
                                         key={seg.catId}
                                         onClick={() => setSelectedSlice(selectedSlice === seg.catId ? null : seg.catId)}
                                         style={{
-                                            display: 'flex', alignItems: 'center', gap: '6px',
+                                            display: 'flex', alignItems: 'center', gap: '8px',
                                             fontSize: '0.85rem', color: 'var(--text-main)',
                                             background: isActive ? `${seg.color}22` : 'var(--bg-color)',
-                                            padding: '6px 12px', borderRadius: '20px',
-                                            border: `1.5px solid ${isActive ? seg.color : seg.color + '50'}`,
-                                            boxShadow: isActive ? `0 0 0 2px ${seg.color}40` : '0 2px 5px rgba(0,0,0,0.05)',
-                                            cursor: 'pointer', transition: 'all 0.2s ease'
+                                            padding: '8px 14px', borderRadius: '14px',
+                                            border: `1.5px solid ${isActive ? seg.color : 'var(--glass-border)'}`,
+                                            boxShadow: isActive ? `0 4px 12px ${seg.color}30` : '0 2px 5px rgba(0,0,0,0.05)',
+                                            cursor: 'pointer', transition: 'all 0.3s ease',
+                                            transform: isActive ? 'scale(1.05)' : 'scale(1)',
+                                            fontWeight: isActive ? '700' : '500'
                                         }}
                                     >
-                                        <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: seg.color, flexShrink: 0 }}></div>
+                                        <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: seg.color, flexShrink: 0, boxShadow: isActive ? `0 0 8px ${seg.color}` : 'none' }}></div>
                                         <span>{category.icon} {t(category.label, { defaultValue: category.label })}</span>
-                                        <span style={{ fontWeight: '600', opacity: 0.8 }}>({seg.pct.toFixed(0)}%)</span>
+                                        <span style={{ opacity: 0.6, fontSize: '0.75rem' }}>{seg.pct.toFixed(0)}%</span>
                                     </div>
                                 );
                             })}
                         </div>
-                    </>
+                    </div>
                 ) : (
                     <div style={{ padding: '40px 0', textAlign: 'center', color: 'var(--text-muted)' }}>
                         <p>{t('no_data_stats')}</p>
