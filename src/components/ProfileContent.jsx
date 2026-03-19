@@ -5,9 +5,8 @@ import { User, LogOut, Trash2, Moon, Globe, DollarSign, ArrowRight, RefreshCcw, 
 import { requestNotificationPermission } from './NotificationHandler';
 import { deleteAllUserTransactions } from '../services/transactionService';
 import { haptic } from '../utils/haptic';
-import AchievementBadges from './AchievementBadges';
 
-const ProfileContent = ({ onOpenNotion, onClose, transactions = [] }) => {
+const ProfileContent = ({ onOpenNotion, onClose }) => {
     const { currentUser, logout, deleteAccount } = useAuth();
     const { t, locale, changeLocale, currency, changeCurrency } = useI18n();
 
@@ -19,7 +18,6 @@ const ProfileContent = ({ onOpenNotion, onClose, transactions = [] }) => {
     const [theme, setTheme] = useState(localStorage.getItem('zimbroo_theme') || 'system');
     const [showVerse, setShowVerse] = useState(false);
     const [verseHiding, setVerseHiding] = useState(false);
-    const [showBadgeDetails, setShowBadgeDetails] = useState(false);
 
     const hideVerse = () => {
         setVerseHiding(true);
@@ -130,7 +128,7 @@ const ProfileContent = ({ onOpenNotion, onClose, transactions = [] }) => {
                 style={{
                     width: '100%', background: 'var(--notion-btn-bg)', padding: '16px 20px', borderRadius: '20px',
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    color: 'var(--notion-btn-text)', cursor: 'pointer', border: 'none', marginBottom: '24px',
+                    color: 'var(--notion-btn-text)', cursor: 'pointer', border: 'none', marginBottom: '32px',
                     boxShadow: '0 8px 15px rgba(0,0,0,0.1)'
                 }}
             >
@@ -142,43 +140,6 @@ const ProfileContent = ({ onOpenNotion, onClose, transactions = [] }) => {
                 </div>
                 <ArrowRight size={18} opacity={0.5} />
             </button>
-
-            {/* Badges Section */}
-            <div style={{ marginBottom: '32px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                    <h3 style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>
-                        Conquistas
-                    </h3>
-                    <button 
-                        onClick={() => { haptic.light(); setShowBadgeDetails(true); }}
-                        style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--primary-color)' }}
-                    >
-                        Ver todas
-                    </button>
-                </div>
-                <div style={{ background: 'var(--surface-color)', padding: '16px', borderRadius: '24px', border: '1px solid var(--glass-border)' }}>
-                    <AchievementBadges transactions={transactions} isDetailView={false} />
-                </div>
-            </div>
-
-            {/* Badge Details Overlay */}
-            {showBadgeDetails && (
-                <div style={{ 
-                    position: 'fixed', inset: 0, background: 'var(--bg-color)', zIndex: 200, padding: '24px', 
-                    overflowY: 'auto', display: 'flex', flexDirection: 'column' 
-                }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-                        <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>Todas as Conquistas</h2>
-                        <button 
-                            onClick={() => setShowBadgeDetails(false)}
-                            style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'var(--surface-color)', border: '1px solid var(--glass-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                        >
-                            <X size={24} />
-                        </button>
-                    </div>
-                    <AchievementBadges transactions={transactions} isDetailView={true} />
-                </div>
-            )}
 
             {/* Quick Settings */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>

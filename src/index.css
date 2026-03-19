@@ -1,32 +1,38 @@
 @import url('https://fonts.googleapis.com/css2?family=Solway:wght@400;500;700&display=swap');
 
 :root {
-  --bg-color: #F7F2EC; /* Muted Cream/Taupe */
+  --bg-color: #FBFEFB;
   --surface-color: #ffffff;
-  --text-main: #3E4A35; /* Deep Muted Bark Brown/Forest Green */
-  --text-muted: #6B7A5F;
-  --primary-color: #B8C1A0; /* Light Muted Sage-Green */
-  --primary-rgb: 184, 193, 160;
-  --highlight-color: #B8C1A0;
 
-  --primary-light: #E1E6D5;
-  --primary-gradient: linear-gradient(135deg, #B8C1A0 0%, #3E4A35 100%);
-  --highlight-gradient: linear-gradient(135deg, #B8C1A0 0%, #8F9D78 100%);
-  --secondary-gradient: linear-gradient(180deg, var(--bg-color) 0%, #E1E6D5 100%);
+  /* LIGHT MODE (Padrão) -> Destaque 4BB45A */
+  --primary-darkest: #2D7D39;
+  --primary-darker: #388E3C;
+  --primary-dark: #1B4520;
+  --primary-color: #4BB45A;
+  --primary-rgb: 75, 180, 90;
+  --highlight-color: #4BB45A;
+
+  --primary-light: #e6f7e9;
+  --primary-gradient: linear-gradient(135deg, #4BB45A 0%, #2D7D39 100%);
+  --highlight-gradient: linear-gradient(135deg, #4BB45A 0%, #388E3C 100%);
+  --secondary-gradient: linear-gradient(180deg, var(--bg-color) 0%, #d4f0db 100%);
 
   --accent-color: var(--primary-color);
-  --btn-text: #ffffff;
 
-  --danger-color: #7A3B36; /* Muted Terracota */
-  --danger-light: #F2A095;
-  --success-color: #B8C1A0;
-  --success-light: #E1E6D5;
+  --text-main: #0E2210;
+  --text-muted: #1B4520;
+  --btn-text: #ffffff; /* Fundo médio da primary = texto branco para contraste */
 
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(62, 74, 53, 0.1);
-  --shadow-sm: 0 4px 6px -1px rgba(62, 74, 53, 0.05);
-  --shadow-md: 0 10px 15px -3px rgba(62, 74, 53, 0.08);
-  --shadow-lg: 0 20px 25px -5px rgba(62, 74, 53, 0.1);
+  --danger-color: #d32f2f;
+  --danger-light: #fdeded;
+  --success-color: #4BB45A;
+  --success-light: var(--primary-light);
+
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(75, 180, 90, 0.4);
+  --shadow-sm: 0 4px 6px -1px rgba(14, 34, 16, 0.05);
+  --shadow-md: 0 10px 15px -3px rgba(14, 34, 16, 0.08);
+  --shadow-lg: 0 20px 25px -5px rgba(14, 34, 16, 0.1);
 
   --border-radius-sm: 8px;
   --border-radius-md: 16px;
@@ -36,51 +42,54 @@
   --transition-fast: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
   --transition-normal: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* Forest Palette - Reds/Terracota */
-  --forest-red-1: #7A3B36;
-  --forest-red-2: #8F4A44;
-  --forest-red-3: #A55A52;
-  --forest-red-4: #BA6A62;
-  --forest-red-5: #CF7B71;
-  --forest-red-6: #E28D83;
-  --forest-red-7: #F2A095;
-  --forest-red-8: #FFB4A9;
-
-  /* Forest Palette - Oranges/Ochre */
-  --forest-orange-1: #A66135;
-  --forest-orange-2: #BA7140;
-  --forest-orange-3: #CE834D;
-  --forest-orange-4: #DF955B;
-  --forest-orange-5: #EFA86B;
-  --forest-orange-6: #F9BB7E;
-  --forest-orange-7: #FFCD92;
-  --forest-orange-8: #FFDFA8;
+  --notion-btn-bg: #000000;
+  --notion-btn-text: #ffffff;
 }
 
-/* Dark mode overrides - keeping it muted/organic */
+/* Dark mode basic variables */
 @media (prefers-color-scheme: dark) {
   :root:not(.theme-light) {
-    --bg-color: #2D3328;
-    --surface-color: #384132;
-    --text-main: #E1E6D5;
-    --text-muted: #B8C1A0;
-    --glass-bg: rgba(45, 51, 40, 0.8);
-    --glass-border: rgba(255, 255, 255, 0.05);
+    --bg-color: #050a06;
+    --surface-color: #0a140b;
+    --text-main: #ffffff;
+    --text-muted: #b8dfc4;
+    --btn-text: #ffffff; /* Fundo escuro da primary = texto claro */
+    --glass-bg: rgba(5, 10, 6, 0.85);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --notion-btn-bg: #ffffff;
+    --notion-btn-text: #000000;
+
+    /* REVERT PRIMARY PARA 1B4520 no Escuro */
+    --primary-darkest: #0E2210;
+    --primary-darker: #1B4520;
+    --primary-dark: #2D7D39;
+    --primary-color: #1B4520;
+    --primary-rgb: 27, 69, 32;
+    --highlight-color: #4BB45A;
+    --primary-gradient: linear-gradient(135deg, #1B4520 0%, #0E2210 100%);
+    --highlight-gradient: linear-gradient(135deg, #4BB45A 0%, #2D7D39 100%);
   }
 }
 
 :root.theme-dark {
-  --bg-color: #2D3328;
-  --surface-color: #384132;
-  --text-main: #E1E6D5;
-  --text-muted: #B8C1A0;
-  --glass-bg: rgba(45, 51, 40, 0.8);
-  --glass-border: rgba(255, 255, 255, 0.05);
-}
+  --bg-color: #050a06;
+  --surface-color: #0a140b;
+  --text-main: #ffffff;
+  --text-muted: #b8dfc4;
+  --btn-text: #ffffff;
+  --glass-bg: rgba(5, 10, 6, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --notion-btn-bg: #ffffff;
+  --notion-btn-text: #000000;
 
-:root.theme-light {
-  /* Alinhado com o root default */
-  --bg-color: #F7F2EC;
+  --primary-darkest: #0E2210;
+  --primary-darker: #1B4520;
+  --primary-dark: #2D7D39;
+  --primary-color: #1B4520;
+  --primary-rgb: 27, 69, 32;
+  --highlight-color: #4BB45A;
+  --primary-gradient: linear-gradient(135deg, #1B4520 0%, #0E2210 100%);
+  --highlight-gradient: linear-gradient(135deg, #4BB45A 0%, #2D7D39 100%);
 }
 
 :root.theme-light {
