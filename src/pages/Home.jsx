@@ -24,11 +24,6 @@ const Home = () => {
     const { t, formatCurrency, locale, changeLocale, currency, changeCurrency } = useI18n();
     const navigate = useNavigate();
 
-    useEffect(() => {
-        if (!isDesktop && setIsBottomNavHidden) {
-            setIsBottomNavHidden(isFlipped);
-        }
-    }, [isFlipped, isDesktop, setIsBottomNavHidden]);
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
@@ -75,6 +70,12 @@ const Home = () => {
     });
     const [chartType, setChartType] = useState('bar'); // 'bar' or 'line'
     const [isFlipped, setIsFlipped] = useState(false);
+
+    useEffect(() => {
+        if (!isDesktop && setIsBottomNavHidden) {
+            setIsBottomNavHidden(isFlipped);
+        }
+    }, [isFlipped, isDesktop, setIsBottomNavHidden]);
 
     // --- Derived Variables ---
     const monthPrefix = format(currentDate, 'yyyy-MM');
