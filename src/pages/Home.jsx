@@ -20,9 +20,15 @@ import BudgetPieChart from '../components/BudgetPieChart';
 
 const Home = () => {
     const { currentUser, logout, deleteAccount } = useAuth();
-    const { setIsAiActive } = useOutletContext();
+    const { setIsAiActive, setIsBottomNavHidden } = useOutletContext();
     const { t, formatCurrency, locale, changeLocale, currency, changeCurrency } = useI18n();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!isDesktop && setIsBottomNavHidden) {
+            setIsBottomNavHidden(isFlipped);
+        }
+    }, [isFlipped, isDesktop, setIsBottomNavHidden]);
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
@@ -363,7 +369,7 @@ const Home = () => {
             {isFlipped && !isDesktop ? (
                 <div className="page-container animate-fade-in" style={{ paddingBottom: '120px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                        <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)' }}>{formattedMonthLabel}</h2>
+                        <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)' }}>{t('statistics', { defaultValue: 'Estatísticas' })}</h2>
                         <button
                             onClick={() => { haptic.light(); setIsFlipped(false); }}
                             style={{
@@ -377,7 +383,16 @@ const Home = () => {
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                        {/* Bar Chart Section */}
+                        {/* Pie Chart Section - First */}
+                        <section className="glass-panel" style={{ padding: '24px' }}>
+                            <h3 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <PieChart size={18} color="var(--primary-color)" />
+                                {t('expenses_by_category', { defaultValue: 'Gastos por Categoria' })}
+                            </h3>
+                            <BudgetPieChart transactions={transactions} currentDate={currentDate} />
+                        </section>
+
+                        {/* Bar Chart Section - Second */}
                         <section className="glass-panel" style={{ padding: '24px' }}>
                             <h3 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <BarChart2 size={18} color="var(--primary-color)" />
@@ -398,15 +413,6 @@ const Home = () => {
                                     );
                                 })}
                             </div>
-                        </section>
-
-                        {/* Pie Chart Section */}
-                        <section className="glass-panel" style={{ padding: '24px' }}>
-                            <h3 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <PieChart size={18} color="var(--primary-color)" />
-                                {t('expenses_by_category', { defaultValue: 'Gastos por Categoria' })}
-                            </h3>
-                            <BudgetPieChart transactions={transactions} currentDate={currentDate} />
                         </section>
                     </div>
                 </div>

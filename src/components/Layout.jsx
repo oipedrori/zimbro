@@ -21,6 +21,7 @@ const Layout = () => {
     const [insightMessage, setInsightMessage] = useState('');
     const location = useLocation();
     const { t } = useI18n();
+    const [isBottomNavHiddenFromChild, setIsBottomNavHiddenFromChild] = useState(false);
 
     // Pegamos a data atual para o hook de transactions, mas de forma simplificada apenas para passar pro balão
     const currentDate = new Date();
@@ -83,6 +84,8 @@ const Layout = () => {
         { path: '/wallet', icon: <WalletIcon size={20} />, label: t('wallet', { defaultValue: 'Carteira' }) },
     ];
 
+    const isHidden = (location.pathname !== '/' && location.pathname !== '/notion-callback' && location.pathname !== '/mic' || isManualModalOpen || isAiActive || isBottomNavHiddenFromChild);
+
     return (
         <div className="app-container">
 
@@ -90,7 +93,7 @@ const Layout = () => {
             <main
                 className="main-content"
             >
-                <Outlet context={{ setIsAiActive }} />
+                <Outlet context={{ setIsAiActive, setIsBottomNavHidden: setIsBottomNavHiddenFromChild }} />
             </main>
 
             {/* Camada do Painel de IA */}
@@ -110,9 +113,9 @@ const Layout = () => {
             />
 
             {/* Fixed FAB - Now renders globally to allow smooth slide animations */}
-            <div className={`bottom-blur-layer ${(location.pathname !== '/' && location.pathname !== '/notion-callback' && location.pathname !== '/mic' || isManualModalOpen || isAiActive) ? 'hidden-state' : ''}`} />
+            <div className={`bottom-blur-layer ${isHidden ? 'hidden-state' : ''}`} />
 
-            <nav className={`bottom-nav ${(location.pathname !== '/' && location.pathname !== '/notion-callback' && location.pathname !== '/mic' || isManualModalOpen || isAiActive) ? 'hidden-state' : ''}`}>
+            <nav className={`bottom-nav ${isHidden ? 'hidden-state' : ''}`}>
                 {showAiInsight && location.pathname === '/' && (
                     <div style={{ position: 'absolute', bottom: '100%', left: 0, right: 0, zIndex: 3000 }}>
                         <AiInsightBubble 
