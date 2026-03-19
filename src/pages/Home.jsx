@@ -30,19 +30,6 @@ const Home = () => {
     const { t, formatCurrency, locale, changeLocale, currency, changeCurrency } = useI18n();
     const navigate = useNavigate();
 
-
-    useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const code = params.get('code');
-        if (code) {
-            setPendingNotionCode(code);
-            setSidebarView('notion');
-            setIsSidebarOpen(true);
-            // Clean URL immediately
-            window.history.replaceState({}, document.title, window.location.pathname);
-        }
-    }, []);
-
     // --- State Declarations ---
     const [currentDate, setCurrentDate] = useState(new Date());
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -74,19 +61,31 @@ const Home = () => {
         const saved = localStorage.getItem('zimbroo_limits');
         return saved ? JSON.parse(saved) : {};
     });
-    const [chartType, setChartType] = useState('bar'); // 'bar' or 'line'
+    const [chartType, setChartType] = useState('bar'); 
     const [isFlipped, setIsFlipped] = useState(false);
-    
-    // Statistics sheet state
     const [isSheetOpen, setIsSheetOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(null);
-    
-    // Animation triggers
     const [showWatering, setShowWatering] = useState(false);
     const [showScissors, setShowScissors] = useState(false);
+    const [prevTxCount, setPrevTxCount] = useState(0);
+
+    // --- Data Fetching Hooks (Called BEFORE effects that use transactions) ---
+    const monthPrefix = format(currentDate, 'yyyy-MM');
+    const { transactions, allTransactions, loading, refetch, deleteTx } = useTransactions(monthPrefix);
+
+    // --- Effects & Handlers ---
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get('code');
+        if (code) {
+            setPendingNotionCode(code);
+            setSidebarView('notion');
+            setIsSidebarOpen(true);
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    }, []);
 
     // Watch for transaction changes to trigger animations
-    const [prevTxCount, setPrevTxCount] = useState(0);
     useEffect(() => {
         if (transactions.length > prevTxCount && prevTxCount > 0) {
             const lastTx = transactions[transactions.length - 1];
@@ -106,10 +105,6 @@ const Home = () => {
             setIsBottomNavHidden(isFlipped);
         }
     }, [isFlipped, isDesktop, setIsBottomNavHidden]);
-
-    // --- Derived Variables ---
-    const monthPrefix = format(currentDate, 'yyyy-MM');
-    const { transactions, allTransactions, loading, refetch, deleteTx } = useTransactions(monthPrefix);
 
     // Lock body scroll when any modal or sidebar is open
     useEffect(() => {
