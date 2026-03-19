@@ -186,8 +186,6 @@ const Home = () => {
         }
     }, [allTransactions, currentDate]);
 
-    // Excluir lógica duplicada ou redundante aqui se necessário
-
     // Navegação de meses
     // Navegação de meses
     const nextMonth = () => {
@@ -341,7 +339,7 @@ const Home = () => {
             cumPercent += pct;
         });
     }
-    // const pieChartBg = totalStatsExpenses > 0 ? `conic-gradient(${conicStops.join(', ')})` : 'var(--glass-border)';
+    const pieChartBg = totalStatsExpenses > 0 ? `conic-gradient(${conicStops.join(', ')})` : 'var(--glass-border)';
 
     const getCategoryTheme = (id, type) => {
         return getCategoryInfo(id, type);
@@ -360,7 +358,6 @@ const Home = () => {
     return (
         <>
 
-            {!isFlipped && (
                 <div
                     className={`page-container animate-fade-in`}
                     style={{ paddingBottom: isDesktop ? '120px' : '180px', animation: 'slideUp 0.3s forwards' }}
@@ -427,7 +424,7 @@ const Home = () => {
                         onTouchEnd={onTouchEnd}
                         style={{ 
                             flexShrink: 0, padding: '24px', background: cardGradient, color: 'var(--btn-text)', border: 'none', 
-                            position: 'relative', overflow: 'hidden',
+                            position: 'relative', overflow: 'hidden', cursor: 'default',
                             touchAction: 'pan-y',
                             transform: `translateX(${swipeOffset}px)`,
                             transition: isSwiping ? 'none' : 'transform 0.3s cubic-bezier(0.1, 0.7, 0.1, 1)',
@@ -438,6 +435,9 @@ const Home = () => {
                             <div>
                                 <p style={{ fontSize: '0.9rem', opacity: 0.8, marginBottom: '8px' }}>{t('monthly_balance')}</p>
                                 <h2 style={{ fontSize: 'clamp(1.8rem, 8vw, 2.5rem)', marginBottom: '24px', fontWeight: '700', letterSpacing: '-1px', wordBreak: 'break-word' }}>{formatCurrency(balance)}</h2>
+                            </div>
+                            <div style={{ position: 'relative', display: !isDesktop ? 'flex' : 'none' }}>
+                                <Pointer className="pointer-icon" size={18} opacity={0.8} />
                             </div>
                         </div>
 
@@ -475,15 +475,10 @@ const Home = () => {
                                 </span>
                             </div>
                         )}
-                    </section>
-                )}
 
-                {!isDesktop && (
-                    <section className="glass-panel" style={{ padding: '24px', marginTop: '16px' }}>
-                        <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '20px' }}>
-                            {t('expenses_by_category', { defaultValue: 'Gastos por Categoria' })}
-                        </h3>
-                        <BudgetPieChart transactions={transactions} currentDate={currentDate} />
+                        <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'center' }}>
+                            <BudgetPieChart transactions={transactions} isDesktop={isDesktop} />
+                        </div>
                     </section>
                 )}
 
@@ -664,7 +659,6 @@ const Home = () => {
                                             <p style={{ fontWeight: '700', fontSize: '1.3rem', margin: 0 }}>{formatCurrency(expenses)}</p>
                                         </div>
                                     </div>
-
                                     {incomes > 0 && (
                                         <div style={{ marginTop: '24px', display: 'flex', alignItems: 'center', gap: '16px' }}>
                                             <div style={{ flex: 1, height: '8px', background: 'rgba(255, 255, 255, 0.2)', borderRadius: '10px', overflow: 'hidden' }}>
@@ -681,6 +675,10 @@ const Home = () => {
                                             </span>
                                         </div>
                                     )}
+
+                                    <div style={{ marginTop: '32px' }}>
+                                        <BudgetPieChart transactions={transactions} isDesktop={true} />
+                                    </div>
                                 </section>
 
                                 <section className="glass-panel" style={{ padding: '32px', display: 'flex', flexDirection: 'column' }}>
@@ -772,12 +770,104 @@ const Home = () => {
                             </div>
 
                             <div className="column-right" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-                                <section className="glass-panel" style={{ padding: '32px', display: 'flex', flexDirection: 'column' }}>
+                                <section className="glass-panel" style={{ padding: '32px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                     <h3 style={{ width: '100%', fontSize: '1.2rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '24px' }}>
                                         {t('expenses_by_category', { defaultValue: 'Gastos por Categoria' })}
                                     </h3>
-                                    <BudgetPieChart transactions={transactions} currentDate={currentDate} />
-                                </section>
+                                    {totalStatsExpenses > 0 ? (
+                                        <>
+                                            <div 
+                                                onClick={(e) => {
+                                                    const rect = e.currentTarget.getBoundingClientRect();
+                                                    const x = e.clientX - rect.left - rect.width / 2;
+                                                    const y = e.clientY - rect.top - rect.height / 2;
+                                                    let angle = Math.atan2(y, x) * (180 / Math.PI) + 90;
+                                                    if (angle < 0) angle += 360;
+
+                                                    const sortedCats = Object.entries(expensesByCategory).sort(([, a], [, b]) => b - a);
+                                                    let cumulativePct = 0;
+                                                    for (const [id, amount] of sortedCats) {
+                                                        const pct = (amount / totalStatsExpenses) * 100;
+                                                        const startAngle = (cumulativePct / 100) * 360;
+                                                        const endAngle = ((cumulativePct + pct) / 100) * 360;
+                                                        if (angle >= startAngle && angle < endAngle) {
+                                                            setSelectedPieCat(id);
+                                                            haptic.light();
+                                                            return;
+                                                        }
+                                                        cumulativePct += pct;
+                                                    }
+                                                    setSelectedPieCat(null);
+                                                }}
+                                                style={{ 
+                                                    position: 'relative', width: '220px', height: '220px', marginBottom: '32px', 
+                                                    borderRadius: '50%', background: pieChartBg, display: 'flex', 
+                                                    justifyContent: 'center', alignItems: 'center', 
+                                                    boxShadow: '0 12px 40px rgba(0,0,0,0.1)', cursor: 'pointer',
+                                                    transition: 'all 0.3s ease'
+                                                }}
+                                            >
+                                                <div style={{ width: '150px', height: '150px', background: 'var(--bg-color)', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', padding: '20px', textAlign: 'center' }}>
+                                                    {selectedPieCat ? (() => {
+                                                        const cat = getCategoryInfo(selectedPieCat, 'expense');
+                                                        const amount = expensesByCategory[selectedPieCat];
+                                                        const pct = Math.round((amount / totalStatsExpenses) * 100);
+                                                        return (
+                                                            <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+                                                                <span style={{ fontSize: '1.8rem' }}>{cat.icon}</span>
+                                                                <span style={{ fontSize: '0.9rem', fontWeight: '800', color: cat.color }}>{t(cat.label, { defaultValue: cat.label })}</span>
+                                                                <span style={{ fontSize: '1.4rem', fontWeight: '800', color: 'var(--text-main)' }}>{formatCurrency(amount)}</span>
+                                                                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{pct}%</span>
+                                                            </div>
+                                                        );
+                                                    })() : (
+                                                        <div className="animate-fade-in">
+                                                            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{t('total')}</span>
+                                                            <span style={{ fontSize: '1.3rem', fontWeight: '800' }}>{formatCurrency(totalStatsExpenses)}</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: '12px', width: '100%', marginTop: 'auto' }}>
+                                        {Object.entries(expensesByCategory).sort(([, a], [, b]) => b - a).slice(0, 4).map(([catId, amount]) => {
+                                            const cat = getCategoryInfo(catId, 'expense');
+                                            const pct = Math.round((amount / totalStatsExpenses) * 100);
+                                            const isSelected = selectedPieCat === catId;
+                                            return (
+                                                <div 
+                                                    key={catId} 
+                                                    onClick={() => { haptic.light(); setSelectedPieCat(isSelected ? null : catId); }}
+                                                    style={{ 
+                                                        display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', 
+                                                        background: isSelected ? cat.color + '10' : 'var(--surface-color)', 
+                                                        padding: '12px 16px', borderRadius: '16px', 
+                                                        border: `1px solid ${isSelected ? cat.color : 'var(--glass-border)'}`,
+                                                        justifyContent: 'space-between',
+                                                        transition: 'all 0.2s ease',
+                                                        cursor: 'pointer'
+                                                    }}
+                                                >
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                        <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: cat.color + '15', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                                            <span style={{ fontSize: '1.1rem' }}>{cat.icon}</span>
+                                                        </div>
+                                                        <span style={{ fontWeight: '600', color: isSelected ? cat.color : 'var(--text-main)' }}>{t(cat.label, { defaultValue: cat.label })}</span>
+                                                    </div>
+                                                    <span style={{ fontWeight: '800', color: cat.color }}>{formatCurrency(amount)} ({pct}%)</span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                    {Object.keys(expensesByCategory).length > 4 && (
+                                        <button onClick={() => navigate('/statistics')} style={{ marginTop: '16px', background: 'transparent', border: 'none', color: 'var(--primary-color)', fontWeight: '600', fontSize: '0.85rem', cursor: 'pointer' }}>
+                                            {t('view_all')}
+                                        </button>
+                                    )}
+                                </>
+                            ) : (
+                                <p style={{ color: 'var(--text-muted)', margin: '60px 0' }}>Sem despesas no mês</p>
+                            )}
+                        </section>
 
                         <section className="glass-panel" style={{ padding: '32px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -1293,9 +1383,9 @@ const Home = () => {
                     </>
                 )}
             </div>
-        )}
-    </>
-);
+        </>
+    );
 };
 
 export default Home;
+
