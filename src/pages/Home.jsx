@@ -17,6 +17,12 @@ import { prepareMonthlyTransactions } from '../services/transactionService';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { haptic } from '../utils/haptic';
 import BudgetPieChart from '../components/BudgetPieChart';
+import MutedGenericTree from '../components/MutedGenericTree';
+import BudgetGaugeChart from '../components/BudgetGaugeChart';
+import { WateringCanAnimation, ScissorsAnimation } from '../components/HomeAnimations';
+import CategoryForest from '../components/CategoryForest';
+import GrowthRingsChart from '../components/GrowthRingsChart';
+import BottomSheet from '../components/BottomSheet';
 
 const Home = () => {
     const { currentUser, logout, deleteAccount } = useAuth();
@@ -70,6 +76,30 @@ const Home = () => {
     });
     const [chartType, setChartType] = useState('bar'); // 'bar' or 'line'
     const [isFlipped, setIsFlipped] = useState(false);
+    
+    // Statistics sheet state
+    const [isSheetOpen, setIsSheetOpen] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    
+    // Animation triggers
+    const [showWatering, setShowWatering] = useState(false);
+    const [showScissors, setShowScissors] = useState(false);
+
+    // Watch for transaction changes to trigger animations
+    const [prevTxCount, setPrevTxCount] = useState(0);
+    useEffect(() => {
+        if (transactions.length > prevTxCount && prevTxCount > 0) {
+            const lastTx = transactions[transactions.length - 1];
+            if (lastTx.type === 'income') {
+                setShowWatering(true);
+                setTimeout(() => setShowWatering(false), 2500);
+            } else {
+                setShowScissors(true);
+                setTimeout(() => setShowScissors(false), 2000);
+            }
+        }
+        setPrevTxCount(transactions.length);
+    }, [transactions]);
 
     useEffect(() => {
         if (!isDesktop && setIsBottomNavHidden) {
@@ -384,38 +414,59 @@ const Home = () => {
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                        {/* Pie Chart Section - First */}
-                        <section className="glass-panel" style={{ padding: '24px' }}>
-                            <h3 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <PieChart size={18} color="var(--primary-color)" />
-                                {t('expenses_by_category', { defaultValue: 'Gastos por Categoria' })}
+                        {/* The Forest of Categories */}
+                        <section className="glass-panel" style={{ padding: '24px', background: 'var(--surface-color)', border: 'none' }}>
+                            <h3 style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '10px' }}>
+                                A Floresta de Categorias
                             </h3>
-                            <BudgetPieChart transactions={transactions} currentDate={currentDate} />
+                            <CategoryForest 
+                                transactions={transactions} 
+                                onCategoryClick={(cat, amount) => {
+                                    haptic.light();
+                                    setSelectedCategory({ ...cat, amount });
+                                    setIsSheetOpen(true);
+                                }}
+                            />
                         </section>
 
-                        {/* Bar Chart Section - Second */}
-                        <section className="glass-panel" style={{ padding: '24px' }}>
-                            <h3 style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <BarChart2 size={18} color="var(--primary-color)" />
-                                {t('monthly_balance_chart', { defaultValue: 'Balanço Mensal' })}
-                            </h3>
-                            <div style={{ height: '180px', display: 'flex', alignItems: 'flex-end', gap: '8px' }}>
-                                {yearlyStats.map((s, i) => {
-                                    const maxVal = Math.max(...yearlyStats.map(x => Math.max(x.incomes, x.expenses, 1)), 1);
-                                    const isCurrentMonth = s.month === currentDate.getMonth() + 1;
-                                    return (
-                                        <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-                                            <div style={{ width: '100%', height: '140px', display: 'flex', alignItems: 'flex-end', gap: '2px', position: 'relative' }}>
-                                                <div style={{ flex: 1, height: `${(s.incomes / maxVal) * 100}%`, background: 'var(--success-color)', borderRadius: '2px 2px 0 0', opacity: isCurrentMonth ? 1 : 0.4 }}></div>
-                                                <div style={{ flex: 1, height: `${(s.expenses / maxVal) * 100}%`, background: 'var(--danger-color)', borderRadius: '2px 2px 0 0', opacity: isCurrentMonth ? 1 : 0.4 }}></div>
-                                            </div>
-                                            <span style={{ fontSize: '0.65rem', fontWeight: isCurrentMonth ? '800' : '500', color: isCurrentMonth ? 'var(--primary-color)' : 'var(--text-muted)' }}>{s.label}</span>
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                        {/* Growth Rings (Yearly History) */}
+                        <section className="glass-panel" style={{ padding: '24px', background: 'var(--surface-color)', border: 'none' }}>
+                            <GrowthRingsChart yearlyStats={yearlyStats} />
                         </section>
                     </div>
+
+                    {/* Category Detail Bottom Sheet */}
+                    <BottomSheet 
+                        isOpen={isSheetOpen} 
+                        onClose={() => setIsSheetOpen(false)}
+                        title={selectedCategory?.label}
+                    >
+                        <div style={{ textAlign: 'center' }}>
+                            <p style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--text-main)', margin: '0 0 10px 0' }}>
+                                {formatCurrency(selectedCategory?.amount || 0)}
+                            </p>
+                            <p style={{ color: 'var(--text-muted)' }}>
+                                Total gasto em {selectedCategory?.label} este mês.
+                            </p>
+                            
+                            <div style={{ marginTop: '30px' }}>
+                                {transactions
+                                    .filter(t => getCategoryInfo(t.category, 'expense').id === selectedCategory?.id)
+                                    .map(tx => (
+                                        <div key={tx.id} style={{ 
+                                            display: 'flex', 
+                                            justifyContent: 'space-between', 
+                                            padding: '12px 0', 
+                                            borderBottom: '1px solid rgba(0,0,0,0.05)' 
+                                        }}>
+                                            <span style={{ fontWeight: '600' }}>{tx.description}</span>
+                                            <span style={{ fontWeight: '700', color: 'var(--danger-color)' }}>{formatCurrency(tx.amount)}</span>
+                                        </div>
+                                    ))
+                                }
+                            </div>
+                        </div>
+                    </BottomSheet>
                 </div>
             ) : (
                 <div
@@ -476,85 +527,76 @@ const Home = () => {
                     </header>
 
                     {!isDesktop && (
-                        <section
-                            key={monthPrefix}
-                            className="glass-panel"
-                            onClick={() => { haptic.medium(); setIsFlipped(true); }}
-                            onTouchStart={onTouchStart}
-                            onTouchMove={onTouchMove}
-                            onTouchEnd={onTouchEnd}
-                            style={{
-                                flexShrink: 0, padding: '24px', background: cardGradient, color: 'var(--btn-text)', border: 'none',
-                                position: 'relative', overflow: 'hidden',
-                                touchAction: 'pan-y',
-                                cursor: 'pointer',
-                                transform: `translateX(${swipeOffset}px)`,
-                                transition: isSwiping ? 'none' : 'transform 0.3s cubic-bezier(0.1, 0.7, 0.1, 1)',
-                                animation: !isSwiping ? (swipeDirection === 'left' ? 'slideLeftIn 0.3s ease-out' : swipeDirection === 'right' ? 'slideRightIn 0.3s ease-out' : 'none') : 'none'
-                            }}
-                        >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                <div>
-                                    <p style={{ fontSize: '0.9rem', opacity: 0.8, marginBottom: '8px' }}>{t('monthly_balance')}</p>
-                                    <h2 style={{ fontSize: 'clamp(1.8rem, 8vw, 2.5rem)', marginBottom: '24px', fontWeight: '700', letterSpacing: '-1px', wordBreak: 'break-word' }}>{formatCurrency(balance)}</h2>
-                                </div>
-                                <div style={{ 
-                                    background: 'rgba(255, 255, 255, 0.15)', 
-                                    padding: '10px', 
-                                    borderRadius: '12px', 
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    justifyContent: 'center',
-                                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                        <div style={{ 
+                            display: 'flex', 
+                            flexDirection: 'column', 
+                            gap: '32px', 
+                            alignItems: 'center', 
+                            padding: '24px 0',
+                            position: 'relative',
+                            minHeight: '400px',
+                            justifyContent: 'center'
+                        }}>
+                            <WateringCanAnimation isVisible={showWatering} />
+                            <ScissorsAnimation isVisible={showScissors} />
+
+                            <BudgetGaugeChart percentage={incomes > 0 ? (expenses / incomes) * 100 : 0} />
+                            
+                            <MutedGenericTree 
+                                size={220} 
+                                onClick={() => { haptic.medium(); setIsFlipped(true); }} 
+                            />
+
+                            <div style={{ 
+                                display: 'flex', 
+                                gap: '16px', 
+                                width: '100%', 
+                                justifyContent: 'center' 
+                            }}>
+                                <div className="glass-panel" style={{ 
+                                    padding: '16px', 
+                                    flex: 1, 
+                                    background: 'var(--surface-color)', 
+                                    border: 'none',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    gap: '4px'
                                 }}>
-                                    <BarChart2 size={24} />
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <ArrowUp size={16} color="var(--success-color)" />
+                                        <span style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-muted)' }}>{t('incomes_plural')}</span>
+                                    </div>
+                                    <p style={{ fontSize: '1.1rem', fontWeight: '800', margin: 0 }}>{formatCurrency(incomes)}</p>
+                                </div>
+                                <div className="glass-panel" style={{ 
+                                    padding: '16px', 
+                                    flex: 1, 
+                                    background: 'var(--surface-color)', 
+                                    border: 'none',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    gap: '4px'
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <ArrowDown size={16} color="var(--danger-color)" />
+                                        <span style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-muted)' }}>{t('expenses_plural')}</span>
+                                    </div>
+                                    <p style={{ fontSize: '1.1rem', fontWeight: '800', margin: 0 }}>{formatCurrency(expenses)}</p>
                                 </div>
                             </div>
-
-                            <div style={{ display: 'flex', gap: '24px', opacity: 0.9 }}>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                                        <ArrowUp size={16} color="#4ade80" />
-                                        <p style={{ fontSize: '0.8rem', margin: 0 }}>{t('incomes_plural', { defaultValue: 'Receitas' })}</p>
-                                    </div>
-                                    <p style={{ fontWeight: '600', fontSize: '1.1rem', margin: 0 }}>{formatCurrency(incomes)}</p>
-                                </div>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                                        <ArrowDown size={16} color="#f87171" />
-                                        <p style={{ fontSize: '0.8rem', margin: 0 }}>{t('expenses_plural', { defaultValue: 'Despesas' })}</p>
-                                    </div>
-                                    <p style={{ fontWeight: '600', fontSize: '1.1rem', margin: 0 }}>{formatCurrency(expenses)}</p>
-                                </div>
-                            </div>
-
-                            {/* Barra de Porcentagem de Gastos */}
-                            {incomes > 0 && (
-                                <div style={{ marginTop: '20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    <div style={{ flex: 1, height: '6px', background: 'rgba(255, 255, 255, 0.2)', borderRadius: '10px', overflow: 'hidden' }}>
-                                        <div style={{
-                                            width: `${Math.min((expenses / incomes) * 100, 100)}%`,
-                                            height: '100%',
-                                            background: 'white',
-                                            borderRadius: '10px',
-                                            transition: 'width 0.8s cubic-bezier(0.4, 0, 0.2, 1)'
-                                        }}></div>
-                                    </div>
-                                    <span style={{ fontSize: '0.85rem', fontWeight: '800', opacity: 0.9, minWidth: '35px', textAlign: 'right' }}>
-                                        {Math.round((expenses / incomes) * 100)}%
-                                    </span>
-                                </div>
-                            )}
-
-
-                        </section>
+                        </div>
                     )}
 
                     {!isDesktop && (
-                        <section style={{ marginTop: '24px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                                <h3 style={{ fontSize: '1.2rem', fontWeight: '600' }}>{t('transactions')}</h3>
+                        <section style={{ 
+                            marginTop: '24px',
+                            scrollSnapAlign: 'start',
+                            paddingTop: '20px'
+                        }}>
+                            <div id="movimentacoes-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                                <h3 style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--text-main)' }}>{t('transactions')}</h3>
                             </div>
 
                             {/* Contêiner de Filtros com Fade */}
@@ -1139,6 +1181,7 @@ const Home = () => {
                                     <ProfileContent
                                         onOpenNotion={() => setSidebarView('notion')}
                                         onClose={closeSidebar}
+                                        transactions={allTransactions}
                                     />
                                 ) : (
                                     <NotionImportContent
