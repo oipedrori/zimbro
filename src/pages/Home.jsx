@@ -498,8 +498,17 @@ const Home = () => {
                                     <p style={{ fontSize: '0.9rem', opacity: 0.8, marginBottom: '8px' }}>{t('monthly_balance')}</p>
                                     <h2 style={{ fontSize: 'clamp(1.8rem, 8vw, 2.5rem)', marginBottom: '24px', fontWeight: '700', letterSpacing: '-1px', wordBreak: 'break-word' }}>{formatCurrency(balance)}</h2>
                                 </div>
-                                <div style={{ opacity: 0.6 }}>
-                                    <BarChart2 size={20} />
+                                <div style={{ 
+                                    background: 'rgba(255, 255, 255, 0.15)', 
+                                    padding: '10px', 
+                                    borderRadius: '12px', 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    justifyContent: 'center',
+                                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                                }}>
+                                    <BarChart2 size={24} />
                                 </div>
                             </div>
 
@@ -538,11 +547,7 @@ const Home = () => {
                                 </div>
                             )}
 
-                            {/* Hint to flip */}
-                            <div style={{ position: 'absolute', bottom: '8px', right: '12px', opacity: 0.4, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                <span style={{ fontSize: '0.65rem', fontWeight: '700' }}>{t('click_to_see_stats', { defaultValue: 'VER ESTATÍSTICAS' })}</span>
-                                <Pointer size={10} className="pointer-icon" />
-                            </div>
+
                         </section>
                     )}
 
