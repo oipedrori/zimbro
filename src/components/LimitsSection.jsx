@@ -22,10 +22,10 @@ const LimitsSection = ({
     const limitEntries = Object.entries(limits);
 
     return (
-        <section className="limits-section" style={{ marginTop: '24px' }}>
+        <section className="limits-section" style={{ marginTop: '16px' }}>
             <h3 style={{ 
-                fontSize: isDesktop ? '1.2rem' : '1.1rem', 
-                fontWeight: '700', 
+                fontSize: '1.2rem', 
+                fontWeight: '600', 
                 marginBottom: '16px',
                 color: 'var(--text-main)',
                 padding: isDesktop ? '0' : '0 20px'
@@ -50,8 +50,14 @@ const LimitsSection = ({
                 {limitEntries.map(([catId, limitAmount]) => {
                     const category = getCategoryInfo(catId, 'expense');
                     const spent = getSpentForCategory(catId);
-                    const percent = Math.min((spent / limitAmount) * 100, 100);
-                    const isOverLimit = spent > limitAmount;
+                    const rawPercent = (spent / limitAmount) * 100;
+                    const percent = Math.min(rawPercent, 100);
+                    const isOverLimit = spent >= limitAmount;
+                    const isNearLimit = rawPercent >= 90;
+
+                    let barColor = category.color;
+                    if (isOverLimit) barColor = 'var(--danger-color)';
+                    else if (isNearLimit) barColor = '#FBBF24'; // Amber 400 for 90%+
 
                     return (
                         <div 
@@ -119,7 +125,7 @@ const LimitsSection = ({
                                 <div style={{
                                     width: `${percent}%`,
                                     height: '100%',
-                                    background: isOverLimit ? 'var(--danger-color)' : category.color,
+                                    background: barColor,
                                     borderRadius: '10px',
                                     transition: 'width 1s cubic-bezier(0.16, 1, 0.3, 1)'
                                 }} />
@@ -128,10 +134,10 @@ const LimitsSection = ({
                             <span style={{ 
                                 fontSize: '0.7rem', 
                                 fontWeight: '800', 
-                                color: isOverLimit ? 'var(--danger-color)' : 'var(--text-muted)',
+                                color: isOverLimit ? 'var(--danger-color)' : isNearLimit ? '#FBBF24' : 'var(--text-muted)',
                                 alignSelf: 'flex-end'
                             }}>
-                                {Math.round((spent / limitAmount) * 100)}%
+                                {Math.round(rawPercent)}%
                             </span>
                         </div>
                     );

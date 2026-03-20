@@ -565,7 +565,7 @@ const Home = () => {
                     )}
 
                     {!isDesktop && (
-                        <section style={{ marginTop: '24px' }}>
+                        <section style={{ marginTop: '16px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                                 <h3 style={{ fontSize: '1.2rem', fontWeight: '600' }}>{t('transactions')}</h3>
                             </div>
@@ -770,7 +770,7 @@ const Home = () => {
                                         isDesktop={isDesktop}
                                     />
 
-                                    <section className="glass-panel" style={{ padding: '32px', display: 'flex', flexDirection: 'column' }}>
+                                    <section className="glass-panel" style={{ padding: '32px', display: 'flex', flexDirection: 'column', marginTop: '16px' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                                             <h3 style={{ fontSize: '1.2rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>{t('transactions')}</h3>
                                         </div>
@@ -1228,6 +1228,7 @@ const Home = () => {
                                 display: 'flex',
                                 flexDirection: 'column',
                                 gap: '24px',
+                                overflow: 'hidden',
                                 animation: isDesktop ? 'modalOpen 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards' : 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards'
                             }}>
                                 {!isDesktop && (
@@ -1256,36 +1257,39 @@ const Home = () => {
                                 </div>
 
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                                    <div>
+                                    <div style={{ position: 'relative' }}>
                                         <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '8px', marginLeft: '4px' }}>CATEGORIA</label>
-                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '10px' }}>
-                                            {CATEGORIAS_DESPESA.map(cat => (
-                                                <button
-                                                    key={cat.id}
-                                                    onClick={() => setTempLimit({ ...tempLimit, categoryId: cat.id })}
-                                                    title={t(cat.label)}
-                                                    style={{
-                                                        padding: '12px 4px', borderRadius: '16px', border: '1px solid',
-                                                        borderColor: tempLimit.categoryId === cat.id ? cat.color : 'transparent',
-                                                        background: tempLimit.categoryId === cat.id ? cat.color + '20' : 'var(--surface-color)',
-                                                        cursor: 'pointer', transition: 'all 0.2s',
-                                                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                                                        position: 'relative', overflow: 'hidden', gap: '4px'
-                                                    }}
-                                                >
-                                                    <span style={{ fontSize: '1.4rem' }}>{cat.icon}</span>
-                                                    <span style={{ fontSize: '0.55rem', fontWeight: '700', textTransform: 'uppercase', opacity: 0.9, textAlign: 'center', width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                                        {t(cat.label, { defaultValue: cat.label }).split(' ')[0]}
-                                                    </span>
-                                                    {isAiLoading && tempLimit.categoryId === cat.id && (
-                                                        <div className="sparkle-overlay" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(255,255,255,0.1)', animation: 'sparklePulse 1s infinite' }} />
-                                                    )}
-                                                </button>
-                                            ))}
+                                        <div style={{ position: 'relative' }}>
+                                            <select
+                                                value={tempLimit.categoryId}
+                                                onChange={(e) => setTempLimit({ ...tempLimit, categoryId: e.target.value })}
+                                                className="form-input"
+                                                style={{ 
+                                                    color: 'var(--text-main)', 
+                                                    boxSizing: 'border-box', 
+                                                    width: '100%', 
+                                                    padding: '14px', 
+                                                    borderRadius: '16px', 
+                                                    background: 'var(--surface-color)', 
+                                                    fontSize: '1rem', 
+                                                    outline: 'none', 
+                                                    appearance: 'none', 
+                                                    minHeight: '48px',
+                                                    cursor: 'pointer',
+                                                    border: '1px solid var(--glass-border)'
+                                                }}
+                                            >
+                                                <option value="" disabled>{t('select_category', { defaultValue: 'Selecionar Categoria' })}</option>
+                                                {CATEGORIAS_DESPESA.map(cat => (
+                                                    <option key={cat.id} value={cat.id}>
+                                                        {cat.icon} {t(cat.label, { defaultValue: cat.label })}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <div style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-muted)' }}>
+                                                ▼
+                                            </div>
                                         </div>
-                                        <p style={{ marginTop: '10px', textAlign: 'center', fontWeight: '700', color: 'var(--text-main)', fontSize: '0.9rem' }}>
-                                            {t(CATEGORIAS_DESPESA.find(c => c.id === tempLimit.categoryId)?.label || '') || '---'}
-                                        </p>
                                     </div>
 
                                     <div style={{ position: 'relative' }}>
@@ -1328,8 +1332,8 @@ const Home = () => {
                                                 </div>
                                             )}
                                             {isAiLoading && (
-                                                <div style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary-color)', animation: 'spin 1s linear infinite' }}>
-                                                    <div style={{ width: '20px', height: '20px', border: '1px solid transparent', borderTopColor: 'currentColor', borderRadius: '50%' }} />
+                                                <div style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center' }}>
+                                                    <LoadingDots />
                                                 </div>
                                             )}
                                         </div>
