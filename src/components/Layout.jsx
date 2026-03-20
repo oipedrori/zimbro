@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Plus, Mic, X, Keyboard, Home as HomeIcon, BarChart2, Shield, Wallet as WalletIcon } from 'lucide-react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import AiPanel from './AiPanel';
@@ -22,6 +22,9 @@ const Layout = () => {
     const location = useLocation();
     const { t } = useI18n();
     const [isBottomNavHiddenFromChild, setIsBottomNavHiddenFromChild] = useState(false);
+    const [isFabShrunk, setIsFabShrunk] = useState(false);
+    const mainContentRef = useRef(null);
+    const lastScrollY = useRef(0);
 
     // Pegamos a data atual para o hook de transactions, mas de forma simplificada apenas para passar pro balão
     const currentDate = new Date();
@@ -43,6 +46,30 @@ const Layout = () => {
         
         return () => { isMounted = false; };
     }, [transactions]); // Will fire when transactions are ready
+ 
+    // Scroll listener for FAB scaling
+    useEffect(() => {
+        const handleScroll = () => {
+            if (!mainContentRef.current) return;
+            const currentScrollY = mainContentRef.current.scrollTop;
+            
+            if (currentScrollY > lastScrollY.current && currentScrollY > 50) {
+                setIsFabShrunk(true);
+            } else if (currentScrollY < lastScrollY.current) {
+                setIsFabShrunk(false);
+            }
+            
+            lastScrollY.current = currentScrollY;
+        };
+
+        const container = mainContentRef.current;
+        if (container) {
+            container.addEventListener('scroll', handleScroll, { passive: true });
+        }
+        return () => {
+            if (container) container.removeEventListener('scroll', handleScroll);
+        };
+    }, []);
 
 
     useEffect(() => {
@@ -91,6 +118,7 @@ const Layout = () => {
 
             {/* O conteúdo das páginas (Home, Stats) será renderizado aqui */}
             <main
+                ref={mainContentRef}
                 className="main-content"
             >
                 <Outlet context={{ setIsAiActive, setIsBottomNavHidden: setIsBottomNavHiddenFromChild }} />
@@ -116,7 +144,7 @@ const Layout = () => {
             <div className={`bottom-blur-layer ${isHidden ? 'hidden-state' : ''}`} />
 
             <nav className={`bottom-nav ${isHidden ? 'hidden-state' : ''}`}>
-                <div className="nav-items-wrapper">
+                <div className={`nav-items-wrapper ${isFabShrunk ? 'shrunk' : ''}`}>
                     <button 
                         className="nav-side-btn" 
                         onClick={() => setIsManualModalOpen(true)}
