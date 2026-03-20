@@ -1187,8 +1187,7 @@ const Home = () => {
                         type="info"
                         options={[
                             { label: 'Editar', value: 'edit', color: 'var(--primary-gradient)' },
-                            { label: 'Excluir', value: 'delete', color: 'var(--danger-color)' },
-                            { label: 'Cancelar', value: 'cancel', color: 'var(--surface-color)', textColor: 'var(--text-main)' }
+                            { label: 'Excluir', value: 'delete', color: 'var(--danger-color)' }
                         ]}
                         onConfirm={(val) => {
                             if (val === 'edit') {
