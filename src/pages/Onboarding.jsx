@@ -18,6 +18,27 @@ const Onboarding = () => {
     const [showDocs, setShowDocs] = useState(null); // 'terms' or 'privacy'
     const [docContent, setDocContent] = useState('');
     const [loadingDoc, setLoadingDoc] = useState(false);
+    const [showFarewell, setShowFarewell] = useState(false);
+    const [farewellCountdown, setFarewellCountdown] = useState(10);
+
+    useEffect(() => {
+        const justDeleted = localStorage.getItem('zimbroo_just_deleted');
+        if (justDeleted === 'true') {
+            setShowFarewell(true);
+            const timer = setInterval(() => {
+                setFarewellCountdown(prev => {
+                    if (prev <= 1) {
+                        clearInterval(timer);
+                        localStorage.removeItem('zimbroo_just_deleted');
+                        setShowFarewell(false);
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+            return () => clearInterval(timer);
+        }
+    }, [t]);
 
     useEffect(() => {
         if (showDocs) {
@@ -402,7 +423,71 @@ const Onboarding = () => {
                     from { opacity: 0; transform: scale(0.95); filter: blur(4px); }
                     to { opacity: 1; transform: scale(1); filter: blur(0px); }
                 }
+
+                .farewell-overlay {
+                    position: fixed;
+                    inset: 0;
+                    background: var(--bg-color);
+                    z-index: 20000;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    text-align: center;
+                    padding: 40px;
+                    animation: fadeIn 0.5s ease-out;
+                }
+
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+
+                .heart-anim {
+                    animation: heartbeat 1.5s ease-in-out infinite;
+                }
+
+                @keyframes heartbeat {
+                    0% { transform: scale(1); }
+                    14% { transform: scale(1.1); }
+                    28% { transform: scale(1); }
+                    42% { transform: scale(1.1); }
+                    70% { transform: scale(1); }
+                }
             `}</style>
+
+            {showFarewell && (
+                <div className="farewell-overlay">
+                    <div className="heart-anim" style={{ 
+                        width: '100px', height: '100px', borderRadius: '30px', 
+                        background: 'rgba(239, 68, 68, 0.1)', display: 'flex', 
+                        justifyContent: 'center', alignItems: 'center', marginBottom: '40px' 
+                    }}>
+                        <Sparkles size={48} color="#ef4444" />
+                    </div>
+                    
+                    <h2 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '24px', color: 'var(--text-main)' }}>
+                        {t('farewell_title', { defaultValue: 'Conta Excluída com Sucesso' })}
+                    </h2>
+                    
+                    <p style={{ fontSize: '1.2rem', lineHeight: 1.6, color: 'var(--text-muted)', maxWidth: '300px', marginBottom: '48px' }}>
+                        {t('farewell_message', { defaultValue: 'Sentiremos sua falta! Todos os seus dados foram removidos permanentemente. Esperamos te ver de volta em breve.' })}
+                    </p>
+                    
+                    <div style={{
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px'
+                    }}>
+                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', border: '4px solid var(--primary-color)', borderTopColor: 'transparent', animation: 'spin 1s linear infinite' }}></div>
+                        <p style={{ fontSize: '0.9rem', color: 'var(--primary-color)', fontWeight: '700', marginTop: '16px' }}>
+                            {t('returning_in', { defaultValue: 'Retornando em' })} {farewellCountdown}s
+                        </p>
+                    </div>
+
+                    <style>{`
+                        @keyframes spin { to { transform: rotate(360deg); } }
+                    `}</style>
+                </div>
+            )}
         </div>
     );
 };

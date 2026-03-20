@@ -64,18 +64,24 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
     const handleDeleteAccount = async () => {
         setIsDeleting(true);
         try {
+            // Pequeno delay para a animação do modal fechar se necessário
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
             // Primeiro deleta TODOS os dados de transações do usuário
             await deleteAllUserTransactions(currentUser.uid);
+            
+            // Sinaliza para o Onboarding que acabamos de deletar (para mostrar a despedida)
+            localStorage.setItem('zimbroo_just_deleted', 'true');
             
             // Depois deleta a conta na Firebase Auth
             await deleteAccount();
             
             haptic.success();
-            onClose();
+            // O App.jsx vai redirecionar automaticamente para /onboarding pois o currentUser ficou null
         } catch (error) {
             console.error(error);
+            localStorage.removeItem('zimbroo_just_deleted');
             alert('Erro ao excluir conta. Pode ser necessário fazer login novamente para esta ação sensível.');
-        } finally {
             setIsDeleting(false);
         }
     };
@@ -357,16 +363,29 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                 onClose={() => { setShowDeleteConfirm(false); setDeleteConfirmText(''); }}
                 title={t('delete_account_confirm_title')}
                 message={t('delete_account_confirm_desc')}
-                onConfirm={() => {
-                    // Simulating original logic which checked for DELETE
-                    // The ConfirmDialog itself handles the input requirement if requireConfirm is passed
-                    handleDeleteAccount();
-                }}
+                onConfirm={handleDeleteAccount}
                 requireConfirm="DELETE"
                 confirmLabel={t('delete_account_confirm_btn')}
                 cancelLabel={t('cancel')}
                 type="danger"
             />
+
+            {/* Tela de Carregamento Full-screen ao deletar */}
+            {isDeleting && (
+                <div style={{
+                    position: 'fixed', inset: 0, background: 'var(--bg-color)', zIndex: 30000,
+                    display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
+                    textAlign: 'center', padding: '32px'
+                }}>
+                    <LoadingDots />
+                    <h3 style={{ marginTop: '24px', fontSize: '1.2rem', fontWeight: '700', color: 'var(--text-main)' }}>
+                        {t('deleting_account_progress', { defaultValue: 'Excluindo sua conta e dados...' })}
+                    </h3>
+                    <p style={{ marginTop: '12px', color: 'var(--text-muted)', maxWidth: '280px' }}>
+                        {t('please_wait_delete', { defaultValue: 'Isso pode levar alguns segundos. Não feche o app.' })}
+                    </p>
+                </div>
+            )}
         </div>
     );
 };
