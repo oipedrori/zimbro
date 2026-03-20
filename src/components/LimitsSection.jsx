@@ -19,7 +19,13 @@ const LimitsSection = ({
             .reduce((acc, t) => acc + t.amount, 0);
     };
 
-    const limitEntries = Object.entries(limits);
+    const limitEntries = Object.entries(limits).sort((a, b) => {
+        const spentA = getSpentForCategory(a[0]);
+        const percentA = spentA / a[1];
+        const spentB = getSpentForCategory(b[0]);
+        const percentB = spentB / b[1];
+        return percentB - percentA;
+    });
 
     return (
         <section className="limits-section">            <h3 style={{ 
