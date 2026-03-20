@@ -65,11 +65,11 @@ const LimitsSection = ({
                             style={{
                                 flexShrink: 0,
                                 width: isDesktop ? '220px' : '180px',
-                                minHeight: '180px',
+                                minHeight: '140px',
                                 padding: '16px',
                                 display: 'flex',
                                 flexDirection: 'column',
-                                gap: '12px',
+                                gap: '8px',
                                 background: 'var(--surface-color)',
                                 border: `1px solid ${isOverLimit ? 'rgba(239, 68, 68, 0.2)' : 'var(--glass-border)'}`,
                                 transition: 'transform 0.2s',
@@ -94,7 +94,7 @@ const LimitsSection = ({
                                 </span>
                             </div>
 
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                                 <p style={{ 
                                     margin: 0, 
                                     fontSize: '1rem', 
@@ -113,7 +113,7 @@ const LimitsSection = ({
                                 </p>
                             </div>
 
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: 'auto' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '4px' }}>
                                 <div style={{ 
                                     flex: 1, 
                                     height: '6px', 
@@ -148,7 +148,7 @@ const LimitsSection = ({
                     style={{
                         flexShrink: 0,
                         width: isDesktop ? '220px' : '180px',
-                        minHeight: '180px',
+                        minHeight: '140px',
                         padding: '16px',
                         display: 'flex',
                         flexDirection: 'column',
