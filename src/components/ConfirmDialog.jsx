@@ -39,7 +39,7 @@ const ConfirmDialog = ({
 
     return createPortal(
         <div 
-            className={`confirm-overlay ${isAnimating ? 'visible' : ''}`}
+            className={`confirm-overlay ${isAnimating ? 'visible' : ''} ${isInputFocused ? 'keyboard-visible' : ''}`}
             onClick={onClose}
         >
             <div 
@@ -154,6 +154,10 @@ const ConfirmDialog = ({
                     backdrop-filter: blur(0px);
                     -webkit-backdrop-filter: blur(0px);
                 }
+                .confirm-overlay.keyboard-visible {
+                    align-items: center;
+                    padding: 24px;
+                }
                 .confirm-overlay.visible {
                     background: rgba(27, 69, 32, 0.4);
                     backdrop-filter: blur(8px);
@@ -185,9 +189,6 @@ const ConfirmDialog = ({
                 .confirm-content.slide-up {
                     transform: translateY(0);
                     opacity: 1;
-                }
-                .confirm-content.slide-up.keyboard-focused {
-                    transform: translateY(-12dvh);
                 }
                 .confirm-content.slide-down {
                     transform: translateY(100%);

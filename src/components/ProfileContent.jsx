@@ -6,6 +6,7 @@ import { requestNotificationPermission } from './NotificationHandler';
 import { deleteAllUserTransactions } from '../services/transactionService';
 import { haptic } from '../utils/haptic';
 import ConfirmDialog from './ConfirmDialog';
+import LoadingDots from './LoadingDots';
 
 const ProfileContent = ({ onOpenNotion, onClose }) => {
     const { currentUser, logout, deleteAccount } = useAuth();
@@ -79,9 +80,14 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
             haptic.success();
             // O App.jsx vai redirecionar automaticamente para /onboarding pois o currentUser ficou null
         } catch (error) {
-            console.error(error);
+            console.error("Erro na exclusão:", error);
             localStorage.removeItem('zimbroo_just_deleted');
-            alert('Erro ao excluir conta. Pode ser necessário fazer login novamente para esta ação sensível.');
+            
+            if (error.code === 'auth/requires-recent-login') {
+                alert('A segurança do Google exige que você faça login novamente antes de excluir sua conta. Por favor, saia e entre novamente antes de tentar excluir.');
+            } else {
+                alert(`Erro ao excluir conta: ${error.message || 'Erro desconhecido'}. Tente novamente.`);
+            }
             setIsDeleting(false);
         }
     };
