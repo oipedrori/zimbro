@@ -635,11 +635,11 @@ const Home = () => {
                             </div>
 
                             {loading ? (
-                                <div style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
+                                <div className="glass-panel" style={{ display: 'flex', justifyContent: 'center', padding: '30px' }}>
                                     <LoadingDots />
                                 </div>
                             ) : filteredTransactions.length === 0 ? (
-                                <div className="glass-panel" style={{ padding: '30px', textAlign: 'center', border: 'none' }}>
+                                <div className="glass-panel" style={{ padding: '30px', textAlign: 'center' }}>
                                     <p style={{ color: 'var(--text-muted)' }}>{t('no_transactions')}</p>
                                 </div>
                             ) : (
