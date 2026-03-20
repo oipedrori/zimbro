@@ -17,6 +17,7 @@ import { prepareMonthlyTransactions } from '../services/transactionService';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { haptic } from '../utils/haptic';
 import BudgetPieChart from '../components/BudgetPieChart';
+import LimitsSection from '../components/LimitsSection';
 
 const Home = () => {
     const { currentUser, logout, deleteAccount } = useAuth();
@@ -552,6 +553,18 @@ const Home = () => {
                     )}
 
                     {!isDesktop && (
+                        <LimitsSection 
+                            limits={limits}
+                            transactions={transactions}
+                            formatCurrency={formatCurrency}
+                            t={t}
+                            setIsLimitModalOpen={setIsLimitModalOpen}
+                            setTempLimit={setTempLimit}
+                            isDesktop={isDesktop}
+                        />
+                    )}
+
+                    {!isDesktop && (
                         <section style={{ marginTop: '24px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                                 <h3 style={{ fontSize: '1.2rem', fontWeight: '600' }}>{t('transactions')}</h3>
@@ -746,6 +759,16 @@ const Home = () => {
                                             </div>
                                         )}
                                     </section>
+
+                                    <LimitsSection 
+                                        limits={limits}
+                                        transactions={transactions}
+                                        formatCurrency={formatCurrency}
+                                        t={t}
+                                        setIsLimitModalOpen={setIsLimitModalOpen}
+                                        setTempLimit={setTempLimit}
+                                        isDesktop={isDesktop}
+                                    />
 
                                     <section className="glass-panel" style={{ padding: '32px', display: 'flex', flexDirection: 'column' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
