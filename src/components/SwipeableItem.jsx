@@ -53,7 +53,7 @@ const SwipeableItem = ({ children, onDelete, onEdit }) => {
     }
 
     return (
-        <div style={{ position: 'relative', overflow: 'hidden', width: '100%', borderRadius: '16px' }}>
+        <div style={{ position: 'relative', overflow: 'hidden', width: '100%' }}>
             {/* Background Actions Container */}
             <div style={{
                 position: 'absolute',
@@ -69,7 +69,7 @@ const SwipeableItem = ({ children, onDelete, onEdit }) => {
                     display: 'flex',
                     justifyContent: 'flex-start',
                     alignItems: 'center',
-                    borderRadius: '16px 0 0 16px',
+                    borderRadius: '0',
                     paddingLeft: '20px',
                     opacity: onEdit ? 1 : 0
                 }}>
@@ -91,7 +91,7 @@ const SwipeableItem = ({ children, onDelete, onEdit }) => {
                     display: 'flex',
                     justifyContent: 'flex-end',
                     alignItems: 'center',
-                    borderRadius: '0 16px 16px 0',
+                    borderRadius: '0',
                     paddingRight: '20px'
                 }}>
                     <button

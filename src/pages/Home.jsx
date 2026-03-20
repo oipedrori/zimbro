@@ -656,7 +656,7 @@ const Home = () => {
                                                 }}
                                             >
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                                                    <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: getCategoryTheme(tx.category, tx.type).color + '20', display: 'flex', justifyContent: 'center', alignItems: 'center', color: getCategoryTheme(tx.category, tx.type).color, fontWeight: 'bold', fontSize: '1.2rem' }}>
+                                                    <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: getCategoryTheme(tx.category, tx.type).color + '20', display: 'flex', justifyContent: 'center', alignItems: 'center', color: getCategoryTheme(tx.category, tx.type).color, fontWeight: 'bold', fontSize: '1.2rem', flexShrink: 0 }}>
                                                         {getEmojiForDescription(tx.description, getCategoryTheme(tx.category, tx.type).icon)}
                                                     </div>
                                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -797,7 +797,7 @@ const Home = () => {
                                                         className="hover-brightness"
                                                     >
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                                                            <div style={{ width: '46px', height: '46px', borderRadius: '12px', background: getCategoryTheme(tx.category, tx.type).color + '20', display: 'flex', justifyContent: 'center', alignItems: 'center', color: getCategoryTheme(tx.category, tx.type).color, fontSize: '1.3rem' }}>
+                                                            <div style={{ width: '46px', height: '46px', borderRadius: '12px', background: getCategoryTheme(tx.category, tx.type).color + '20', display: 'flex', justifyContent: 'center', alignItems: 'center', color: getCategoryTheme(tx.category, tx.type).color, fontSize: '1.3rem', flexShrink: 0 }}>
                                                                 {getEmojiForDescription(tx.description, getCategoryTheme(tx.category, tx.type).icon)}
                                                             </div>
                                                             <div style={{ display: 'flex', flexDirection: 'column' }}>

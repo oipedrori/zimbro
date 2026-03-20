@@ -883,10 +883,10 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
 
 
         @keyframes verticalRoulette {
-            0% { opacity: 0; transform: translateY(60px); }
-            10% { opacity: 1; transform: translateY(0); }
-            90% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(-60px); }
+            0% { opacity: 0; transform: translateY(30px) scale(0.95); }
+            10% { opacity: 1; transform: translateY(0) scale(1); }
+            90% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-30px) scale(0.95); }
         }
       `}</style>
         </div>
