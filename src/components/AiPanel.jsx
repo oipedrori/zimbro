@@ -572,7 +572,7 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
                             <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center' }}>
                                 <div className="ai-status-header">
                                     <h3 style={{ color: 'white', fontSize: '1.4rem', fontWeight: '600', marginBottom: '8px', opacity: 0.9 }}>
-                                        {isListening ? t('listening_now', { defaultValue: 'Ouvindo...' }) : t('ai_ready', { defaultValue: `Como posso ajudar${firstName ? ', ' + firstName : ''}?` })}
+                                        {t('ai_ready', { defaultValue: firstName ? `Como posso ajudar, ${firstName}?` : "Como posso ajudar?" })}
                                     </h3>
                                 </div>
 
