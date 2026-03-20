@@ -18,6 +18,7 @@ const ConfirmDialog = ({
     const [shouldRender, setShouldRender] = useState(isOpen);
     const [isAnimating, setIsAnimating] = useState(false);
     const [confirmText, setConfirmText] = useState('');
+    const [isInputFocused, setIsInputFocused] = useState(false);
     const { t } = useI18n();
 
     useEffect(() => {
@@ -42,7 +43,7 @@ const ConfirmDialog = ({
             onClick={onClose}
         >
             <div 
-                className={`confirm-content ${isAnimating ? 'slide-up' : 'slide-down'}`}
+                className={`confirm-content ${isAnimating ? 'slide-up' : 'slide-down'} ${isInputFocused ? 'keyboard-focused' : ''}`}
                 onClick={e => e.stopPropagation()}
             >
                 <div style={{ position: 'absolute', top: '16px', right: '16px', zIndex: 10 }}>
@@ -79,6 +80,8 @@ const ConfirmDialog = ({
                             type="text" 
                             placeholder={t('type_to_confirm', { defaultValue: `Digite ${requireConfirm}` })}
                             value={confirmText}
+                            onFocus={() => setIsInputFocused(true)}
+                            onBlur={() => setIsInputFocused(false)}
                             onChange={(e) => setConfirmText(e.target.value)}
                             style={{
                                 width: '100%', padding: '14px', borderRadius: '12px',
@@ -182,6 +185,9 @@ const ConfirmDialog = ({
                 .confirm-content.slide-up {
                     transform: translateY(0);
                     opacity: 1;
+                }
+                .confirm-content.slide-up.keyboard-focused {
+                    transform: translateY(-30dvh);
                 }
                 .confirm-content.slide-down {
                     transform: translateY(100%);
