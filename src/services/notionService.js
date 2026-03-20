@@ -300,7 +300,7 @@ const mapNotionToZimbroo = (results) => {
             );
             const totalProp = Object.entries(props).find(([name, p]) => {
                 const lowName = name.toLowerCase();
-                return (p.type === 'number' || p.type === 'formula') && (lowName === 'valor' || lowName === 'amount');
+                return (p.type === 'number' || p.type === 'formula') && (lowName === 'valor' || lowName === 'amount' || lowName === 'valor (inteiro)');
             });
 
             let baseAmount = 0;
@@ -354,7 +354,15 @@ const mapNotionToZimbroo = (results) => {
             // 6. Type (Income/Expense detection)
             const catName = (mapped.category || '').toLowerCase();
             const descName = (mapped.description || '').toLowerCase();
-            const isRec = catName.includes('receita') || catName.includes('ganho') || descName.includes('receita');
+            const typePropValue = typeProp ? (typeProp[1].select?.name || typeProp[1].multi_select?.[0]?.name || '').toLowerCase() : '';
+            
+            // Specific check for "Tipo de Receita" property
+            const incomeProp = Object.entries(props).find(([name]) => name.toLowerCase().includes('tipo de receita'));
+            
+            const isRec = catName.includes('receita') || catName.includes('ganho') || 
+                          descName.includes('receita') || !!incomeProp || 
+                          typePropValue.includes('receita') || typePropValue.includes('rendimento');
+            
             mapped.type = isRec ? 'income' : 'expense';
 
         } catch (err) {
