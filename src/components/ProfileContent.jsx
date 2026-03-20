@@ -5,6 +5,7 @@ import { User, LogOut, Trash2, Moon, Globe, DollarSign, ArrowRight, RefreshCcw, 
 import { requestNotificationPermission } from './NotificationHandler';
 import { deleteAllUserTransactions } from '../services/transactionService';
 import { haptic } from '../utils/haptic';
+import ConfirmDialog from './ConfirmDialog';
 
 const ProfileContent = ({ onOpenNotion, onClose }) => {
     const { currentUser, logout, deleteAccount } = useAuth();
@@ -281,38 +282,6 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                 </button>
             </div>
 
-            {/* Overlays (Inline for Sheet) */}
-            {(showResetConfirm || showDeleteConfirm) && (
-                <div style={{ position: 'absolute', inset: 0, background: 'var(--bg-color)', zIndex: 10, padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'center' }}>
-                    {showResetConfirm && (
-                        <>
-                            <RefreshCcw size={48} color="#f59e0b" style={{ margin: '0 auto 20px' }} />
-                            <h3 style={{ fontSize: '1.4rem', fontWeight: '800', marginBottom: '12px' }}>{t('reset_data_confirm_title')}</h3>
-                            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '32px' }}>{t('reset_data_confirm_desc')}</p>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                <button onClick={handleResetData} style={{ height: '56px', borderRadius: '18px', background: '#f59e0b', color: 'white', fontWeight: '700', border: 'none' }}>{t('reset_data_confirm_btn')}</button>
-                                <button onClick={() => setShowResetConfirm(false)} style={{ height: '56px', borderRadius: '18px', background: 'var(--surface-color)', color: 'var(--text-main)', border: 'none' }}>{t('cancel')}</button>
-                            </div>
-                        </>
-                    )}
-                    {showDeleteConfirm && (
-                        <>
-                            <Trash2 size={48} color="var(--danger-color)" style={{ margin: '0 auto 20px' }} />
-                            <h3 style={{ fontSize: '1.4rem', fontWeight: '800', marginBottom: '12px' }}>{t('delete_account_confirm_title')}</h3>
-                            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '24px' }}>{t('delete_account_confirm_desc')}</p>
-                            <input 
-                                type="text" value={deleteConfirmText} onChange={e => setDeleteConfirmText(e.target.value.toUpperCase())}
-                                style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1px solid var(--danger-color)', background: 'var(--bg-color)', color: 'var(--text-main)', textAlign: 'center', fontWeight: '700', marginBottom: '20px', outline: 'none' }}
-                            />
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                <button onClick={handleDeleteAccount} disabled={deleteConfirmText !== 'DELETE'} style={{ height: '56px', borderRadius: '18px', background: deleteConfirmText === 'DELETE' ? 'var(--danger-color)' : 'var(--glass-border)', color: 'white', fontWeight: '700', border: 'none' }}>{t('delete_account_confirm_btn')}</button>
-                                <button onClick={() => { setShowDeleteConfirm(false); setDeleteConfirmText(''); }} style={{ height: '56px', borderRadius: '18px', background: 'var(--surface-color)', color: 'var(--text-main)', border: 'none' }}>{t('cancel')}</button>
-                            </div>
-                        </>
-                    )}
-                </div>
-            )}
-            
             {/* App Version, Easter Egg e Feito no Brasil */}
             <div style={{ marginTop: '32px', textAlign: 'center', paddingBottom: '20px', position: 'relative' }}>
                 <style>{`
@@ -365,6 +334,34 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                 </button>
                 <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.35, margin: '4px 0 0', letterSpacing: '0.3px' }}>{t('made_in_brazil')}</p>
             </div>
+
+            {/* Modals de Confirmação */}
+            <ConfirmDialog
+                isOpen={showResetConfirm}
+                onClose={() => setShowResetConfirm(false)}
+                title={t('reset_data_confirm_title')}
+                message={t('reset_data_confirm_desc')}
+                onConfirm={handleResetData}
+                confirmLabel={t('reset_data_confirm_btn')}
+                cancelLabel={t('cancel')}
+                type="warning"
+            />
+
+            <ConfirmDialog
+                isOpen={showDeleteConfirm}
+                onClose={() => { setShowDeleteConfirm(false); setDeleteConfirmText(''); }}
+                title={t('delete_account_confirm_title')}
+                message={t('delete_account_confirm_desc')}
+                onConfirm={() => {
+                    // Simulating original logic which checked for DELETE
+                    // The ConfirmDialog itself handles the input requirement if requireConfirm is passed
+                    handleDeleteAccount();
+                }}
+                requireConfirm="DELETE"
+                confirmLabel={t('delete_account_confirm_btn')}
+                cancelLabel={t('cancel')}
+                type="danger"
+            />
         </div>
     );
 };
