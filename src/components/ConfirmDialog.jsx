@@ -187,7 +187,7 @@ const ConfirmDialog = ({
                     opacity: 1;
                 }
                 .confirm-content.slide-up.keyboard-focused {
-                    transform: translateY(-30dvh);
+                    transform: translateY(-12dvh);
                 }
                 .confirm-content.slide-down {
                     transform: translateY(100%);
