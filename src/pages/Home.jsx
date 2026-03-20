@@ -643,7 +643,7 @@ const Home = () => {
                                     <p style={{ color: 'var(--text-muted)' }}>{t('no_transactions')}</p>
                                 </div>
                             ) : (
-                                <div className="glass-panel" style={{ padding: 0, overflow: 'hidden', background: 'transparent' }}>
+                                <div className="glass-panel" style={{ padding: 0, overflow: 'hidden' }}>
                                     {filteredTransactions.map((tx, i) => (
                                         <SwipeableItem key={tx.id} onDelete={() => handleConfirmDelete(tx)} onEdit={() => handleEditTx(tx)}>
                                             <div
@@ -652,12 +652,7 @@ const Home = () => {
                                                     justifyContent: 'space-between',
                                                     alignItems: 'center',
                                                     padding: '12px 16px',
-                                                    background: 'transparent',
-                                                    borderBottom: i === filteredTransactions.length - 1 ? 'none' : '1px solid var(--glass-border)',
-                                                    borderTopLeftRadius: i === 0 ? '16px' : '0',
-                                                    borderTopRightRadius: i === 0 ? '16px' : '0',
-                                                    borderBottomLeftRadius: i === filteredTransactions.length - 1 ? '16px' : '0',
-                                                    borderBottomRightRadius: i === filteredTransactions.length - 1 ? '16px' : '0',
+                                                    background: 'transparent'
                                                 }}
                                             >
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
