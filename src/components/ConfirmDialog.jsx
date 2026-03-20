@@ -19,6 +19,7 @@ const ConfirmDialog = ({
     const [isAnimating, setIsAnimating] = useState(false);
     const [confirmText, setConfirmText] = useState('');
     const [isInputFocused, setIsInputFocused] = useState(false);
+    const [keyboardHeight, setKeyboardHeight] = useState(0);
     const { t } = useI18n();
 
     useEffect(() => {
@@ -35,11 +36,38 @@ const ConfirmDialog = ({
         }
     }, [isOpen]);
 
+    useEffect(() => {
+        if (!window.visualViewport || !isInputFocused) {
+            setKeyboardHeight(0);
+            return;
+        }
+
+        const handleViewportChange = () => {
+            const vv = window.visualViewport;
+            const offset = window.innerHeight - vv.height;
+            // Subtracting scroll position if the viewport was scrolled
+            setKeyboardHeight(Math.max(0, offset));
+        };
+
+        window.visualViewport.addEventListener('resize', handleViewportChange);
+        window.visualViewport.addEventListener('scroll', handleViewportChange);
+        handleViewportChange();
+
+        return () => {
+            window.visualViewport.removeEventListener('resize', handleViewportChange);
+            window.visualViewport.removeEventListener('scroll', handleViewportChange);
+        };
+    }, [isInputFocused]);
+
     if (!shouldRender && !isOpen) return null;
 
     return createPortal(
         <div 
-            className={`confirm-overlay ${isAnimating ? 'visible' : ''} ${isInputFocused ? 'keyboard-visible' : ''}`}
+            className={`confirm-overlay ${isAnimating ? 'visible' : ''}`}
+            style={{ 
+                paddingBottom: keyboardHeight > 0 ? `${keyboardHeight}px` : '0px',
+                transition: 'padding-bottom 0.1s ease-out'
+            }}
             onClick={onClose}
         >
             <div 
@@ -153,10 +181,6 @@ const ConfirmDialog = ({
                     touch-action: none;
                     backdrop-filter: blur(0px);
                     -webkit-backdrop-filter: blur(0px);
-                }
-                .confirm-overlay.keyboard-visible {
-                    align-items: center;
-                    padding: 24px;
                 }
                 .confirm-overlay.visible {
                     background: rgba(27, 69, 32, 0.4);
