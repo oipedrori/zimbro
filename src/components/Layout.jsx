@@ -50,12 +50,13 @@ const Layout = () => {
     // Scroll listener for FAB scaling
     useEffect(() => {
         const handleScroll = () => {
-            if (!mainContentRef.current) return;
-            const currentScrollY = mainContentRef.current.scrollTop;
+            const currentScrollY = mainContentRef.current?.scrollTop || window.scrollY;
             
-            if (currentScrollY > lastScrollY.current && currentScrollY > 50) {
+            // Shrink faster and be more sensitive
+            if (currentScrollY > lastScrollY.current && currentScrollY > 20) {
                 setIsFabShrunk(true);
-            } else if (currentScrollY < lastScrollY.current) {
+            } else if (currentScrollY < lastScrollY.current - 5 || currentScrollY <= 20) {
+                // Only enlarge if scrolling up significantly or back to top
                 setIsFabShrunk(false);
             }
             
@@ -63,10 +64,12 @@ const Layout = () => {
         };
 
         const container = mainContentRef.current;
+        window.addEventListener('scroll', handleScroll, { passive: true });
         if (container) {
             container.addEventListener('scroll', handleScroll, { passive: true });
         }
         return () => {
+            window.removeEventListener('scroll', handleScroll);
             if (container) container.removeEventListener('scroll', handleScroll);
         };
     }, []);
