@@ -1373,19 +1373,19 @@ const Home = () => {
                                     return catTxs.map((tx, idx) => {
                                         const theme = getCategoryTheme(tx.category, tx.type);
                                         return (
-                                            <div key={idx} style={{ 
-                                                display: 'flex', 
-                                                justifyContent: 'space-between', 
+                                            <div key={idx} style={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
                                                 alignItems: 'center',
                                                 padding: '12px 0',
-                                                borderBottom: idx === catTxs.length - 1 ? 'none' : '1px solid var(--glass-border)'
+                                                borderBottom: 'none'
                                             }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                                                    <div style={{ 
-                                                        width: '40px', height: '40px', borderRadius: 'var(--btn-radius)', 
-                                                        background: theme.color + '20', 
-                                                        display: 'flex', justifyContent: 'center', alignItems: 'center', 
-                                                        color: theme.color, fontSize: '1.2rem', flexShrink: 0 
+                                                    <div style={{
+                                                        width: '40px', height: '40px', borderRadius: 'var(--btn-radius)',
+                                                        background: theme.color + '20',
+                                                        display: 'flex', justifyContent: 'center', alignItems: 'center',
+                                                        color: theme.color, fontSize: '1.2rem', flexShrink: 0
                                                     }}>
                                                         {getEmojiForDescription(tx.description, theme.icon)}
                                                     </div>

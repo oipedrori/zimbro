@@ -255,7 +255,7 @@ const ConfirmDialog = ({
                     text-align: center;
                     box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
                     transform: translateY(100%);
-                    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+                    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
                     position: relative;
                 }
                 .confirm-content::before {
