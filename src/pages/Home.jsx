@@ -472,9 +472,6 @@ const Home = () => {
                                     minWidth: '110px', 
                                     textAlign: 'center',
                                     cursor: 'pointer',
-                                    padding: '4px 8px',
-                                    borderRadius: '8px',
-                                    background: 'var(--surface-color)',
                                     userSelect: 'none'
                                 }}
                             >
