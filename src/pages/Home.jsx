@@ -275,7 +275,7 @@ const Home = () => {
 
     const handleFilterClick = (filterId) => {
         haptic.light();
-        if (activeFilter === filterId) {
+        if (activeFilter === filterId && filterId !== 'all') {
             // Se clicar no já ativo, calcula o total
             const total = filteredTransactions.reduce((acc, t) => acc + t.amount, 0);
             setShowFilterTotal({ id: filterId, amount: total });
