@@ -648,7 +648,8 @@ const Home = () => {
                                         display: 'flex',
                                         overflowX: 'auto',
                                         gap: '10px',
-                                        padding: '4px 24px',
+                                        padding: '45px 24px 4px 24px', // Aumentado o padding top para o balão não cortar
+                                        marginTop: '-41px', // Compensa o padding extra para manter o layout
                                         scrollbarWidth: 'none',
                                         msOverflowStyle: 'none',
                                         WebkitOverflowScrolling: 'touch'
@@ -691,24 +692,32 @@ const Home = () => {
                                             <AnimatePresence>
                                                 {showFilterTotal?.id === f.id && (
                                                     <motion.div
-                                                        initial={{ opacity: 0, y: 10, scale: 0.8 }}
-                                                        animate={{ opacity: 1, y: -45, scale: 1 }}
-                                                        exit={{ opacity: 0, y: 10, scale: 0.8 }}
+                                                        initial={{ opacity: 0, y: 10, x: '-50%', scale: 0.8 }}
+                                                        animate={{ opacity: 1, y: -50, x: '-50%', scale: 1 }}
+                                                        exit={{ opacity: 0, y: 10, x: '-50%', scale: 0.8 }}
                                                         onClick={() => setShowFilterTotal(null)}
                                                         style={{
-                                                            position: 'absolute', left: '50%', transform: 'translateX(-50%)',
-                                                            background: 'var(--primary-dark)', color: 'white',
-                                                            padding: '6px 12px', borderRadius: '10px', fontSize: '0.75rem',
-                                                            fontWeight: '800', whiteSpace: 'nowrap', zIndex: 100,
-                                                            boxShadow: '0 4px 12px rgba(0,0,0,0.2)', cursor: 'pointer',
-                                                            pointerEvents: 'auto'
+                                                            position: 'absolute', left: '50%',
+                                                            background: 'var(--surface-color)', 
+                                                            color: 'var(--text-main)',
+                                                            padding: '8px 14px', borderRadius: '12px', fontSize: '0.85rem',
+                                                            fontWeight: '700', whiteSpace: 'nowrap', zIndex: 100,
+                                                            boxShadow: '0 8px 16px rgba(0,0,0,0.3)', cursor: 'pointer',
+                                                            pointerEvents: 'auto',
+                                                            border: '1px solid var(--glass-border)',
+                                                            backdropFilter: 'blur(10px)',
+                                                            WebkitBackdropFilter: 'blur(10px)'
                                                         }}
                                                     >
                                                         Total: {formatCurrency(showFilterTotal.amount)}
                                                         <div style={{
-                                                            position: 'absolute', bottom: '-4px', left: '50%',
+                                                            position: 'absolute', bottom: '-4.5px', left: '50%',
                                                             transform: 'translateX(-50%) rotate(45deg)',
-                                                            width: '8px', height: '8px', background: 'var(--primary-dark)'
+                                                            width: '8px', height: '8px', 
+                                                            background: 'var(--surface-color)',
+                                                            borderRight: '1px solid var(--glass-border)',
+                                                            borderBottom: '1px solid var(--glass-border)',
+                                                            zIndex: -1
                                                         }} />
                                                     </motion.div>
                                                 )}
@@ -854,7 +863,7 @@ const Home = () => {
                                             <h3 style={{ fontSize: '1.2rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>{t('transactions')}</h3>
                                         </div>
 
-                                        <div className="filters-row" style={{ display: 'flex', overflowX: 'auto', gap: '10px', marginBottom: '24px', padding: '4px 0', scrollbarWidth: 'none' }}>
+                                        <div className="filters-row" style={{ display: 'flex', overflowX: 'auto', gap: '10px', marginBottom: '24px', padding: '50px 0 4px 0', marginTop: '-50px', scrollbarWidth: 'none' }}>
                                             {[
                                                 { id: 'all', label: 'filter_all' },
                                                 { id: 'income', label: 'filter_incomes' },
@@ -879,24 +888,32 @@ const Home = () => {
                                                     <AnimatePresence>
                                                         {showFilterTotal?.id === f.id && (
                                                             <motion.div
-                                                                initial={{ opacity: 0, y: 10, scale: 0.8 }}
-                                                                animate={{ opacity: 1, y: -50, scale: 1 }}
-                                                                exit={{ opacity: 0, y: 10, scale: 0.8 }}
+                                                                initial={{ opacity: 0, y: 10, x: '-50%', scale: 0.8 }}
+                                                                animate={{ opacity: 1, y: -55, x: '-50%', scale: 1 }}
+                                                                exit={{ opacity: 0, y: 10, x: '-50%', scale: 0.8 }}
                                                                 onClick={() => setShowFilterTotal(null)}
                                                                 style={{
-                                                                    position: 'absolute', left: '50%', transform: 'translateX(-50%)',
-                                                                    background: 'var(--primary-dark)', color: 'white',
-                                                                    padding: '8px 14px', borderRadius: '12px', fontSize: '0.8rem',
-                                                                    fontWeight: '800', whiteSpace: 'nowrap', zIndex: 100,
-                                                                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)', cursor: 'pointer',
-                                                                    pointerEvents: 'auto'
+                                                                    position: 'absolute', left: '50%',
+                                                                    background: 'var(--surface-color)', 
+                                                                    color: 'var(--text-main)',
+                                                                    padding: '8px 14px', borderRadius: '12px', fontSize: '0.85rem',
+                                                                    fontWeight: '700', whiteSpace: 'nowrap', zIndex: 100,
+                                                                    boxShadow: '0 8px 16px rgba(0,0,0,0.3)', cursor: 'pointer',
+                                                                    pointerEvents: 'auto',
+                                                                    border: '1px solid var(--glass-border)',
+                                                                    backdropFilter: 'blur(10px)',
+                                                                    WebkitBackdropFilter: 'blur(10px)'
                                                                 }}
                                                             >
                                                                 Total: {formatCurrency(showFilterTotal.amount)}
                                                                 <div style={{
-                                                                    position: 'absolute', bottom: '-4px', left: '50%',
+                                                                    position: 'absolute', bottom: '-4.5px', left: '50%',
                                                                     transform: 'translateX(-50%) rotate(45deg)',
-                                                                    width: '8px', height: '8px', background: 'var(--primary-dark)'
+                                                                    width: '8px', height: '8px', 
+                                                                    background: 'var(--surface-color)',
+                                                                    borderRight: '1px solid var(--glass-border)',
+                                                                    borderBottom: '1px solid var(--glass-border)',
+                                                                    zIndex: -1
                                                                 }} />
                                                             </motion.div>
                                                         )}
