@@ -100,7 +100,7 @@ body.hide-ai-btn .bottom-nav,
     gap: 20px;
     padding: 12px 24px;
     background: var(--surface-color);
-    border-radius: 40px;
+    border-radius: var(--btn-radius);
     border: 1px solid var(--glass-border);
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
     backdrop-filter: blur(10px);
@@ -229,7 +229,7 @@ body.hide-ai-btn .bottom-nav,
 .close-btn {
     width: 30px;
     height: 30px;
-    border-radius: 50%;
+    border-radius: var(--btn-radius);
     background: var(--bg-color);
     color: var(--text-muted);
     display: flex;
@@ -255,7 +255,7 @@ body.hide-ai-btn .bottom-nav,
     background: var(--primary-light);
     color: var(--primary-color);
     padding: 10px 16px;
-    border-radius: var(--border-radius-full);
+    border-radius: var(--btn-radius);
     font-size: 14px;
     font-weight: 500;
     transition: background var(--transition-fast);

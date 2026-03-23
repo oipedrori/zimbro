@@ -69,6 +69,13 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
         // O reset natural acontecerá na próxima vez que abrir (isOpen && !initialData).
     }, [isOpen, initialData, defaultType]);
 
+    // Auto-set recurring for Salary and Subscriptions
+    useEffect(() => {
+        if (category === 'salario' || category === 'assinaturas') {
+            setRepeatType('recurring');
+        }
+    }, [category]);
+
     if (!shouldRender && !isOpen) return null;
 
     const categories = type === 'expense' ? CATEGORIAS_DESPESA : CATEGORIAS_RECEITA;
@@ -137,7 +144,7 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
                         style={{ 
                             width: '40px', 
                             height: '40px', 
-                            borderRadius: '12px', 
+                            borderRadius: 'var(--btn-radius)', 
                             background: 'var(--surface-color)', 
                             border: '1px solid var(--glass-border)',
                             color: 'var(--text-main)', 
@@ -157,7 +164,7 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
                     <button
                         type="button"
                         style={{
-                            flex: 1, padding: '12px', borderRadius: 'var(--border-radius-md)',
+                            flex: 1, padding: '12px', borderRadius: 'var(--btn-radius)',
                             background: type === 'expense' ? 'var(--danger-color)' : 'var(--bg-color)',
                             color: type === 'expense' ? 'white' : 'var(--text-main)',
                             fontWeight: '600', transition: 'all 0.2s'
@@ -284,7 +291,7 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
                         type="submit" disabled={loading}
                         style={{
                             marginTop: '10px', width: '100%', padding: '16px', background: 'var(--primary-gradient)',
-                            color: 'var(--btn-text)', borderRadius: 'var(--border-radius-lg)', fontWeight: 'bold', fontSize: '1.1rem',
+                            color: 'var(--btn-text)', borderRadius: 'var(--btn-radius)', fontWeight: 'bold', fontSize: '1.1rem',
                             display: 'flex', justifyContent: 'center', alignItems: 'center', height: '56px',
                             boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                         }}
@@ -324,7 +331,7 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
                                 marginTop: '12px', width: '100%', padding: '16px',
                                 border: '1px solid var(--danger-color)', color: 'var(--danger-color)',
                                 background: 'transparent',
-                                borderRadius: 'var(--border-radius-lg)', fontWeight: '700', fontSize: '1rem',
+                                borderRadius: 'var(--btn-radius)', fontWeight: '700', fontSize: '1rem',
                                 height: '56px', display: 'flex', justifyContent: 'center', alignItems: 'center',
                                 cursor: 'pointer', transition: 'all 0.2s'
                             }}

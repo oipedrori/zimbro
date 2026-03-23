@@ -32,6 +32,7 @@ const LimitsSection = ({
                 fontSize: '1.2rem', 
                 fontWeight: '600', 
                 marginBottom: '16px',
+                marginTop: '32px',
                 color: 'var(--text-main)',
                 padding: '0'
             }}>

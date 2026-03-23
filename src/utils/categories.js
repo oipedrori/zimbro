@@ -14,6 +14,7 @@ export const CATEGORIAS_DESPESA = [
     { id: 'transporte', label: 'Transporte', icon: '🚗', color: '#D8B4FE' }, // Purple 300
     { id: 'vestuario', label: 'Vestuário', icon: '👕', color: '#86EFAC' }, // Green 300
     { id: 'higiene', label: 'Higiene Pessoal', icon: '🪥', color: '#BEF264' }, // Lime 300
+    { id: 'assinaturas', label: 'Assinaturas', icon: '💎', color: '#818CF8' }, // Indigo 400
     { id: 'outros', label: 'Outros', icon: '📌', color: '#D1D5DB' }, // Gray 300
 ];
 

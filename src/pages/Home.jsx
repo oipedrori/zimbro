@@ -289,11 +289,10 @@ const Home = () => {
     const filteredTransactions = transactions.filter(t => {
         if (activeFilter === 'all') return true;
         if (activeFilter === 'income') return t.type === 'income';
-        if (activeFilter === 'expense') return t.type === 'expense';
-        // Categorias de despesas específicas devem filtrar pelo tipo expense também
-        if (activeFilter === 'variable') return t.type === 'expense' && (t.repeatType === 'none' || !t.repeatType);
+        // O filtro "Despesas" (ID: expense) agora mostra apenas as despesas móveis (não recorrentes/parceladas)
+        if (activeFilter === 'expense' || activeFilter === 'variable') return t.type === 'expense' && (t.repeatType === 'none' || !t.repeatType);
         if (activeFilter === 'installment') return t.type === 'expense' && t.repeatType === 'installment';
-        if (activeFilter === 'recurring') return t.type === 'expense' && t.repeatType === 'recurring';
+        if (activeFilter === 'recurring') return t.repeatType === 'recurring';
         return true;
     });
 
@@ -393,7 +392,7 @@ const Home = () => {
                         <button
                             onClick={() => { haptic.light(); setIsFlipped(false); }}
                             style={{
-                                width: '40px', height: '40px', borderRadius: '12px', background: 'var(--surface-color)',
+                                width: '40px', height: '40px', borderRadius: 'var(--btn-radius)', background: 'var(--surface-color)',
                                 border: '1px solid var(--glass-border)', color: 'var(--text-main)',
                                 display: 'flex', justifyContent: 'center', alignItems: 'center'
                             }}
@@ -478,7 +477,7 @@ const Home = () => {
                             gap: '8px',
                             background: 'transparent',
                             padding: '6px 12px',
-                            borderRadius: '20px',
+                            borderRadius: 'var(--btn-radius)',
                             border: 'none',
                             alignSelf: isDesktop ? 'auto' : 'stretch',
                             justifyContent: isDesktop ? 'flex-start' : 'space-between'
@@ -609,9 +608,9 @@ const Home = () => {
                     )}
 
                     {!isDesktop && (
-                        <section id="onboarding-transactions-list">
+                        <section id="onboarding-transactions-list" style={{ marginTop: '32px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                                <h3 style={{ fontSize: '1.2rem', fontWeight: '600' }}>{t('transactions')}</h3>
+                                <h3 style={{ fontSize: '1.2rem', fontWeight: '600', margin: 0 }}>{t('transactions')}</h3>
                             </div>
 
                             {/* Contêiner de Filtros com Fade */}
@@ -679,7 +678,7 @@ const Home = () => {
                                             <button
                                                 onClick={() => handleFilterClick(f.id)}
                                                 style={{
-                                                    whiteSpace: 'nowrap', padding: '8px 16px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: '600',
+                                                    whiteSpace: 'nowrap', padding: '8px 16px', borderRadius: 'var(--btn-radius)', fontSize: '0.85rem', fontWeight: '600',
                                                     background: activeFilter === f.id ? 'var(--primary-color)' : 'var(--surface-color)',
                                                     color: activeFilter === f.id ? 'white' : 'var(--text-muted)',
                                                     border: '1px solid var(--glass-border)',
@@ -858,7 +857,7 @@ const Home = () => {
                                         isDesktop={isDesktop}
                                     />
 
-                                    <section className="glass-panel" style={{ padding: '32px', display: 'flex', flexDirection: 'column' }}>
+                                    <section className="glass-panel" style={{ padding: '32px', display: 'flex', flexDirection: 'column', marginTop: '32px' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                                             <h3 style={{ fontSize: '1.2rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>{t('transactions')}</h3>
                                         </div>
@@ -867,15 +866,15 @@ const Home = () => {
                                             {[
                                                 { id: 'all', label: 'filter_all' },
                                                 { id: 'income', label: 'filter_incomes' },
-                                                { id: 'variable', label: 'Despesas Móveis' },
-                                                { id: 'recurring', label: 'Despesas Recorrentes' },
-                                                { id: 'installment', label: 'Despesas Parceladas' }
+                                                { id: 'expense', label: 'filter_expenses' },
+                                                { id: 'recurring', label: 'filter_recurring' },
+                                                { id: 'installment', label: 'filter_installment' }
                                             ].map(f => (
                                                 <div key={f.id} style={{ position: 'relative' }}>
                                                     <button
                                                         onClick={() => handleFilterClick(f.id)}
                                                         style={{
-                                                            whiteSpace: 'nowrap', padding: '10px 18px', borderRadius: '12px', fontSize: '0.9rem', fontWeight: '600',
+                                                            whiteSpace: 'nowrap', padding: '10px 18px', borderRadius: 'var(--btn-radius)', fontSize: '0.9rem', fontWeight: '600',
                                                             background: activeFilter === f.id ? 'var(--primary-color)' : 'var(--bg-color)',
                                                             color: activeFilter === f.id ? 'white' : 'var(--text-muted)',
                                                             border: '1px solid var(--glass-border)', boxShadow: 'var(--shadow-sm)',
@@ -989,7 +988,7 @@ const Home = () => {
                                         <BudgetPieChart transactions={transactions} currentDate={currentDate} />
                                     </section>
 
-                                    <section className="glass-panel" style={{ padding: '32px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                    <section className="glass-panel" style={{ padding: '32px', display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '32px' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                             <h3 style={{ fontSize: '1.2rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>Limites Ativos</h3>
                                             <button
@@ -1046,11 +1045,11 @@ const Home = () => {
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
                                     <h3 style={{ fontSize: '1.2rem', fontWeight: '700', color: 'var(--text-main)', margin: 0 }}>Evolução de Saldos Mensais</h3>
 
-                                    <div style={{ display: 'flex', background: 'var(--bg-color)', padding: '4px', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
+                                    <div style={{ display: 'flex', background: 'var(--bg-color)', padding: '4px', borderRadius: 'var(--btn-radius)', border: '1px solid var(--glass-border)' }}>
                                         <button
                                             onClick={() => { haptic.light(); setChartType('bar'); }}
                                             style={{
-                                                padding: '6px 14px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: '700', cursor: 'pointer', border: 'none',
+                                                padding: '6px 14px', borderRadius: 'var(--btn-radius)', fontSize: '0.8rem', fontWeight: '700', cursor: 'pointer', border: 'none',
                                                 background: chartType === 'bar' ? 'var(--primary-color)' : 'transparent',
                                                 color: chartType === 'bar' ? 'white' : 'var(--text-muted)',
                                                 transition: 'all 0.2s'
@@ -1061,7 +1060,7 @@ const Home = () => {
                                         <button
                                             onClick={() => { haptic.light(); setChartType('line'); }}
                                             style={{
-                                                padding: '6px 14px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: '700', cursor: 'pointer', border: 'none',
+                                                padding: '6px 14px', borderRadius: 'var(--btn-radius)', fontSize: '0.8rem', fontWeight: '700', cursor: 'pointer', border: 'none',
                                                 background: chartType === 'line' ? 'var(--primary-color)' : 'transparent',
                                                 color: chartType === 'line' ? 'white' : 'var(--text-muted)',
                                                 transition: 'all 0.2s'
@@ -1373,7 +1372,7 @@ const Home = () => {
                                             }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                                                     <div style={{ 
-                                                        width: '40px', height: '40px', borderRadius: '12px', 
+                                                        width: '40px', height: '40px', borderRadius: 'var(--btn-radius)', 
                                                         background: theme.color + '20', 
                                                         display: 'flex', justifyContent: 'center', alignItems: 'center', 
                                                         color: theme.color, fontSize: '1.2rem', flexShrink: 0 
@@ -1449,7 +1448,7 @@ const Home = () => {
                                     <button
                                         onClick={() => { haptic.light(); setIsLimitModalOpen(false); }}
                                         style={{
-                                            width: '40px', height: '40px', borderRadius: '12px',
+                                            width: '40px', height: '40px', borderRadius: 'var(--btn-radius)',
                                             background: 'var(--surface-color)', border: '1px solid var(--glass-border)',
                                             color: 'var(--text-main)', display: 'flex', alignItems: 'center', justifyContent: 'center',
                                             cursor: 'pointer', transition: 'all 0.2s', flexShrink: 0
@@ -1518,7 +1517,7 @@ const Home = () => {
                                 <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
                                     <button
                                         onClick={() => setIsLimitModalOpen(false)}
-                                        style={{ flex: 1, padding: '16px', borderRadius: '16px', background: 'var(--surface-color)', border: 'none', color: 'var(--text-main)', fontWeight: '700', cursor: 'pointer' }}
+                                        style={{ flex: 1, padding: '16px', borderRadius: 'var(--btn-radius)', background: 'var(--surface-color)', border: 'none', color: 'var(--text-main)', fontWeight: '700', cursor: 'pointer' }}
                                     >
                                         Cancelar
                                     </button>
@@ -1530,7 +1529,7 @@ const Home = () => {
                                                 haptic.medium();
                                             }
                                         }}
-                                        style={{ flex: 2, padding: '16px', borderRadius: '16px', background: 'var(--primary-color)', border: 'none', color: 'var(--btn-text)', fontWeight: '700', cursor: 'pointer', boxShadow: '0 8px 20px rgba(var(--primary-rgb), 0.3)' }}
+                                        style={{ flex: 2, padding: '16px', borderRadius: 'var(--btn-radius)', background: 'var(--primary-color)', border: 'none', color: 'var(--btn-text)', fontWeight: '700', cursor: 'pointer', boxShadow: '0 8px 20px rgba(var(--primary-rgb), 0.3)' }}
                                     >
                                         Salvar Limite
                                     </button>

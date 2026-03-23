@@ -94,7 +94,7 @@ const ConfirmDialog = ({
                         style={{ 
                             width: '40px', 
                             height: '40px', 
-                            borderRadius: '12px', 
+                            borderRadius: 'var(--btn-radius)', 
                             background: 'var(--surface-color)', 
                             border: '1px solid var(--glass-border)',
                             color: 'var(--text-main)', 
@@ -139,7 +139,7 @@ const ConfirmDialog = ({
                             onBlur={() => setIsInputFocused(false)}
                             onChange={(e) => setConfirmText(e.target.value)}
                             style={{
-                                width: '100%', padding: '14px', borderRadius: '12px',
+                                width: '100%', padding: '14px', borderRadius: 'var(--btn-radius)',
                                 border: '1px solid var(--glass-border)', background: 'var(--bg-color)',
                                 color: 'var(--text-main)', textAlign: 'center', fontSize: '1rem',
                                 fontWeight: '700', outline: 'none', transition: 'all 0.2s',
@@ -333,7 +333,7 @@ const ConfirmDialog = ({
                 .confirm-btn {
                     width: 100%;
                     padding: 16px;
-                    border-radius: 16px;
+                    border-radius: var(--btn-radius);
                     font-weight: 700;
                     font-size: 1rem;
                     transition: all 0.2s;

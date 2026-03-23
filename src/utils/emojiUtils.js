@@ -29,6 +29,7 @@ const emojiRules = [
     { emoji: '🎧', keywords: ['spotify', 'deezer', 'apple music', 'musica', 'música'] },
     { emoji: '🎮', keywords: ['psn', 'xbox', 'steam', 'jogos', 'game', 'nintendo'] },
     { emoji: '🏟️', keywords: ['estadio', 'estádio', 'futebol', 'ingresso'] },
+    { emoji: '💎', keywords: ['assinatura', 'subscription', 'plano', 'mensalidade'] },
 
     // Saúde / Bem-estar
     { emoji: '🏋️‍♂️', keywords: ['wellhub', 'gympass', 'academia', 'gym', 'treino', 'smart fit', 'bluefit'] },

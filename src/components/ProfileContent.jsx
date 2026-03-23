@@ -119,7 +119,7 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                 <button 
                     onClick={onClose}
                     style={{ 
-                        width: '40px', height: '40px', borderRadius: '12px', 
+                        width: '40px', height: '40px', borderRadius: 'var(--btn-radius)', 
                         background: 'var(--surface-color)', border: '1px solid var(--glass-border)',
                         color: 'var(--text-main)', display: 'flex', alignItems: 'center', justifyContent: 'center',
                         cursor: 'pointer', transition: 'all 0.2s', flexShrink: 0
@@ -172,7 +172,7 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                                 key={themeOption}
                                 onClick={() => setTheme(themeOption)}
                                 style={{
-                                    flex: 1, padding: '10px 8px', borderRadius: '12px', border: 'none', fontSize: '0.85rem', fontWeight: '700',
+                                    flex: 1, padding: '10px 8px', borderRadius: 'var(--btn-radius)', border: 'none', fontSize: '0.85rem', fontWeight: '700',
                                     background: theme === themeOption ? 'var(--primary-color)' : 'transparent',
                                     color: theme === themeOption ? 'white' : 'var(--text-muted)'
                                 }}
@@ -191,7 +191,7 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                     <select
                         value={locale}
                         onChange={(e) => changeLocale(e.target.value)}
-                        style={{ width: '100%', background: 'var(--bg-color)', border: '1px solid var(--glass-border)', padding: '14px', borderRadius: '12px', color: 'var(--text-main)', fontWeight: '600', fontSize: '0.85rem' }}
+                        style={{ width: '100%', background: 'var(--bg-color)', border: '1px solid var(--glass-border)', padding: '14px', borderRadius: 'var(--btn-radius)', color: 'var(--text-main)', fontWeight: '600', fontSize: '0.85rem' }}
                     >
                         <option value="pt">Português</option>
                         <option value="en">English</option>
@@ -207,7 +207,7 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                     <select
                         value={currency}
                         onChange={(e) => changeCurrency(e.target.value)}
-                        style={{ width: '100%', background: 'var(--bg-color)', border: '1px solid var(--glass-border)', padding: '14px', borderRadius: '12px', color: 'var(--text-main)', fontWeight: '600', fontSize: '0.85rem' }}
+                        style={{ width: '100%', background: 'var(--bg-color)', border: '1px solid var(--glass-border)', padding: '14px', borderRadius: 'var(--btn-radius)', color: 'var(--text-main)', fontWeight: '600', fontSize: '0.85rem' }}
                     >
                         <option value="BRL">Real (R$)</option>
                         <option value="USD">Dólar ($)</option>
@@ -267,7 +267,7 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                 <button
                     onClick={() => logout()}
                     style={{ 
-                        width: '100%', padding: '16px', borderRadius: '16px', 
+                        width: '100%', padding: '16px', borderRadius: 'var(--btn-radius)', 
                         background: 'rgba(34, 197, 94, 0.1)', color: 'var(--primary-color)', 
                         border: '1px solid rgba(34, 197, 94, 0.3)', fontWeight: '700', 
                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' 
@@ -278,7 +278,7 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                 <button
                     onClick={() => setShowResetConfirm(true)}
                     style={{ 
-                        width: '100%', padding: '16px', borderRadius: '16px', 
+                        width: '100%', padding: '16px', borderRadius: 'var(--btn-radius)', 
                         background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', 
                         border: '1px solid rgba(245, 158, 11, 0.3)', fontWeight: '700', 
                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' 
@@ -289,7 +289,7 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                 <button
                     onClick={() => setShowDeleteConfirm(true)}
                     style={{ 
-                        width: '100%', padding: '16px', borderRadius: '16px', 
+                        width: '100%', padding: '16px', borderRadius: 'var(--btn-radius)', 
                         background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger-color)', 
                         border: '1px solid rgba(239, 68, 68, 0.3)', fontWeight: '700', 
                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' 

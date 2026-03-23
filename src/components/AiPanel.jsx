@@ -484,7 +484,7 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
                         position: 'absolute', 
                         top: '16px', 
                         right: '16px',
-                        width: '40px', height: '40px', borderRadius: '12px',
+                        width: '40px', height: '40px', borderRadius: 'var(--btn-radius)',
                         background: 'rgba(255, 255, 255, 0.1)', color: 'white',
                         display: 'flex', justifyContent: 'center', alignItems: 'center',
                         border: '1px solid rgba(255,255,255,0.2)', cursor: 'pointer', zIndex: 3005,
@@ -516,11 +516,11 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
                             <button
                                 className="ai-voice-close-btn"
                                 onClick={onClose}
-                                style={{ background: 'rgba(239, 68, 68, 0.2)', border: '1px solid #ef4444', borderRadius: '12px' }}
+                                style={{ background: 'rgba(239, 68, 68, 0.2)', border: '1px solid #ef4444', borderRadius: 'var(--btn-radius)' }}
                             >
                                 <X size={24} color="#ef4444" />
                             </button>
-                            <p style={{ color: '#ef4444', fontSize: '0.9rem', fontWeight: '700', textAlign: 'center', background: 'rgba(0,0,0,0.4)', padding: '12px 20px', borderRadius: '16px', maxWidth: '80%' }}>
+                            <p style={{ color: '#ef4444', fontSize: '0.9rem', fontWeight: '700', textAlign: 'center', background: 'rgba(0,0,0,0.4)', padding: '12px 20px', borderRadius: 'var(--btn-radius)', maxWidth: '80%' }}>
                                 {t('mic_blocked', { defaultValue: 'Microfone bloqueado. Ative nas configurações do navegador para usar voz.' })}
                             </p>
                         </div>

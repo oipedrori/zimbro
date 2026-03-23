@@ -225,7 +225,7 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '32px', gap: '12px' }}>
                 <button
                     onClick={onBack}
-                    style={{ background: 'var(--surface-color)', border: '1px solid var(--glass-border)', borderRadius: '12px', width: '40px', height: '40px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--text-main)', cursor: 'pointer' }}
+                    style={{ background: 'var(--surface-color)', border: '1px solid var(--glass-border)', borderRadius: 'var(--btn-radius)', width: '40px', height: '40px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--text-main)', cursor: 'pointer' }}
                 >
                     <ChevronLeft size={20} />
                 </button>
@@ -234,13 +234,13 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
                     <div style={{ display: 'flex', gap: '8px' }}>
                         <button
                             onClick={handleResetData}
-                            style={{ background: 'rgba(239, 68, 68, 0.1)', border: 'none', borderRadius: '12px', padding: '8px 12px', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', fontWeight: '700' }}
+                            style={{ background: 'rgba(239, 68, 68, 0.1)', border: 'none', borderRadius: 'var(--btn-radius)', padding: '8px 12px', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', fontWeight: '700' }}
                         >
                             {t('clear_all')}
                         </button>
                         <button
                             onClick={handleDisconnect}
-                            style={{ background: 'var(--surface-color)', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '8px 12px', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+                            style={{ background: 'var(--surface-color)', border: '1px solid var(--glass-border)', borderRadius: 'var(--btn-radius)', padding: '8px 12px', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
                         >
                             <Trash2 size={16} />
                         </button>
@@ -315,7 +315,7 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
                    <div style={{ display: 'flex', gap: '12px', marginBottom: '32px' }}>
                         <div 
                             style={{
-                                flex: 1, padding: '20px 12px', borderRadius: '20px', 
+                                flex: 1, padding: '20px 12px', borderRadius: 'var(--btn-radius)', 
                                 background: expenseDbId ? 'var(--danger-light)' : 'var(--surface-color)',
                                 border: `2px solid ${expenseDbId ? 'var(--danger-color)' : 'var(--glass-border)'}`, 
                                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px'
@@ -326,7 +326,7 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
                         </div>
                         <div 
                             style={{
-                                flex: 1, padding: '20px 12px', borderRadius: '20px', 
+                                flex: 1, padding: '20px 12px', borderRadius: 'var(--btn-radius)', 
                                 background: incomeDbId ? 'var(--success-light)' : 'var(--surface-color)',
                                 border: `2px solid ${incomeDbId ? 'var(--success-color)' : 'var(--glass-border)'}`, 
                                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px'
@@ -347,8 +347,8 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
                                         {db.title[0]?.plain_text || t('unnamed')}
                                     </div>
                                     <div style={{ display: 'flex', gap: '6px' }}>
-                                        <button onClick={() => assignDb(db.id, 'expense')} style={{ fontSize: '0.65rem', fontWeight: '800', padding: '6px 8px', borderRadius: '8px', background: isExpense ? 'var(--danger-color)' : 'var(--bg-color)', color: isExpense ? 'white' : 'var(--text-muted)', border: 'none' }}>{t('expense_btn')}</button>
-                                        <button onClick={() => assignDb(db.id, 'income')} style={{ fontSize: '0.65rem', fontWeight: '800', padding: '6px 8px', borderRadius: '8px', background: isIncome ? 'var(--success-color)' : 'var(--bg-color)', color: isIncome ? 'white' : 'var(--text-muted)', border: 'none' }}>{t('income_btn')}</button>
+                                        <button onClick={() => assignDb(db.id, 'expense')} style={{ fontSize: '0.65rem', fontWeight: '800', padding: '6px 8px', borderRadius: 'var(--btn-radius)', background: isExpense ? 'var(--danger-color)' : 'var(--bg-color)', color: isExpense ? 'white' : 'var(--text-muted)', border: 'none' }}>{t('expense_btn')}</button>
+                                        <button onClick={() => assignDb(db.id, 'income')} style={{ fontSize: '0.65rem', fontWeight: '800', padding: '6px 8px', borderRadius: 'var(--btn-radius)', background: isIncome ? 'var(--success-color)' : 'var(--bg-color)', color: isIncome ? 'white' : 'var(--text-muted)', border: 'none' }}>{t('income_btn')}</button>
                                     </div>
                                 </div>
                             );
@@ -359,7 +359,7 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
                         onClick={startSync}
                         disabled={(!expenseDbId && !incomeDbId) || loading}
                         style={{
-                            width: '100%', padding: '24px', borderRadius: '20px',
+                            width: '100%', padding: '24px', borderRadius: 'var(--btn-radius)',
                             background: 'white', color: 'black',
                             fontWeight: '900', fontSize: '1.3rem', border: 'none',
                             opacity: (!expenseDbId && !incomeDbId) ? 0.6 : 1,
@@ -380,7 +380,7 @@ const NotionImportContent = ({ onFinish, onBack, initialOAuthCode }) => {
                     </p>
                     <button
                         onClick={onFinish}
-                        style={{ width: '100%', padding: '18px', borderRadius: '18px', background: 'white', color: 'black', fontWeight: '800', border: 'none' }}
+                        style={{ width: '100%', padding: '18px', borderRadius: 'var(--btn-radius)', background: 'white', color: 'black', fontWeight: '800', border: 'none' }}
                     >
                         {t('done')}
                     </button>
