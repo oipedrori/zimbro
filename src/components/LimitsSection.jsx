@@ -123,9 +123,10 @@ const LimitsSection = ({
                                 <div style={{ 
                                     flex: 1, 
                                     height: '6px', 
-                                    background: 'rgba(255,255,255,0.05)', 
+                                    background: 'rgba(255, 255, 255, 0.12)', 
                                     borderRadius: '10px', 
-                                    overflow: 'hidden'
+                                    overflow: 'hidden',
+                                    border: '1px solid rgba(255, 255, 255, 0.05)'
                                 }}>
                                     <div style={{
                                         width: `${percent}%`,
