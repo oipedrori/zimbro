@@ -105,6 +105,16 @@ const Home = () => {
         };
     }, [isSidebarOpen, isModalOpen, isLimitModalOpen, isConfirmOpen, isLimitActionOpen]);
 
+    // Auto-hide filter total bubble after 10s
+    useEffect(() => {
+        if (showFilterTotal) {
+            const timer = setTimeout(() => {
+                setShowFilterTotal(null);
+            }, 10000);
+            return () => clearTimeout(timer);
+        }
+    }, [showFilterTotal]);
+
     // Hide Bottom Nav globally via layout context when any modal is open
     useEffect(() => {
         if (setIsBottomNavHidden) {
