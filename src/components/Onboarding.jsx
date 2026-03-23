@@ -56,9 +56,10 @@ const Onboarding = ({ onComplete }) => {
       if (element) {
         const rect = element.getBoundingClientRect();
         if (rect.height > 0) {
+          const isBalance = step.id === 'onboarding-balance-card';
           setTargetRect({
             x: rect.left,
-            y: rect.top,
+            y: isBalance ? rect.top - 8 : rect.top, // Adjustment: move up if balance card
             width: rect.width,
             height: rect.height,
             padding: step.id === 'onboarding-ai-fab' ? 20 : 8
