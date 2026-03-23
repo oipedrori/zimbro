@@ -110,7 +110,7 @@ const Onboarding = ({ onComplete }) => {
 
   // Custom padding for FAB
   if (ONBOARDING_STEPS[currentStep].id === 'onboarding-ai-fab') {
-    padding = 40; // Push tooltip higher for FAB
+    padding = 80; // Push tooltip significantly higher for FAB
   }
 
   const isTooLow = targetRect.y + targetRect.height + tooltipHeight + padding > window.innerHeight;
