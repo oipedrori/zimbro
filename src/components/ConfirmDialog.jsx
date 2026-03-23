@@ -17,7 +17,10 @@ const ConfirmDialog = ({
     requireConfirm = null, // string to match
     isLoading = false,
     loadingMessage = null,
-    loadingSubMessage = null
+    loadingSubMessage = null,
+    showIcon = true,
+    showCancel = true,
+    children = null
 }) => {
     const [shouldRender, setShouldRender] = useState(isOpen);
     const [isAnimating, setIsAnimating] = useState(false);
@@ -105,12 +108,16 @@ const ConfirmDialog = ({
                     </button>
                 </div>
 
-                <div className="confirm-icon-box">
-                    {type === 'danger' ? <Trash2 size={32} color="#ef4444" /> : <AlertCircle size={32} color="var(--primary-color)" />}
-                </div>
+                {showIcon && (
+                    <div className="confirm-icon-box">
+                        {type === 'danger' ? <Trash2 size={32} color="#ef4444" /> : <AlertCircle size={32} color="var(--primary-color)" />}
+                    </div>
+                )}
 
                 <h2 className="confirm-title">{title}</h2>
-                <p className="confirm-message">{message}</p>
+                <p className="confirm-message" style={{ marginBottom: children ? '16px' : '32px' }}>{message}</p>
+
+                {children && <div style={{ marginBottom: '32px', textAlign: 'left' }}>{children}</div>}
 
                 {requireConfirm && (
                     <div style={{ marginBottom: '24px' }}>
@@ -169,13 +176,15 @@ const ConfirmDialog = ({
                         </button>
                     )}
                     
-                    <button 
-                        className="confirm-btn confirm-btn-outline"
-                        onClick={onClose}
-                        disabled={isLoading}
-                    >
-                        {cancelLabel || "Cancelar"}
-                    </button>
+                    {showCancel && (
+                        <button 
+                            className="confirm-btn confirm-btn-outline"
+                            onClick={onClose}
+                            disabled={isLoading}
+                        >
+                            {cancelLabel || "Cancelar"}
+                        </button>
+                    )}
                 </div>
 
                 {isLoading && (

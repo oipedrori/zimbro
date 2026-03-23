@@ -693,7 +693,7 @@ const Home = () => {
                                                 {showFilterTotal?.id === f.id && (
                                                     <motion.div
                                                         initial={{ opacity: 0, y: 10, x: '-50%', scale: 0.8 }}
-                                                        animate={{ opacity: 1, y: -50, x: '-50%', scale: 1 }}
+                                                        animate={{ opacity: 1, y: -62, x: '-50%', scale: 1 }}
                                                         exit={{ opacity: 0, y: 10, x: '-50%', scale: 0.8 }}
                                                         onClick={() => setShowFilterTotal(null)}
                                                         style={{
@@ -889,7 +889,7 @@ const Home = () => {
                                                         {showFilterTotal?.id === f.id && (
                                                             <motion.div
                                                                 initial={{ opacity: 0, y: 10, x: '-50%', scale: 0.8 }}
-                                                                animate={{ opacity: 1, y: -55, x: '-50%', scale: 1 }}
+                                                                animate={{ opacity: 1, y: -68, x: '-50%', scale: 1 }}
                                                                 exit={{ opacity: 0, y: 10, x: '-50%', scale: 0.8 }}
                                                                 onClick={() => setShowFilterTotal(null)}
                                                                 style={{
@@ -1329,10 +1329,11 @@ const Home = () => {
                         onClose={() => setIsLimitActionOpen(false)}
                         title={getCategoryInfo(selectedLimitCat, 'expense')?.label || 'Gerenciar Limite'}
                         message="O que você deseja fazer com este limite?"
-                        type="info"
+                        showIcon={false}
+                        showCancel={false}
                         options={[
-                            { label: 'Editar', value: 'edit', color: 'var(--primary-gradient)' },
-                            { label: 'Excluir', value: 'delete', color: 'var(--danger-color)' }
+                            { label: t('edit', { defaultValue: 'Editar' }), value: 'edit', color: 'var(--primary-gradient)' },
+                            { label: t('delete', { defaultValue: 'Excluir' }), value: 'delete', color: 'var(--danger-color)' }
                         ]}
                         onConfirm={(val) => {
                             if (val === 'edit') {
@@ -1346,7 +1347,34 @@ const Home = () => {
                             }
                             setIsLimitActionOpen(false);
                         }}
-                    />
+                    >
+                        <div style={{ 
+                            maxHeight: '200px', 
+                            overflowY: 'auto', 
+                            background: 'var(--surface-color)', 
+                            borderRadius: '16px', 
+                            padding: '8px',
+                            border: '1px solid var(--glass-border)'
+                        }}>
+                            {transactions.filter(t => t.category === selectedLimitCat).length > 0 ? (
+                                transactions.filter(t => t.category === selectedLimitCat).map((tx, idx) => (
+                                    <div key={idx} style={{ 
+                                        display: 'flex', 
+                                        justifyContent: 'space-between', 
+                                        padding: '10px 12px',
+                                        borderBottom: idx === transactions.filter(t => t.category === selectedLimitCat).length - 1 ? 'none' : '1px solid var(--glass-border)'
+                                    }}>
+                                        <span style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: '500' }}>{tx.description}</span>
+                                        <span style={{ fontSize: '0.85rem', color: tx.type === 'income' ? 'var(--success-color)' : 'var(--danger-color)', fontWeight: '700' }}>
+                                            {formatCurrency(tx.amount)}
+                                        </span>
+                                    </div>
+                                ))
+                            ) : (
+                                <p style={{ textAlign: 'center', padding: '16px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>{t('no_transactions')}</p>
+                            )}
+                        </div>
+                    </ConfirmDialog>
 
                     {/* Modal Dinâmico de Limite */}
                     {isLimitModalOpen && (
