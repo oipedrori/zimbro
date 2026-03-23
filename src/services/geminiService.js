@@ -112,6 +112,8 @@ Você é um extrator financeiro de elite. Transforme a frase do usuário em um J
 Categorias de Despesa: [${categoriesExpenseStr}]
 Categorias de Receita: [${categoriesIncomeStr}]
 
+${conversationContext ? `DADOS JÁ COLETADOS (CONTEXTO): ${JSON.stringify(conversationContext)}\nCombine os dados acima com a nova mensagem do usuário para completar a transação.` : ''}
+
 Mensagem do usuário: "${text}"
 `;
     }
