@@ -276,6 +276,36 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
 
 
             try {
+                // --- ATALHO CONVERSACIONAL PARA RECORRÊNCIA ---
+                if (conversationContext?.type === 'recurring_suggestion') {
+                    const cleanText = textToProcess.toLowerCase().trim();
+                    const isYes = /^(sim|claro|pode|com certeza|yes|confirmar|ok|quero)/i.test(cleanText);
+                    const isNo = /^(n[ãa]o|nopes|deixa|esquece|no)/i.test(cleanText);
+
+                    if (isYes) {
+                        const tx = conversationContext.tx;
+                        await updateTx(tx.id, { ...tx, repeatType: 'recurring' });
+                        haptic.success();
+                        setAiMessage("Perfeito! Este lançamento agora se repetirá todos os meses.");
+                        setTranscript('');
+                        transcriptRef.current = '';
+                        setConversationContext(null);
+                        setTimeout(() => onClose(), 2500);
+                        setIsProcessing(false);
+                        return;
+                    } else if (isNo) {
+                        haptic.medium();
+                        setAiMessage("Sem problemas, mantive como lançamento único.");
+                        setTranscript('');
+                        transcriptRef.current = '';
+                        setConversationContext(null);
+                        setTimeout(() => onClose(), 2500);
+                        setIsProcessing(false);
+                        return;
+                    }
+                    // Se não for sim nem não, continua enviando pro Gemini normalmente
+                }
+
                 const result = await analyzeTextWithGemini(textToProcess, transactions, conversationContext, locale);
                 console.log("GEMINI RAW RESULT:", result); // DEBUGS
 
@@ -340,12 +370,13 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
 
                     // Processar todas as transações em lote
                     let totalAdded = 0;
+                    let lastAddedTx = null;
                     for (const tx of txs) {
                         const finalDate = tx.date ? tx.date : format(new Date(), 'yyyy-MM-dd');
                         // Capitalizar primeira letra da descrição
                         const capitalizedDescription = tx.description.charAt(0).toUpperCase() + tx.description.slice(1);
                         
-                        await addTx({
+                        const added = await addTx({
                             type: tx.type,
                             amount: parseFloat(tx.amount),
                             description: capitalizedDescription,
@@ -354,7 +385,27 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
                             repeatType: tx.repeatType,
                             installments: tx.installments || 1
                         });
+                        lastAddedTx = added;
                         totalAdded++;
+                    }
+
+                    // Lógica Conversacional de Recorrência
+                    if (result.recorrente_sugerida && lastAddedTx) {
+                        setAiMessage(`Adicionado: ${lastAddedTx.description} (R$ ${lastAddedTx.amount}).\n\nNotei que parece ser uma conta recorrente. Deseja repetir este lançamento todos os meses?`);
+                        setConversationContext({ type: 'recurring_suggestion', tx: lastAddedTx });
+                        setTranscript('');
+                        transcriptRef.current = '';
+                        haptic.medium();
+                        
+                        if (!isManualTextMode) {
+                            setTimeout(() => {
+                                try {
+                                    recognitionRef.current?.start();
+                                } catch(e) {}
+                            }, 1500);
+                        }
+                        setIsProcessing(false);
+                        return; // Mantém o painel aberto para a resposta
                     }
 
                     // Confirmação de Sucesso Polida para Múltiplos ou Único

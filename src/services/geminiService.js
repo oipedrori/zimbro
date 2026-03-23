@@ -90,7 +90,10 @@ MODELO LIMITE: {"action": "limit", "category": "ID_CATEGORIA", "amount": 500.00,
     } else {
       // ROTA 3: Extração de Transação (Prompt Curto)
       prompt = `
-Você é um extrator financeiro. Transforme a frase do usuário em um JSON: {"valor": number, "categoria": string, "tipo": "despesa"|"receita", "descricao": string}. Não responda com texto, apenas o JSON.
+Você é um extrator financeiro. Transforme a frase do usuário em um JSON: {"valor": number, "categoria": string, "tipo": "despesa"|"receita", "descricao": string, "recorrente_sugerida": boolean}. 
+
+INSTRUÇÕES PARA "recorrente_sugerida":
+Defina como true se a descrição sugerir algo que acontece mensalmente, como: Salário, Aluguel, Condomínio, Netflix, Spotify, Internet, Plano de Celular, Academia, Escola/Faculdade, Assinatura, Seguro, etc. Caso contrário, false.
 
 Categorias de Despesa: [${categoriesExpenseStr}]
 Categorias de Receita: [${categoriesIncomeStr}]
@@ -112,6 +115,7 @@ Mensagem do usuário: "${text}"
     if (!isQuestion && aiJson.valor) {
       return {
         action: "add",
+        recorrente_sugerida: aiJson.recorrente_sugerida || false,
         transactions: [
           {
             type: aiJson.tipo === 'receita' ? 'income' : 'expense',

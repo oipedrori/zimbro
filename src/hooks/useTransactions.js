@@ -70,7 +70,8 @@ export const useTransactions = (currentMonth) => { // format 'YYYY-MM'
         setTransactions(prev => prepareMonthlyTransactions([newTx, ...allTransactions], currentMonth));
 
         try {
-            await addTransaction(currentUser.uid, data);
+            const added = await addTransaction(currentUser.uid, data);
+            return added;
         } catch (err) {
             // Rollback
             setAllTransactions(previousAll);
