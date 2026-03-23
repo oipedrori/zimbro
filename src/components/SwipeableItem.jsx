@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { Trash2, Edit2 } from 'lucide-react';
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
+import ConfirmDialog from './ConfirmDialog';
+import { useI18n } from '../contexts/I18nContext';
 
 const SwipeableItem = ({ children, onDelete, onEdit }) => {
     const [isDeleted, setIsDeleted] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
+    const { t } = useI18n();
     const x = useMotionValue(0);
 
     // Transformações para efeitos visuais durante o arraste
@@ -28,6 +32,11 @@ const SwipeableItem = ({ children, onDelete, onEdit }) => {
     };
 
     const handleDeleteClick = () => {
+        setShowConfirm(true);
+    };
+
+    const confirmDeletion = () => {
+        setShowConfirm(false);
         setIsDeleted(true);
         setTimeout(() => {
             onDelete();
@@ -128,6 +137,17 @@ const SwipeableItem = ({ children, onDelete, onEdit }) => {
                     {children}
                 </div>
             </motion.div>
+
+            <ConfirmDialog 
+                isOpen={showConfirm}
+                onClose={() => setShowConfirm(false)}
+                title={t('confirm_deletion', { defaultValue: 'Excluir Movimentação' })}
+                message={t('delete_confirmation_message', { defaultValue: 'Tem certeza que deseja excluir esta movimentação? Esta ação não pode ser desfeita.' })}
+                confirmLabel={t('exclude', { defaultValue: 'Excluir' })}
+                cancelLabel={t('cancel', { defaultValue: 'Cancelar' })}
+                onConfirm={confirmDeletion}
+                type="danger"
+            />
         </div>
     );
 };
