@@ -25,6 +25,7 @@ const Home = () => {
     const { setIsAiActive, setIsBottomNavHidden } = useOutletContext();
     const { t, formatCurrency, locale, changeLocale, currency, changeCurrency } = useI18n();
     const navigate = useNavigate();
+    const isAnimatingMonth = React.useRef(false);
 
 
     useEffect(() => {
@@ -114,6 +115,37 @@ const Home = () => {
             setIsSidebarOpen(false);
             setIsSidebarClosing(false);
         }, 300);
+    };
+
+    const handleReturnToToday = () => {
+        if (isAnimatingMonth.current) return;
+        
+        const today = new Date();
+        const targetMonthValue = today.getFullYear() * 12 + today.getMonth();
+        
+        const step = () => {
+            setCurrentDate(prev => {
+                const currentMonthValue = prev.getFullYear() * 12 + prev.getMonth();
+                const todayMonthValue = targetMonthValue;
+                
+                if (currentMonthValue === todayMonthValue) {
+                    isAnimatingMonth.current = false;
+                    return prev;
+                }
+                
+                isAnimatingMonth.current = true;
+                haptic.light();
+                
+                const nextDate = currentMonthValue < todayMonthValue 
+                    ? addMonths(prev, 1) 
+                    : subMonths(prev, 1);
+                
+                setTimeout(step, 40); // 40ms for a "fast-scroll" feel
+                return nextDate;
+            });
+        };
+        
+        step();
     };
 
     // AI Limit Suggestion removed as per user request
@@ -430,7 +462,22 @@ const Home = () => {
                             <button onClick={() => { haptic.light(); setCurrentDate(subMonths(currentDate, 1)); }} style={{ border: 'none', background: 'transparent', color: 'var(--text-main)', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
                                 <ChevronLeft size={20} />
                             </button>
-                            <span style={{ fontWeight: '700', color: 'var(--text-main)', fontSize: '0.95rem', textTransform: 'capitalize', minWidth: '110px', textAlign: 'center' }}>
+                            <span 
+                                onClick={handleReturnToToday}
+                                style={{ 
+                                    fontWeight: '700', 
+                                    color: 'var(--text-main)', 
+                                    fontSize: '0.95rem', 
+                                    textTransform: 'capitalize', 
+                                    minWidth: '110px', 
+                                    textAlign: 'center',
+                                    cursor: 'pointer',
+                                    padding: '4px 8px',
+                                    borderRadius: '8px',
+                                    background: 'var(--surface-color)',
+                                    userSelect: 'none'
+                                }}
+                            >
                                 {format(currentDate, 'MMMM yyyy', { locale: { pt: ptBR, en: enUS, es: es, fr: fr }[locale] || ptBR })}
                             </span>
                             <button onClick={() => { haptic.light(); setCurrentDate(addMonths(currentDate, 1)); }} style={{ border: 'none', background: 'transparent', color: 'var(--text-main)', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
