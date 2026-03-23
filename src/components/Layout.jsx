@@ -158,6 +158,7 @@ const Layout = () => {
 
                     <div className="nav-center-item">
                         <button
+                            id="onboarding-ai-fab"
                             className={`ai-mic-btn ${isListening ? 'active' : ''}`}
                             onClick={() => handleAiClick('voice')}
                             aria-label={t('ai_mic_label')}

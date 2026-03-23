@@ -19,6 +19,7 @@ import { haptic } from '../utils/haptic';
 import BudgetPieChart from '../components/BudgetPieChart';
 import LimitsSection from '../components/LimitsSection';
 import { useLimits } from '../hooks/useLimits';
+import Onboarding from '../components/Onboarding';
 
 const Home = () => {
     const { currentUser, logout, deleteAccount } = useAuth();
@@ -71,6 +72,14 @@ const Home = () => {
     const { limits, setLimits } = useLimits(currentYear);
     const [chartType, setChartType] = useState('bar'); // 'bar' or 'line'
     const [isFlipped, setIsFlipped] = useState(false);
+    const [showOnboarding, setShowOnboarding] = useState(false);
+
+    useEffect(() => {
+        const hasCompleted = localStorage.getItem('hasCompletedOnboarding');
+        if (hasCompleted !== 'true') {
+            setShowOnboarding(true);
+        }
+    }, []);
 
     useEffect(() => {
         if (!isDesktop && setIsBottomNavHidden) {
@@ -429,6 +438,7 @@ const Home = () => {
                         gap: isDesktop ? '0' : '10px'
                     }}>
                         <div
+                            id="onboarding-profile-btn"
                             onClick={() => setIsSidebarOpen(true)}
                             style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
                         >
@@ -485,6 +495,7 @@ const Home = () => {
 
                     {!isDesktop && (
                         <section
+                            id="onboarding-balance-card"
                             key={monthPrefix}
                             className="glass-panel"
                             onClick={() => { haptic.medium(); setIsFlipped(true); }}
@@ -506,16 +517,18 @@ const Home = () => {
                                     <p style={{ fontSize: '0.9rem', opacity: 0.8, marginBottom: '8px' }}>{t('monthly_balance')}</p>
                                     <h2 style={{ fontSize: 'clamp(1.8rem, 8vw, 2.5rem)', marginBottom: '24px', fontWeight: '700', letterSpacing: '-1px', wordBreak: 'break-word' }}>{formatCurrency(balance)}</h2>
                                 </div>
-                                <div style={{ 
-                                    background: 'rgba(255, 255, 255, 0.15)', 
-                                    padding: '8px', 
-                                    borderRadius: '10px', 
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    justifyContent: 'center',
-                                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                                }}>
+                                <div 
+                                    id="onboarding-stats-btn"
+                                    style={{ 
+                                        background: 'rgba(255, 255, 255, 0.15)', 
+                                        padding: '8px', 
+                                        borderRadius: '10px', 
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        justifyContent: 'center',
+                                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                                    }}>
                                     <BarChart2 size={20} />
                                 </div>
                             </div>
@@ -560,27 +573,29 @@ const Home = () => {
                     )}
 
                     {!isDesktop && (
-                        <LimitsSection 
-                            limits={limits}
-                            transactions={transactions}
-                            formatCurrency={formatCurrency}
-                            t={t}
-                            setIsLimitModalOpen={(val, catId, amount) => {
-                                if (val && catId) {
-                                  setSelectedLimitCat(catId);
-                                  setIsLimitActionOpen(true);
-                                } else {
-                                  setTempLimit({ categoryId: '', amount: '' });
-                                  setIsLimitModalOpen(val);
-                                }
-                            }}
-                            setTempLimit={setTempLimit}
-                            isDesktop={isDesktop}
-                        />
+                        <div id="onboarding-limits-section">
+                            <LimitsSection 
+                                limits={limits}
+                                transactions={transactions}
+                                formatCurrency={formatCurrency}
+                                t={t}
+                                setIsLimitModalOpen={(val, catId, amount) => {
+                                    if (val && catId) {
+                                      setSelectedLimitCat(catId);
+                                      setIsLimitActionOpen(true);
+                                    } else {
+                                      setTempLimit({ categoryId: '', amount: '' });
+                                      setIsLimitModalOpen(val);
+                                    }
+                                }}
+                                setTempLimit={setTempLimit}
+                                isDesktop={isDesktop}
+                            />
+                        </div>
                     )}
 
                     {!isDesktop && (
-                        <section>
+                        <section id="onboarding-transactions-list">
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                                 <h3 style={{ fontSize: '1.2rem', fontWeight: '600' }}>{t('transactions')}</h3>
                             </div>
@@ -1406,6 +1421,10 @@ const Home = () => {
                         </>
                     )}
                 </div>
+            )}
+            {/* Onboarding Overlay */}
+            {showOnboarding && (
+                <Onboarding onComplete={() => setShowOnboarding(false)} />
             )}
         </>
     );
