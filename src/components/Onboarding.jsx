@@ -97,17 +97,22 @@ const Onboarding = ({ onComplete }) => {
       setCurrentStep(prev => prev + 1);
     } else {
       localStorage.setItem('hasCompletedOnboarding', 'true');
-      setIsVisible(false);
-      setTimeout(() => onComplete?.(), 500);
+      onComplete?.();
     }
   };
 
-  if (!isVisible || !targetRect) return null;
+  if (!targetRect) return null;
 
   // Visual cohesion: display card near the spotlight
   // If there's space below, show it below. Otherwise show it above.
   const tooltipHeight = 160; // Approximate
-  const padding = 20;
+  let padding = 20;
+
+  // Custom padding for FAB
+  if (ONBOARDING_STEPS[currentStep].id === 'onboarding-ai-fab') {
+    padding = 40; // Push tooltip higher for FAB
+  }
+
   const isTooLow = targetRect.y + targetRect.height + tooltipHeight + padding > window.innerHeight;
   
   const tooltipPosition = isTooLow 
