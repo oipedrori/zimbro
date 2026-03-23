@@ -22,7 +22,7 @@ const callBackendAi = async (type, payload) => {
   }
 };
 
-export const analyzeTextWithGemini = async (text, transactions = [], conversationContext = null, locale = 'pt') => {
+export const analyzeTextWithGemini = async (text, transactions = [], conversationContext = null, locale = 'pt', allTransactions = []) => {
   try {
     // --- ROUTER DE INTENÇÕES (REGEX) ---
     
@@ -38,7 +38,7 @@ export const analyzeTextWithGemini = async (text, transactions = [], conversatio
     const categoriesExpenseStr = CATEGORIAS_DESPESA.map(c => c.id).join(', ');
     const categoriesIncomeStr = CATEGORIAS_RECEITA.map(c => c.id).join(', ');
 
-    // ✅ Calcular resumo financeiro a partir de TODAS as transações do mês
+    // ✅ Calcular resumo financeiro do mês (sempre útil como base)
     const totalIncome = transactions
       .filter(t => t.type === 'income')
       .reduce((sum, t) => sum + t.amount, 0);
@@ -47,45 +47,77 @@ export const analyzeTextWithGemini = async (text, transactions = [], conversatio
       .reduce((sum, t) => sum + t.amount, 0);
     const monthlyBalance = totalIncome - totalExpenses;
 
-    // Enviar até 50 transações para análise profunda
-    const recentTxsStr = transactions.slice(0, 50).map(t =>
-      `ID: ${t.id} | Tipo: ${t.type === 'expense' ? 'Despesa' : 'Receita'} | Valor: R$${t.amount.toFixed(2)} | Desc: ${t.description} | Cat: ${t.category} | Data: ${t.date || ''}`
-    ).join('\n');
+    const questionKeywords = /^(quem|quando|como|quanto|o que|vale a pena|pode|consegue|me ajude|ajuda|sugere|sugest|recomenda)/i;
+    const isQuestion = questionKeywords.test(text.trim()) || text.includes('?') || text.toLowerCase().includes('limite') || text.toLowerCase().includes('sugerir');
 
-    // ROTA 2: Pergunta (Análise Contextual)
-    const questionKeywords = /^(quem|quando|como|quanto|o que|vale a pena)/i;
-    const isQuestion = questionKeywords.test(text.trim()) || text.includes('?') || text.toLowerCase().includes('limite');
+    // --- SCOPING DE DADOS (ECONOMIA DE TOKENS) ---
+    let contextualData = "";
+    
+    if (isQuestion) {
+      const lowerText = text.toLowerCase();
+      
+      // Encontrar categoria mencionada
+      const allCats = [...CATEGORIAS_DESPESA, ...CATEGORIAS_RECEITA];
+      const matchedCat = allCats.find(c => lowerText.includes(c.id.toLowerCase()) || lowerText.includes(c.label.toLowerCase()));
+      
+      if (matchedCat && (lowerText.includes('quanto') || lowerText.includes('gastei') || lowerText.includes('recebi'))) {
+        // ECONOMIA: Apenas valor total da categoria no mês atual
+        const catTotal = transactions
+          .filter(t => (t.category === matchedCat.id || t.category === matchedCat.label))
+          .reduce((sum, t) => sum + t.amount, 0);
+        contextualData = `═══ DADOS ESPECÍFICOS (CATEGORIA: ${matchedCat.label}) ═══\n• Total no mês atual: R$${catTotal.toFixed(2)}\n═══════════════════════════════════════`;
+      } 
+      else if (matchedCat && (lowerText.includes('sugere') || lowerText.includes('sugestão') || lowerText.includes('recomenda')) && lowerText.includes('limite')) {
+        // ECONOMIA: Enviar totais históricos da categoria (sem listar todas as transações)
+        const histData = allTransactions.length > 0 ? allTransactions : transactions;
+        const historical = {};
+        histData.forEach(t => {
+          if (t.category === matchedCat.id || t.category === matchedCat.label) {
+            const dateStr = t.date || t.createdAt;
+            const month = dateStr ? dateStr.substring(0, 7) : 'Atual';
+            historical[month] = (historical[month] || 0) + t.amount;
+          }
+        });
+        const historicalStr = Object.entries(historical)
+          .map(([m, val]) => `- ${m}: R$${val.toFixed(2)}`)
+          .join('\n');
+        contextualData = `═══ HISTÓRICO PARA SUGESTÃO DE LIMITE (${matchedCat.label}) ═══\n${historicalStr || "Sem histórico anterior."}\n════════════════════════════════════════════`;
+      }
+      else {
+        // Pergunta geral ou conselho: Enviar resumo de TODAS as transações do mês atual (mas sem metadados pesados)
+        const recentTxsStr = transactions.slice(0, 40).map(t =>
+          `- R$${t.amount.toFixed(2)}${t.description ? ' | ' + t.description : ''} (${t.category})`
+        ).join('\n');
+        contextualData = `═══ MOVIMENTAÇÕES DO MÊS ATUAL ═══\n${recentTxsStr || "Nenhuma transação encontrada."}\n══════════════════════════════════`;
+      }
+    }
 
     const currentDateStr = new Date().toLocaleDateString('pt-BR');
     let prompt = "";
     const model = "gemini-2.5-flash";
 
     if (isQuestion) {
-      // ROTA 2: Análise Profunda (Mantém histórico para perguntas e limites)
+      // ROTA 2: Análise Profunda
       prompt = `
-Você é um assistente financeiro do aplicativo Zimbroo. O usuário fez uma pergunta ou pediu para gerenciar limites: "${text}"
+Você é um assistente financeiro do aplicativo Zimbroo. Responda à pergunta ou faça a sugestão solicitada: "${text}"
 
 Data de Hoje: ${currentDateStr}.
 
-═══ RESUMO FINANCEIRO DO MÊS ATUAL ═══
+═══ RESUMO FINANCEIRO (MÊS ATUAL) ═══
 • Total de Receitas: R$${totalIncome.toFixed(2)}
 • Total de Despesas: R$${totalExpenses.toFixed(2)}
-• Saldo do Mês: R$${monthlyBalance.toFixed(2)} ${monthlyBalance >= 0 ? '(positivo ✓)' : '(negativo ✗)'}
-═══════════════════════════════════════
+• Saldo do Mês: R$${monthlyBalance.toFixed(2)}
 
-TRANSAÇÕES DO MÊS:
-${recentTxsStr || "Nenhuma transação registrada este mês"}
-
-Categorias de Despesa: [${categoriesExpenseStr}]
-Categorias de Receita: [${categoriesIncomeStr}]
+${contextualData}
 
 INSTRUÇÕES:
-1. Responda à pergunta do usuário considerando o contexto financeiro acima.
-2. Se o usuário quiser definir um limite (ex: "limite de 500 em mercado"), retorne MODELO LIMITE.
-3. Retorne APENAS o JSON puro.
+1. Responda de forma curta, prestativa e amigável.
+2. Se o usuário quiser DEFINIR um limite (ex: "defina limite de 500 em mercado"), ignore o histórico e retorne o MODELO LIMITE.
+3. Se o usuário pedir uma SUGESTÃO de limite, use os dados históricos fornecidos para recomendar um valor realista baseado no comportamento passado.
+4. Retorne APENAS o JSON puro.
 
-MODELO ANÁLISE: {"action": "analysis", "message": "Sua resposta curta..."}
-MODELO LIMITE: {"action": "limit", "category": "ID_CATEGORIA", "amount": 500.00, "message": "Confirmação..."}
+MODELO ANÁLISE: {"action": "analysis", "message": "Sua resposta..."}
+MODELO LIMITE: {"action": "limit", "category": "ID_CATEGORIA", "amount": number, "message": "Confirmação..."}
 `;
     } else {
       // ROTA 3: Extração de Transação (Prompt Completo e Inteligente)

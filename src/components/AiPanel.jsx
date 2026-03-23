@@ -92,7 +92,7 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
     const silenceTimeoutRef = useRef(null);
     const transcriptRef = useRef(''); // To keep latest state for timeout
 
-    const { transactions, addTx, deleteTx } = useTransactions(format(new Date(), 'yyyy-MM'));
+    const { transactions, allTransactions, addTx, deleteTx } = useTransactions(format(new Date(), 'yyyy-MM'));
     const { limits, setLimits } = useLimits(new Date().getFullYear());
     const { t, locale } = useI18n();
 
@@ -306,7 +306,7 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
                     // Se não for sim nem não, continua enviando pro Gemini normalmente
                 }
 
-                const result = await analyzeTextWithGemini(textToProcess, transactions, conversationContext, locale);
+                const result = await analyzeTextWithGemini(textToProcess, transactions, conversationContext, locale, allTransactions);
                 console.log("GEMINI RAW RESULT:", result); // DEBUGS
 
                 if (result.error) {
