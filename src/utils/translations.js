@@ -81,6 +81,9 @@ export const translations = {
         install_android_btn: "Instalar Agora",
         install_android_step1: "Toque no menu {icon} no canto superior.",
         install_android_step2: "Selecione Adicionar à tela inicial.",
+        install_btn: "Instalar Aplicativo",
+        install_ios_step1_text: "Toque no ícone de Compartilhar no Safari",
+        install_ios_step2_text: "Role para baixo e toque em 'Adicionar à Tela de Início'",
         
         // Cookie Notice
         cookie_title: "Privacidade & Cookies",
@@ -297,6 +300,9 @@ export const translations = {
         install_android_btn: "Install Now",
         install_android_step1: "Tap the {icon} menu in the top corner.",
         install_android_step2: "Select Add to home screen.",
+        install_btn: "Install Application",
+        install_ios_step1_text: "Tap the Share icon in Safari",
+        install_ios_step2_text: "Scroll down and tap 'Add to Home Screen'",
 
         // Cookie Notice
         cookie_title: "Privacy & Cookies",
@@ -509,6 +515,9 @@ export const translations = {
         install_android_btn: "Instalar ahora",
         install_android_step1: "Toca el menú {icon} en la esquina superior.",
         install_android_step2: "Selecciona Añadir a la pantalla de inicio.",
+        install_btn: "Instalar Aplicación",
+        install_ios_step1_text: "Toca el icono de Compartir en Safari",
+        install_ios_step2_text: "Desplázate hacia abajo y toca 'Añadir a la pantalla de inicio'",
 
         // Cookie Notice
         cookie_title: "Privacidad y Cookies",

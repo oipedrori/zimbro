@@ -69,16 +69,20 @@ const AppRoutes = () => {
   );
 };
 
+import { InstallProvider } from './contexts/InstallContext';
+
 function App() {
   return (
     <I18nProvider>
       <AuthProvider>
-        <InstallPrompt />
-        <CookieNotice />
-        <NotificationHandler />
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
+        <InstallProvider>
+          <InstallPrompt />
+          <CookieNotice />
+          <NotificationHandler />
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </InstallProvider>
       </AuthProvider>
     </I18nProvider>
   );
