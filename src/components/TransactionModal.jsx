@@ -289,58 +289,60 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
                         </div>
                     )}
 
-                    <button
-                        type="submit" disabled={loading}
-                        style={{
-                            marginTop: '10px', width: '100%', padding: '16px', background: 'var(--primary-gradient)',
-                            color: 'var(--btn-text)', borderRadius: 'var(--btn-radius)', fontWeight: 'bold', fontSize: '1.1rem',
-                            display: 'flex', justifyContent: 'center', alignItems: 'center', height: '56px',
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                        }}
-                    >
-                        {loading ? <LoadingDots style={{ color: 'var(--btn-text)' }} /> : (initialData ? t('save') : t('add'))}
-                    </button>
-
-                    {initialData && (
-                        <button
-                            type="button"
-                            onClick={() => {
-                                const isRecurring = repeatType !== 'none';
-                                setConfirmConfig({
-                                    title: isRecurring ? t('recurring_delete_title', { defaultValue: 'Movimentação Recorrente' }) : t('confirm_delete', { defaultValue: 'Excluir Movimentação' }),
-                                    message: isRecurring ? t('recurring_delete_msg', { defaultValue: 'Deseja excluir apenas este mês ou toda a série?' }) : t('confirm_delete_msg', { defaultValue: 'Tem certeza que deseja excluir este registro?' }),
-                                    options: isRecurring ? [
-                                        { 
-                                            label: t('only_this_month', { defaultValue: 'Apenas este mês' }), 
-                                            value: 'skip',
-                                            color: 'var(--surface-color)',
-                                            textColor: 'var(--text-main)'
-                                        },
-                                        { 
-                                            label: t('all_series', { defaultValue: 'Toda a série' }), 
-                                            value: 'all',
-                                            color: 'var(--danger-color)'
+                    <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+                        {initialData && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    const isRecurring = repeatType !== 'none';
+                                    setConfirmConfig({
+                                        title: isRecurring ? t('recurring_delete_title', { defaultValue: 'Movimentação Recorrente' }) : t('confirm_delete', { defaultValue: 'Excluir Movimentação' }),
+                                        message: isRecurring ? t('recurring_delete_msg', { defaultValue: 'Deseja excluir apenas este mês ou toda a série?' }) : t('confirm_delete_msg', { defaultValue: 'Tem certeza que deseja excluir este registro?' }),
+                                        options: isRecurring ? [
+                                            { 
+                                                label: t('only_this_month', { defaultValue: 'Apenas este mês' }), 
+                                                value: 'skip',
+                                                color: 'var(--surface-color)',
+                                                textColor: 'var(--text-main)'
+                                            },
+                                            { 
+                                                label: t('all_series', { defaultValue: 'Toda a série' }), 
+                                                value: 'all',
+                                                color: 'var(--danger-color)'
+                                            }
+                                        ] : [],
+                                        onConfirm: (val) => {
+                                            console.log("Deletion confirmed with option:", val);
+                                            handleDelete(val || 'all');
                                         }
-                                    ] : [],
-                                    onConfirm: (val) => {
-                                        console.log("Deletion confirmed with option:", val);
-                                        handleDelete(val || 'all');
-                                    }
-                                });
-                                setIsConfirmOpen(true);
-                            }}
+                                    });
+                                    setIsConfirmOpen(true);
+                                }}
+                                style={{
+                                    flex: 1, padding: '16px',
+                                    border: '1px solid var(--danger-color)', color: 'var(--danger-color)',
+                                    background: 'transparent',
+                                    borderRadius: 'var(--btn-radius)', fontWeight: '700', fontSize: '1rem',
+                                    height: '56px', display: 'flex', justifyContent: 'center', alignItems: 'center',
+                                    cursor: 'pointer', transition: 'all 0.2s'
+                                }}
+                            >
+                                {t('delete')}
+                            </button>
+                        )}
+
+                        <button
+                            type="submit" disabled={loading}
                             style={{
-                                marginTop: '12px', width: '100%', padding: '16px',
-                                border: '1px solid var(--danger-color)', color: 'var(--danger-color)',
-                                background: 'transparent',
-                                borderRadius: 'var(--btn-radius)', fontWeight: '700', fontSize: '1rem',
-                                height: '56px', display: 'flex', justifyContent: 'center', alignItems: 'center',
-                                cursor: 'pointer', transition: 'all 0.2s'
+                                flex: initialData ? 1.8 : 1, padding: '16px', background: 'var(--primary-gradient)',
+                                color: 'var(--btn-text)', borderRadius: 'var(--btn-radius)', fontWeight: 'bold', fontSize: '1.1rem',
+                                display: 'flex', justifyContent: 'center', alignItems: 'center', height: '56px',
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.1)', border: 'none'
                             }}
                         >
-                            {t('delete_transaction', { defaultValue: 'Excluir Movimentação' })}
+                            {loading ? <LoadingDots style={{ color: 'var(--btn-text)' }} /> : (initialData ? t('save') : t('add'))}
                         </button>
-                    )}
+                    </div>
                 </form>
             </div>
 

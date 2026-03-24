@@ -21,7 +21,9 @@ const ConfirmDialog = ({
     showIcon = true,
     showCancel = true,
     children = null,
-    childrenPosition = 'bottom' // 'top' or 'bottom'
+    childrenPosition = 'bottom', // 'top' or 'bottom'
+    layout = 'column', // 'column' or 'row'
+    wide = false
 }) => {
     const [shouldRender, setShouldRender] = useState(isOpen);
     const [isAnimating, setIsAnimating] = useState(false);
@@ -81,9 +83,9 @@ const ConfirmDialog = ({
             onClick={onClose}
         >
             <div 
-                className={`confirm-content ${isAnimating ? 'slide-up' : 'slide-down'}`}
+                className={`confirm-content ${isAnimating ? 'slide-up' : 'slide-down'} ${wide ? 'wide' : ''}`}
                 style={{ 
-                    paddingBottom: keyboardHeight > 0 ? `${keyboardHeight + 20}px` : '48px',
+                    paddingBottom: keyboardHeight > 0 ? `${keyboardHeight + 20}px` : (layout === 'row' ? '32px' : '48px'),
                     transition: 'padding-bottom 0.1s ease-out'
                 }}
                 onClick={e => e.stopPropagation()}
@@ -149,7 +151,7 @@ const ConfirmDialog = ({
                     </div>
                 )}
 
-                <div className="confirm-actions">
+                <div className={`confirm-actions ${layout === 'row' ? 'layout-row' : ''}`}>
                     {options.length > 0 ? (
                         options.map((opt, i) => (
                             <button
@@ -159,7 +161,8 @@ const ConfirmDialog = ({
                                 style={{ 
                                     background: opt.color || 'var(--primary-gradient)', 
                                     color: 'white',
-                                    opacity: (requireConfirm && confirmText !== requireConfirm) ? 0.5 : 1
+                                    opacity: (requireConfirm && confirmText !== requireConfirm) ? 0.5 : 1,
+                                    flex: layout === 'row' ? 1 : 'none'
                                 }}
                                 onClick={() => {
                                     onConfirm(opt.value);
@@ -174,7 +177,8 @@ const ConfirmDialog = ({
                             className="confirm-btn confirm-btn-primary"
                             disabled={requireConfirm && confirmText !== requireConfirm}
                             style={{ 
-                                opacity: (requireConfirm && confirmText !== requireConfirm) ? 0.5 : 1
+                                opacity: (requireConfirm && confirmText !== requireConfirm) ? 0.5 : 1,
+                                flex: layout === 'row' ? (showCancel ? 2 : 1) : 'none'
                             }}
                             onClick={() => {
                                 onConfirm();
@@ -187,9 +191,12 @@ const ConfirmDialog = ({
                     
                     {showCancel && (
                         <button 
-                            className="confirm-btn confirm-btn-outline"
+                            className={`confirm-btn confirm-btn-outline ${layout === 'row' ? 'outlined-only' : ''}`}
                             onClick={onClose}
                             disabled={isLoading}
+                            style={{
+                                flex: layout === 'row' ? 1 : 'none'
+                            }}
                         >
                             {cancelLabel || "Cancelar"}
                         </button>
@@ -289,6 +296,9 @@ const ConfirmDialog = ({
                         transform: scale(0.9) translateY(20px);
                         opacity: 0;
                     }
+                    .confirm-content.wide {
+                        max-width: 600px;
+                    }
                     .confirm-content::before {
                         display: none;
                     }
@@ -330,6 +340,10 @@ const ConfirmDialog = ({
                     flex-direction: column;
                     gap: 12px;
                 }
+                .confirm-actions.layout-row {
+                    flex-direction: row-reverse;
+                    gap: 8px;
+                }
                 .confirm-btn {
                     width: 100%;
                     padding: 16px;
@@ -339,6 +353,9 @@ const ConfirmDialog = ({
                     transition: all 0.2s;
                     border: none;
                     cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
                 }
                 .confirm-btn:active {
                     transform: scale(0.98);
@@ -352,6 +369,11 @@ const ConfirmDialog = ({
                     background: var(--surface-color);
                     color: var(--text-main);
                     border: 1px solid var(--glass-border);
+                }
+                .confirm-btn.outlined-only {
+                    background: transparent;
+                    border: 1px solid var(--danger-color);
+                    color: var(--danger-color);
                 }
             `}</style>
         </div>,

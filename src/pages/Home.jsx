@@ -1341,15 +1341,17 @@ const Home = () => {
                         showIcon={false}
                         showCancel={false}
                         childrenPosition="top"
+                        layout="row"
+                        wide={true}
                         options={[
                             { label: t('edit', { defaultValue: 'Editar' }), value: 'edit', color: 'var(--primary-gradient)' },
-                            { label: t('delete', { defaultValue: 'Excluir' }), value: 'delete', color: 'var(--danger-color)' }
+                            { label: t('delete', { defaultValue: 'Excluir' }), value: 'transparent', textColor: 'var(--danger-color)' }
                         ]}
                         onConfirm={(val) => {
                             if (val === 'edit') {
                                 setTempLimit({ categoryId: selectedLimitCat, amount: limits[selectedLimitCat].toString() });
                                 setIsLimitModalOpen(true);
-                            } else if (val === 'delete') {
+                            } else if (val === 'transparent') { // Represents Delete when outlined
                                 const newLimits = { ...limits };
                                 delete newLimits[selectedLimitCat];
                                 setLimits(newLimits);
@@ -1525,24 +1527,55 @@ const Home = () => {
                                 </div>
 
                                 <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-                                    <button
-                                        onClick={() => setIsLimitModalOpen(false)}
-                                        style={{ flex: 1, padding: '16px', borderRadius: 'var(--btn-radius)', background: 'var(--surface-color)', border: 'none', color: 'var(--text-main)', fontWeight: '700', cursor: 'pointer' }}
-                                    >
-                                        Cancelar
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            if (tempLimit.categoryId && tempLimit.amount) {
-                                                setLimits({ ...limits, [tempLimit.categoryId]: parseFloat(tempLimit.amount) });
-                                                setIsLimitModalOpen(false);
-                                                haptic.medium();
-                                            }
-                                        }}
-                                        style={{ flex: 2, padding: '16px', borderRadius: 'var(--btn-radius)', background: 'var(--primary-color)', border: 'none', color: 'var(--btn-text)', fontWeight: '700', cursor: 'pointer', boxShadow: '0 8px 20px rgba(var(--primary-rgb), 0.3)' }}
-                                    >
-                                        Salvar Limite
-                                    </button>
+                                    {tempLimit.categoryId && limits[tempLimit.categoryId] ? (
+                                        <>
+                                            <button
+                                                onClick={() => {
+                                                    const newLimits = { ...limits };
+                                                    delete newLimits[tempLimit.categoryId];
+                                                    setLimits(newLimits);
+                                                    setIsLimitModalOpen(false);
+                                                    haptic.medium();
+                                                }}
+                                                style={{ flex: 1, padding: '16px', borderRadius: 'var(--btn-radius)', background: 'transparent', border: '1px solid var(--danger-color)', color: 'var(--danger-color)', fontWeight: '700', cursor: 'pointer' }}
+                                            >
+                                                Excluir
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    if (tempLimit.categoryId && tempLimit.amount) {
+                                                        setLimits({ ...limits, [tempLimit.categoryId]: parseFloat(tempLimit.amount) });
+                                                        setIsLimitModalOpen(false);
+                                                        haptic.medium();
+                                                    }
+                                                }}
+                                                style={{ flex: 2, padding: '16px', borderRadius: 'var(--btn-radius)', background: 'var(--primary-gradient)', border: 'none', color: 'var(--btn-text)', fontWeight: '700', cursor: 'pointer', boxShadow: '0 8px 20px rgba(var(--primary-rgb), 0.3)' }}
+                                            >
+                                                Salvar
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <button
+                                                onClick={() => setIsLimitModalOpen(false)}
+                                                style={{ flex: 1, padding: '16px', borderRadius: 'var(--btn-radius)', background: 'var(--surface-color)', border: 'none', color: 'var(--text-main)', fontWeight: '700', cursor: 'pointer' }}
+                                            >
+                                                Cancelar
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    if (tempLimit.categoryId && tempLimit.amount) {
+                                                        setLimits({ ...limits, [tempLimit.categoryId]: parseFloat(tempLimit.amount) });
+                                                        setIsLimitModalOpen(false);
+                                                        haptic.medium();
+                                                    }
+                                                }}
+                                                style={{ flex: 2, padding: '16px', borderRadius: 'var(--btn-radius)', background: 'var(--primary-gradient)', border: 'none', color: 'var(--btn-text)', fontWeight: '700', cursor: 'pointer', boxShadow: '0 8px 20px rgba(var(--primary-rgb), 0.3)' }}
+                                            >
+                                                Criar Limite
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
 
