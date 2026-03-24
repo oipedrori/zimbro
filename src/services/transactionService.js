@@ -165,33 +165,30 @@ export const prepareMonthlyTransactions = (allTxs, targetMonth) => {
         }
 
         if (tx.repeatType === 'recurring') {
-            // Recorrente aparece do mês inicial para a frente, MAS apenas para o mesmo ano (regra do usuário)
+            // Recorrente aparece do mês inicial para a frente, mas apenas dentro do mesmo ano
             return targetDateValue >= txDateValue && targetY === y;
         }
 
         if (tx.repeatType === 'installment') {
             // Comeca no mes txDateValue e vai ate txDateValue + installments - 1
-            const isWithinInstallments = targetDateValue >= txDateValue && targetDateValue < (txDateValue + tx.installments);
-
-            // Ajuste cosmético: poderíamos calcular o numero da parcela dinamicamente
-            if (isWithinInstallments) {
-                // Injetar informação dinâmica da parcela atual na tx para exibir no app
-                const currentParcelAmount = (targetDateValue - txDateValue) + 1;
-                tx.dynamicDescription = `${tx.description} (${currentParcelAmount}/${tx.installments})`;
-            }
-            return isWithinInstallments;
+            return targetDateValue >= txDateValue && targetDateValue < (txDateValue + tx.installments);
         }
 
         return false;
     }).map(tx => {
-        // Retornar uma NOVA referência para evitar mutação em loops (como o de estatísticas anuais)
         const txCopy = { ...tx };
         
-        // Normalizar a data virtualmente para cair dentro do mes buscado, caso seja recorrente,
-        // para ordenar corretamente nos extratos (por exemplo, assumindo o mesmo dia do mes original)
+        // Pós-processamento na cópia para evitar mutação do original
+        if (txCopy.repeatType === 'installment') {
+            const txDate = txCopy.date;
+            const [y, m] = txDate.split('-').map(Number);
+            const txDateValue = y * 12 + m;
+            const currentParcelAmount = (targetDateValue - txDateValue) + 1;
+            txCopy.description = `${txCopy.description} (${currentParcelAmount}/${txCopy.installments})`;
+        }
+
         if (txCopy.repeatType === 'recurring' || txCopy.repeatType === 'installment') {
             const originalDay = txCopy.date.split('-')[2];
-            // Garante que o mes/ano corresponde ao targetMonth
             txCopy.virtualDate = `${targetMonth}-${originalDay}`;
         } else {
             txCopy.virtualDate = txCopy.date;

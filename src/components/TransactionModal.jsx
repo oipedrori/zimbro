@@ -98,10 +98,12 @@ const TransactionModal = ({ isOpen, onClose, defaultType = 'expense', initialDat
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        // Ajuste de valores numéricos
-        const numericAmount = parseFloat(amount.replace(',', '.'));
+        // Ajuste de valores numéricos (remove pontos de milhar e troca vírgula por ponto decimal)
+        const cleanAmount = amount.replace(/\./g, '').replace(',', '.');
+        const numericAmount = parseFloat(cleanAmount);
+        
         if (isNaN(numericAmount) || numericAmount <= 0) {
-            alert("Digite um valor válido");
+            alert(t('invalid_value', { defaultValue: 'Digite um valor válido' }));
             return;
         }
 

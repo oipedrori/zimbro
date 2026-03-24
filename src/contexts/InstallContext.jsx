@@ -11,12 +11,8 @@ export const InstallProvider = ({ children }) => {
 
     useEffect(() => {
         // Detect standalone mode
-        const checkStandalone = () => {
-            const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-            setIsStandalone(!!standalone);
-        };
-
-        checkStandalone();
+        const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+        setIsStandalone(!!standalone);
 
         // Detect iOS
         const userAgent = window.navigator.userAgent.toLowerCase();
@@ -26,7 +22,6 @@ export const InstallProvider = ({ children }) => {
         setIsIOS(ios);
 
         // Pre-set installable for iOS if not standalone
-        // Safari iOS supports "Add to Home Screen" but doesn't fire 'beforeinstallprompt'
         if (ios && !standalone) {
             setIsInstallable(true);
         }
