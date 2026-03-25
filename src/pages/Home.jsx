@@ -21,6 +21,8 @@ import BudgetPieChart from '../components/BudgetPieChart';
 import LimitsSection from '../components/LimitsSection';
 import { useLimits } from '../hooks/useLimits';
 import Onboarding from '../components/Onboarding';
+import { useSubscription } from '../hooks/useSubscription';
+import PaywallModal from '../components/PaywallModal';
 
 const Home = () => {
     const { currentUser, logout, deleteAccount } = useAuth();
@@ -76,6 +78,10 @@ const Home = () => {
     const [isFlipped, setIsFlipped] = useState(false);
     const [showOnboarding, setShowOnboarding] = useState(false);
 
+    // Freemium
+    const { isPremium, loading: subLoading } = useSubscription();
+    const [showPaywall, setShowPaywall] = useState(false);
+
     useEffect(() => {
         const hasCompleted = localStorage.getItem('hasCompletedOnboarding');
         if (hasCompleted !== 'true') {
@@ -129,6 +135,28 @@ const Home = () => {
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
+
+    const currentActualYear = new Date().getFullYear();
+
+    const handleYearChange = (newYear) => {
+        if (!isPremium && newYear < currentActualYear) {
+            setShowPaywall(true);
+            return;
+        }
+        haptic.medium();
+        if (newYear !== currentYear) {
+            setLoadingYearly(true);
+            setCurrentYear(newYear);
+        }
+    };
+
+    const handleNextYear = () => {
+        handleYearChange(currentYear + 1);
+    };
+
+    const handlePrevYear = () => {
+        handleYearChange(currentYear - 1);
+    };
 
     const closeSidebar = () => {
         setIsSidebarClosing(true);
@@ -1608,6 +1636,12 @@ const Home = () => {
                     <Onboarding key="onboarding" onComplete={() => setShowOnboarding(false)} />
                 )}
             </AnimatePresence>
+
+            <PaywallModal 
+                isOpen={showPaywall} 
+                onClose={() => setShowPaywall(false)} 
+                reason="feature" 
+            />
         </>
     );
 };

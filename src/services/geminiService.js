@@ -1,16 +1,22 @@
 import { CATEGORIAS_DESPESA, CATEGORIAS_RECEITA } from '../utils/categories';
 import { AI_BUBBLE_PHRASES } from '../utils/phrases';
 
-const callBackendAi = async (type, payload) => {
+const callBackendAi = async (type, payload, uid, premiumPrompt) => {
   try {
     const response = await fetch('/api/gemini', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type, payload })
+      body: JSON.stringify({ type, payload, uid, premiumPrompt })
     });
 
     if (!response.ok) {
       const errData = await response.json();
+      
+      // Paywall Interception
+      if (errData.action === 'show_paywall') {
+         return { action: 'show_paywall', error: errData.error, message: 'Limite atingido.' };
+      }
+
       const detailedError = errData.details ? `${errData.error} (${errData.details})` : (errData.error || 'Erro no servidor de IA');
       throw new Error(detailedError);
     }
@@ -22,7 +28,7 @@ const callBackendAi = async (type, payload) => {
   }
 };
 
-export const analyzeTextWithGemini = async (text, transactions = [], conversationContext = null, locale = 'pt', allTransactions = []) => {
+export const analyzeTextWithGemini = async (text, transactions = [], conversationContext = null, locale = 'pt', allTransactions = [], uid = null) => {
   try {
     const lowerText = text.toLowerCase();
 
@@ -116,12 +122,28 @@ FORMATO DE SAÍDA:
 - Incompleto: {'action': 'need_info', 'pendingData': {...}, 'message': '...'}`;
     }
 
-    const result = await callBackendAi('analyze', { prompt, model });
+    const premiumPrompt = prompt; // Send as premiumPrompt to the backend, the backend will decide whether to use it based on the user's status.
+    // O backend agora injeta o "strict JSON prompt" caso o usuário seja gratuito.
+    const result = await callBackendAi('analyze', { prompt: text, model }, uid, premiumPrompt);
+    
+    // Check if the backend intercepted due to limit
+    if (result.action === 'show_paywall') {
+       return result;
+    }
+
     let responseText = result.text.replace(/\`\`\`json/gi, '').replace(/\`\`\`/g, '').trim();
-    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("Invalid output format from IA");
+    const jsonMatch = responseText.match(/\{[\s\S]*\}|\[[\s\S]*\]/); // Matches objects or arrays
+    if (!jsonMatch) {
+       // Se o Gemini backend (gating free user) retornou "action: paywall", a regex ainda deve achar, mas caso não ache:
+       if (responseText.includes('"action": "paywall"')) return { action: 'show_paywall', trigger_type: 'feature_gate' };
+       throw new Error("Invalid output format from IA");
+    }
     
     const aiJson = JSON.parse(jsonMatch[0]);
+
+    if (aiJson.action === 'paywall') {
+        return { action: 'show_paywall', trigger_type: 'feature_gate' };
+    }
 
     if (aiJson.action === 'add' || aiJson.transactions) {
       return {
@@ -167,7 +189,8 @@ export const suggestCategoryLimit = async (category, transactions = [], locale =
       Ex: {"amount": 150.00, "reason": "Sua média é R$130, deixamos uma margem extra."}
     `;
 
-    const result = await callBackendAi('suggest_limit', { prompt, model: "gemini-1.5-flash" });
+    // Limit calculation doesn't consume the text input of the user, but we will protect it in the frontend later or pass UID
+    const result = await callBackendAi('suggest_limit', { prompt, model: "gemini-1.5-flash" }, null, prompt);
     let text = result.text;
     text = text.replace(/\`\`\`json/gi, '').replace(/\`\`\`/g, '').trim();
     

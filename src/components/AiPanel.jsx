@@ -9,6 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { haptic } from '../utils/haptic';
 import ConfirmDialog from './ConfirmDialog';
 import LoadingDots from './LoadingDots';
+import PaywallModal from './PaywallModal';
 
 const AI_SUGGESTIONS = [
     "Gastei 50 reais no mercado",
@@ -85,6 +86,11 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
     const [activeSuggestions, setActiveSuggestions] = useState([]);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [confirmConfig, setConfirmConfig] = useState({});
+    
+    // Paywall State
+    const [showPaywall, setShowPaywall] = useState(false);
+    const [paywallReason, setPaywallReason] = useState('feature'); // 'feature' ou 'quota'
+
     const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
     const [viewportOffset, setViewportOffset] = useState(0);
     const inputRef = useRef(null);
@@ -306,8 +312,21 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
                     // Se não for sim nem não, continua enviando pro Gemini normalmente
                 }
 
-                const result = await analyzeTextWithGemini(textToProcess, transactions, conversationContext, locale, allTransactions);
+                const result = await analyzeTextWithGemini(textToProcess, transactions, conversationContext, locale, allTransactions, currentUser?.uid);
                 console.log("GEMINI RAW RESULT:", result); // DEBUGS
+
+                // INTERCEPÇÃO DO PAYWALL
+                if (result.action === 'show_paywall') {
+                    setPaywallReason(result.error === 'limit_reached' ? 'quota' : 'feature');
+                    setShowPaywall(true);
+                    haptic.error();
+                    setAiMessage("");
+                    setTranscript('');
+                    transcriptRef.current = '';
+                    setConversationContext(null);
+                    setIsProcessing(false);
+                    return;
+                }
 
                 if (result.error) {
                     console.error("Gemini returned an error flag:", result.error);
@@ -660,7 +679,11 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
                 {...confirmConfig}
             />
 
-
+            <PaywallModal 
+                isOpen={showPaywall} 
+                onClose={() => setShowPaywall(false)} 
+                reason={paywallReason} 
+            />
 
             <style>{`
         .ai-overlay {
