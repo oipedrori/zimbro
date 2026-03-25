@@ -7,6 +7,8 @@ import LoadingDots from './components/LoadingDots';
 import InstallPrompt from './components/InstallPrompt';
 import CookieNotice from './components/CookieNotice';
 import NotificationHandler from './components/NotificationHandler';
+import { GamificationProvider } from './contexts/GamificationContext';
+import AchievementUnlockModal from './components/AchievementUnlockModal';
 import './index.css';
 
 // Helper for lazy loading with retry logic
@@ -75,14 +77,17 @@ function App() {
   return (
     <I18nProvider>
       <AuthProvider>
-        <InstallProvider>
-          <InstallPrompt />
-          <CookieNotice />
-          <NotificationHandler />
-          <BrowserRouter>
-            <AppRoutes />
-          </BrowserRouter>
-        </InstallProvider>
+        <GamificationProvider>
+          <InstallProvider>
+            <InstallPrompt />
+            <CookieNotice />
+            <NotificationHandler />
+            <AchievementUnlockModal />
+            <BrowserRouter>
+              <AppRoutes />
+            </BrowserRouter>
+          </InstallProvider>
+        </GamificationProvider>
       </AuthProvider>
     </I18nProvider>
   );

@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
-import { User, LogOut, Trash2, Moon, Globe, DollarSign, ArrowRight, RefreshCcw, X, Sparkles, Bell } from 'lucide-react';
+import { User, LogOut, Trash2, Moon, Globe, DollarSign, ArrowRight, RefreshCcw, X, Sparkles, Bell, Trophy, PlusSquare, AlertCircle } from 'lucide-react';
 import { requestNotificationPermission } from './NotificationHandler';
 import { deleteAllUserTransactions } from '../services/transactionService';
 import { haptic } from '../utils/haptic';
 import ConfirmDialog from './ConfirmDialog';
 import LoadingDots from './LoadingDots';
 import { useInstall } from '../contexts/InstallContext';
+import { useGamification } from '../contexts/GamificationContext';
+import { GAMIFICATION_CATEGORIES } from '../utils/gamification';
+import BadgeSVG from './BadgeSVG';
+import AchievementDetailsModal from './AchievementDetailsModal';
 
 const ProfileContent = ({ onOpenNotion, onClose }) => {
     const { currentUser, logout, deleteAccount } = useAuth();
@@ -22,6 +26,11 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
     const [theme, setTheme] = useState(localStorage.getItem('zimbroo_theme') || 'system');
     const [showVerse, setShowVerse] = useState(false);
     const [verseHiding, setVerseHiding] = useState(false);
+
+    // Gamification
+    const { unlockedBadges } = useGamification();
+    const [selectedBadge, setSelectedBadge] = useState(null);
+    const [activeTab, setActiveTab] = useState('transactions');
 
     const hideVerse = () => {
         setVerseHiding(true);
@@ -160,6 +169,83 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                 </div>
                 <ArrowRight size={18} opacity={0.5} />
             </button>
+
+            {/* Gamification / Achievements Section */}
+            <div style={{ marginBottom: '32px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(234, 179, 8, 0.1)', color: '#eab308', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        <Trophy size={18} />
+                    </div>
+                    <h3 style={{ fontSize: '1.2rem', fontWeight: '700', margin: 0, color: 'var(--text-main)' }}>Conquistas</h3>
+                </div>
+
+                <div style={{ background: 'var(--surface-color)', borderRadius: '20px', border: '1px solid var(--glass-border)', padding: '16px', overflow: 'hidden' }}>
+                    {/* Tabs */}
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
+                        {Object.values(GAMIFICATION_CATEGORIES).map(cat => (
+                            <button
+                                key={cat.id}
+                                onClick={() => setActiveTab(cat.id)}
+                                style={{
+                                    padding: '8px 16px',
+                                    borderRadius: '12px',
+                                    border: 'none',
+                                    background: activeTab === cat.id ? `${cat.color}20` : 'var(--bg-color)',
+                                    color: activeTab === cat.id ? cat.color : 'var(--text-muted)',
+                                    fontWeight: '700',
+                                    fontSize: '0.85rem',
+                                    transition: 'all 0.2s',
+                                    whiteSpace: 'nowrap'
+                                }}
+                            >
+                                {cat.title}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Horizontal Carousel */}
+                    <div style={{ display: 'flex', gap: '16px', overflowX: 'auto', paddingBottom: '8px', scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
+                        {GAMIFICATION_CATEGORIES[activeTab].milestones.map((m) => {
+                            const isUnlocked = unlockedBadges.includes(m.id);
+                            const categoryColor = GAMIFICATION_CATEGORIES[activeTab].color;
+                            
+                            return (
+                                <div 
+                                    key={m.id} 
+                                    onClick={() => isUnlocked ? setSelectedBadge({ id: m.id, title: m.label, categoryTitle: GAMIFICATION_CATEGORIES[activeTab].title, color: categoryColor }) : null}
+                                    style={{ 
+                                        display: 'flex', 
+                                        flexDirection: 'column', 
+                                        alignItems: 'center', 
+                                        gap: '8px',
+                                        opacity: isUnlocked ? 1 : 0.4,
+                                        filter: isUnlocked ? 'none' : 'grayscale(100%)',
+                                        cursor: isUnlocked ? 'pointer' : 'default',
+                                        transition: 'all 0.2s',
+                                        transform: isUnlocked ? 'scale(1)' : 'scale(0.95)'
+                                    }}
+                                >
+                                    <div style={{ position: 'relative' }}>
+                                        <BadgeSVG 
+                                            title={m.label} 
+                                            categoryColor={isUnlocked ? categoryColor : '#9ca3af'} 
+                                            size={90} 
+                                        />
+                                        {!isUnlocked && (
+                                            <div style={{ position: 'absolute', top: -4, right: -4, background: 'var(--bg-color)', borderRadius: '50%', padding: '4px', border: '1px solid var(--glass-border)' }}>
+                                                <AlertCircle size={14} color="var(--text-muted)" />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <span style={{ fontSize: '0.75rem', fontWeight: '700', color: isUnlocked ? 'var(--text-main)' : 'var(--text-muted)' }}>
+                                        {m.label}
+                                    </span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </div>
 
             {/* Quick Settings */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>
@@ -419,6 +505,13 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                 isLoading={isDeleting}
                 loadingMessage={t('deleting_account_progress', { defaultValue: 'Excluindo sua conta e dados...' })}
                 loadingSubMessage={t('please_wait_delete', { defaultValue: 'Isso pode levar alguns segundos. Não feche o app.' })}
+            />
+
+            {/* Achievement Details & Share Modal */}
+            <AchievementDetailsModal 
+                isOpen={!!selectedBadge} 
+                onClose={() => setSelectedBadge(null)} 
+                badge={selectedBadge} 
             />
 
         </div>

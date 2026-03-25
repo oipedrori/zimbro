@@ -21,6 +21,7 @@ import BudgetPieChart from '../components/BudgetPieChart';
 import LimitsSection from '../components/LimitsSection';
 import { useLimits } from '../hooks/useLimits';
 import Onboarding from '../components/Onboarding';
+import { useGamification } from '../contexts/GamificationContext';
 
 const Home = () => {
     const { currentUser, logout, deleteAccount } = useAuth();
@@ -75,6 +76,9 @@ const Home = () => {
     const [chartType, setChartType] = useState('bar'); // 'bar' or 'line'
     const [isFlipped, setIsFlipped] = useState(false);
     const [showOnboarding, setShowOnboarding] = useState(false);
+    
+    // Gamification Hook
+    const { evaluateAchievements } = useGamification();
 
     useEffect(() => {
         const hasCompleted = localStorage.getItem('hasCompletedOnboarding');
@@ -207,8 +211,11 @@ const Home = () => {
             }
             setYearlyStats(monthlyBalances);
             setLoadingYearly(false);
+            
+            // Trigger gamification evaluation since we have all transactions
+            evaluateAchievements(allTransactions);
         }
-    }, [allTransactions, currentDate]);
+    }, [allTransactions, currentDate, evaluateAchievements]);
 
     // Excluir lógica duplicada ou redundante aqui se necessário
 
