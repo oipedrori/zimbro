@@ -1,17 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
-import { User, LogOut, Trash2, Moon, Globe, DollarSign, ArrowRight, RefreshCcw, X, Sparkles, Bell, Trophy, PlusSquare, AlertCircle } from 'lucide-react';
+import { User, LogOut, Trash2, Moon, Globe, DollarSign, ArrowRight, RefreshCcw, X, Sparkles, Bell } from 'lucide-react';
 import { requestNotificationPermission } from './NotificationHandler';
 import { deleteAllUserTransactions } from '../services/transactionService';
 import { haptic } from '../utils/haptic';
 import ConfirmDialog from './ConfirmDialog';
 import LoadingDots from './LoadingDots';
 import { useInstall } from '../contexts/InstallContext';
-import { useGamification } from '../contexts/GamificationContext';
-import { GAMIFICATION_CATEGORIES } from '../utils/gamification';
-import BadgeSVG from './BadgeSVG';
-import AchievementDetailsModal from './AchievementDetailsModal';
 
 const ProfileContent = ({ onOpenNotion, onClose }) => {
     const { currentUser, logout, deleteAccount } = useAuth();
@@ -26,11 +22,6 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
     const [theme, setTheme] = useState(localStorage.getItem('zimbroo_theme') || 'system');
     const [showVerse, setShowVerse] = useState(false);
     const [verseHiding, setVerseHiding] = useState(false);
-
-    // Gamification
-    const { unlockedBadges } = useGamification();
-    const [selectedBadge, setSelectedBadge] = useState(null);
-    const [activeTab, setActiveTab] = useState('transactions');
 
     const hideVerse = () => {
         setVerseHiding(true);
@@ -78,22 +69,22 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
         try {
             // Pequeno delay para a animação do modal fechar se necessário
             await new Promise(resolve => setTimeout(resolve, 500));
-            
+
             // Primeiro deleta TODOS os dados de transações do usuário
             await deleteAllUserTransactions(currentUser.uid);
-            
+
             // Sinaliza para o Onboarding que acabamos de deletar (para mostrar a despedida)
             localStorage.setItem('zimbroo_just_deleted', 'true');
-            
+
             // Depois deleta a conta na Firebase Auth
             await deleteAccount();
-            
+
             haptic.success();
             // O App.jsx vai redirecionar automaticamente para /onboarding pois o currentUser ficou null
         } catch (error) {
             console.error("Erro na exclusão:", error);
             localStorage.removeItem('zimbroo_just_deleted');
-            
+
             if (error.code === 'auth/requires-recent-login') {
                 alert('A segurança do Google exige que você faça login novamente antes de excluir sua conta. Por favor, saia e entre novamente antes de tentar excluir.');
             } else {
@@ -109,7 +100,7 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
 
     const handleToggleNotifications = async () => {
         haptic.medium();
-        
+
         if (!notificationsEnabled) {
             const token = await requestNotificationPermission();
             if (token) {
@@ -127,10 +118,10 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
             {/* Header with Close Button */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
                 <h2 style={{ fontSize: '1.5rem', fontWeight: '800', margin: 0, color: 'var(--text-main)' }}>{t('profile')}</h2>
-                <button 
+                <button
                     onClick={onClose}
-                    style={{ 
-                        width: '40px', height: '40px', borderRadius: 'var(--btn-radius)', 
+                    style={{
+                        width: '40px', height: '40px', borderRadius: 'var(--btn-radius)',
                         background: 'var(--surface-color)', border: '1px solid var(--glass-border)',
                         color: 'var(--text-main)', display: 'flex', alignItems: 'center', justifyContent: 'center',
                         cursor: 'pointer', transition: 'all 0.2s', flexShrink: 0
@@ -169,83 +160,6 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                 </div>
                 <ArrowRight size={18} opacity={0.5} />
             </button>
-
-            {/* Gamification / Achievements Section */}
-            <div style={{ marginBottom: '32px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'rgba(234, 179, 8, 0.1)', color: '#eab308', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                        <Trophy size={18} />
-                    </div>
-                    <h3 style={{ fontSize: '1.2rem', fontWeight: '700', margin: 0, color: 'var(--text-main)' }}>Conquistas</h3>
-                </div>
-
-                <div style={{ background: 'var(--surface-color)', borderRadius: '20px', border: '1px solid var(--glass-border)', padding: '16px', overflow: 'hidden' }}>
-                    {/* Tabs */}
-                    <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
-                        {Object.values(GAMIFICATION_CATEGORIES).map(cat => (
-                            <button
-                                key={cat.id}
-                                onClick={() => setActiveTab(cat.id)}
-                                style={{
-                                    padding: '8px 16px',
-                                    borderRadius: '12px',
-                                    border: 'none',
-                                    background: activeTab === cat.id ? `${cat.color}20` : 'var(--bg-color)',
-                                    color: activeTab === cat.id ? cat.color : 'var(--text-muted)',
-                                    fontWeight: '700',
-                                    fontSize: '0.85rem',
-                                    transition: 'all 0.2s',
-                                    whiteSpace: 'nowrap'
-                                }}
-                            >
-                                {cat.title}
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* Horizontal Carousel */}
-                    <div style={{ display: 'flex', gap: '16px', overflowX: 'auto', paddingBottom: '8px', scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
-                        {GAMIFICATION_CATEGORIES[activeTab].milestones.map((m) => {
-                            const isUnlocked = unlockedBadges.includes(m.id);
-                            const categoryColor = GAMIFICATION_CATEGORIES[activeTab].color;
-                            
-                            return (
-                                <div 
-                                    key={m.id} 
-                                    onClick={() => isUnlocked ? setSelectedBadge({ id: m.id, title: m.label, categoryTitle: GAMIFICATION_CATEGORIES[activeTab].title, color: categoryColor }) : null}
-                                    style={{ 
-                                        display: 'flex', 
-                                        flexDirection: 'column', 
-                                        alignItems: 'center', 
-                                        gap: '8px',
-                                        opacity: isUnlocked ? 1 : 0.4,
-                                        filter: isUnlocked ? 'none' : 'grayscale(100%)',
-                                        cursor: isUnlocked ? 'pointer' : 'default',
-                                        transition: 'all 0.2s',
-                                        transform: isUnlocked ? 'scale(1)' : 'scale(0.95)'
-                                    }}
-                                >
-                                    <div style={{ position: 'relative' }}>
-                                        <BadgeSVG 
-                                            title={m.label} 
-                                            categoryColor={isUnlocked ? categoryColor : '#9ca3af'} 
-                                            size={90} 
-                                        />
-                                        {!isUnlocked && (
-                                            <div style={{ position: 'absolute', top: -4, right: -4, background: 'var(--bg-color)', borderRadius: '50%', padding: '4px', border: '1px solid var(--glass-border)' }}>
-                                                <AlertCircle size={14} color="var(--text-muted)" />
-                                            </div>
-                                        )}
-                                    </div>
-                                    <span style={{ fontSize: '0.75rem', fontWeight: '700', color: isUnlocked ? 'var(--text-main)' : 'var(--text-muted)' }}>
-                                        {m.label}
-                                    </span>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-            </div>
 
             {/* Quick Settings */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>
@@ -322,7 +236,7 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                         <span style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-main)' }}>NOTIFICAÇÕES</span>
                     </div>
 
-                    <div 
+                    <div
                         onClick={handleToggleNotifications}
                         style={{
                             width: '56px',
@@ -373,8 +287,8 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                         }}
                     >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{ 
-                                width: '36px', height: '36px', borderRadius: '10px', 
+                            <div style={{
+                                width: '36px', height: '36px', borderRadius: '10px',
                                 background: 'var(--primary-color)', color: 'white',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center'
                             }}>
@@ -393,33 +307,33 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
             <div style={{ paddingTop: '32px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <button
                     onClick={() => logout()}
-                    style={{ 
-                        width: '100%', padding: '16px', borderRadius: 'var(--btn-radius)', 
-                        background: 'rgba(34, 197, 94, 0.1)', color: 'var(--primary-color)', 
-                        border: '1px solid rgba(34, 197, 94, 0.3)', fontWeight: '700', 
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' 
+                    style={{
+                        width: '100%', padding: '16px', borderRadius: 'var(--btn-radius)',
+                        background: 'rgba(34, 197, 94, 0.1)', color: 'var(--primary-color)',
+                        border: '1px solid rgba(34, 197, 94, 0.3)', fontWeight: '700',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px'
                     }}
                 >
                     <LogOut size={18} /> <span style={{ fontSize: '1rem' }}>{t('logout')}</span>
                 </button>
                 <button
                     onClick={() => setShowResetConfirm(true)}
-                    style={{ 
-                        width: '100%', padding: '16px', borderRadius: 'var(--btn-radius)', 
-                        background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', 
-                        border: '1px solid rgba(245, 158, 11, 0.3)', fontWeight: '700', 
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' 
+                    style={{
+                        width: '100%', padding: '16px', borderRadius: 'var(--btn-radius)',
+                        background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b',
+                        border: '1px solid rgba(245, 158, 11, 0.3)', fontWeight: '700',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px'
                     }}
                 >
                     <RefreshCcw size={18} /> <span style={{ fontSize: '1rem' }}>{t('reset_data')}</span>
                 </button>
                 <button
                     onClick={() => setShowDeleteConfirm(true)}
-                    style={{ 
-                        width: '100%', padding: '16px', borderRadius: 'var(--btn-radius)', 
-                        background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger-color)', 
-                        border: '1px solid rgba(239, 68, 68, 0.3)', fontWeight: '700', 
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' 
+                    style={{
+                        width: '100%', padding: '16px', borderRadius: 'var(--btn-radius)',
+                        background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger-color)',
+                        border: '1px solid rgba(239, 68, 68, 0.3)', fontWeight: '700',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px'
                     }}
                 >
                     <Trash2 size={18} /> <span style={{ fontSize: '1rem' }}>{t('delete_account')}</span>
@@ -505,13 +419,6 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                 isLoading={isDeleting}
                 loadingMessage={t('deleting_account_progress', { defaultValue: 'Excluindo sua conta e dados...' })}
                 loadingSubMessage={t('please_wait_delete', { defaultValue: 'Isso pode levar alguns segundos. Não feche o app.' })}
-            />
-
-            {/* Achievement Details & Share Modal */}
-            <AchievementDetailsModal 
-                isOpen={!!selectedBadge} 
-                onClose={() => setSelectedBadge(null)} 
-                badge={selectedBadge} 
             />
 
         </div>

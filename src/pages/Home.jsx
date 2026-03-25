@@ -21,7 +21,6 @@ import BudgetPieChart from '../components/BudgetPieChart';
 import LimitsSection from '../components/LimitsSection';
 import { useLimits } from '../hooks/useLimits';
 import Onboarding from '../components/Onboarding';
-import { useGamification } from '../contexts/GamificationContext';
 
 const Home = () => {
     const { currentUser, logout, deleteAccount } = useAuth();
@@ -76,9 +75,6 @@ const Home = () => {
     const [chartType, setChartType] = useState('bar'); // 'bar' or 'line'
     const [isFlipped, setIsFlipped] = useState(false);
     const [showOnboarding, setShowOnboarding] = useState(false);
-    
-    // Gamification Hook
-    const { evaluateAchievements } = useGamification();
 
     useEffect(() => {
         const hasCompleted = localStorage.getItem('hasCompletedOnboarding');
@@ -144,32 +140,32 @@ const Home = () => {
 
     const handleReturnToToday = () => {
         if (isAnimatingMonth.current) return;
-        
+
         const today = new Date();
         const targetMonthValue = today.getFullYear() * 12 + today.getMonth();
-        
+
         const step = () => {
             setCurrentDate(prev => {
                 const currentMonthValue = prev.getFullYear() * 12 + prev.getMonth();
                 const todayMonthValue = targetMonthValue;
-                
+
                 if (currentMonthValue === todayMonthValue) {
                     isAnimatingMonth.current = false;
                     return prev;
                 }
-                
+
                 isAnimatingMonth.current = true;
                 haptic.light();
-                
-                const nextDate = currentMonthValue < todayMonthValue 
-                    ? addMonths(prev, 1) 
+
+                const nextDate = currentMonthValue < todayMonthValue
+                    ? addMonths(prev, 1)
                     : subMonths(prev, 1);
-                
+
                 setTimeout(step, 40); // 40ms for a "fast-scroll" feel
                 return nextDate;
             });
         };
-        
+
         step();
     };
 
@@ -211,11 +207,8 @@ const Home = () => {
             }
             setYearlyStats(monthlyBalances);
             setLoadingYearly(false);
-            
-            // Trigger gamification evaluation since we have all transactions
-            evaluateAchievements(allTransactions);
         }
-    }, [allTransactions, currentDate, evaluateAchievements]);
+    }, [allTransactions, currentDate]);
 
     // Excluir lógica duplicada ou redundante aqui se necessário
 
@@ -502,14 +495,14 @@ const Home = () => {
                             <button onClick={() => { haptic.light(); setCurrentDate(subMonths(currentDate, 1)); }} style={{ border: 'none', background: 'transparent', color: 'var(--text-main)', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}>
                                 <ChevronLeft size={20} />
                             </button>
-                            <span 
+                            <span
                                 onClick={handleReturnToToday}
-                                style={{ 
-                                    fontWeight: '700', 
-                                    color: 'var(--text-main)', 
-                                    fontSize: '0.95rem', 
-                                    textTransform: 'capitalize', 
-                                    minWidth: '110px', 
+                                style={{
+                                    fontWeight: '700',
+                                    color: 'var(--text-main)',
+                                    fontSize: '0.95rem',
+                                    textTransform: 'capitalize',
+                                    minWidth: '110px',
                                     textAlign: 'center',
                                     cursor: 'pointer',
                                     userSelect: 'none'
@@ -547,14 +540,14 @@ const Home = () => {
                                     <p style={{ fontSize: '0.9rem', opacity: 0.8, marginBottom: '8px' }}>{t('monthly_balance')}</p>
                                     <h2 style={{ fontSize: 'clamp(1.8rem, 8vw, 2.5rem)', marginBottom: '24px', fontWeight: '700', letterSpacing: '-1px', wordBreak: 'break-word' }}>{formatCurrency(balance)}</h2>
                                 </div>
-                                <div 
+                                <div
                                     id="onboarding-stats-btn"
-                                    style={{ 
-                                        background: 'rgba(255, 255, 255, 0.15)', 
-                                        padding: '8px', 
-                                        borderRadius: '10px', 
-                                        display: 'flex', 
-                                        alignItems: 'center', 
+                                    style={{
+                                        background: 'rgba(255, 255, 255, 0.15)',
+                                        padding: '8px',
+                                        borderRadius: '10px',
+                                        display: 'flex',
+                                        alignItems: 'center',
                                         justifyContent: 'center',
                                         border: '1px solid rgba(255, 255, 255, 0.2)',
                                         boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
@@ -604,18 +597,18 @@ const Home = () => {
 
                     {!isDesktop && (
                         <div id="onboarding-limits-section">
-                            <LimitsSection 
+                            <LimitsSection
                                 limits={limits}
                                 transactions={transactions}
                                 formatCurrency={formatCurrency}
                                 t={t}
                                 setIsLimitModalOpen={(val, catId, amount) => {
                                     if (val && catId) {
-                                      setSelectedLimitCat(catId);
-                                      setIsLimitActionOpen(true);
+                                        setSelectedLimitCat(catId);
+                                        setIsLimitActionOpen(true);
                                     } else {
-                                      setTempLimit({ categoryId: '', amount: '' });
-                                      setIsLimitModalOpen(val);
+                                        setTempLimit({ categoryId: '', amount: '' });
+                                        setIsLimitModalOpen(val);
                                     }
                                 }}
                                 setTempLimit={setTempLimit}
@@ -704,7 +697,7 @@ const Home = () => {
                                             >
                                                 {t(f.label)}
                                             </button>
-                                            
+
                                             <AnimatePresence>
                                                 {showFilterTotal?.id === f.id && (
                                                     <motion.div
@@ -714,7 +707,7 @@ const Home = () => {
                                                         onClick={() => setShowFilterTotal(null)}
                                                         style={{
                                                             position: 'absolute', left: '50%',
-                                                            background: 'var(--surface-color)', 
+                                                            background: 'var(--surface-color)',
                                                             color: 'var(--text-main)',
                                                             padding: '8px 14px', borderRadius: '12px', fontSize: '0.85rem',
                                                             fontWeight: '700', whiteSpace: 'nowrap', zIndex: 100,
@@ -729,7 +722,7 @@ const Home = () => {
                                                         <div style={{
                                                             position: 'absolute', bottom: '-4.5px', left: '50%',
                                                             transform: 'translateX(-50%) rotate(45deg)',
-                                                            width: '8px', height: '8px', 
+                                                            width: '8px', height: '8px',
                                                             background: 'var(--surface-color)',
                                                             borderRight: '1px solid var(--glass-border)',
                                                             borderBottom: '1px solid var(--glass-border)',
@@ -856,7 +849,7 @@ const Home = () => {
                                         )}
                                     </section>
 
-                                    <LimitsSection 
+                                    <LimitsSection
                                         limits={limits}
                                         transactions={transactions}
                                         formatCurrency={formatCurrency}
@@ -900,7 +893,7 @@ const Home = () => {
                                                     >
                                                         {t(f.label, { defaultValue: f.label })}
                                                     </button>
-                                                    
+
                                                     <AnimatePresence>
                                                         {showFilterTotal?.id === f.id && (
                                                             <motion.div
@@ -910,7 +903,7 @@ const Home = () => {
                                                                 onClick={() => setShowFilterTotal(null)}
                                                                 style={{
                                                                     position: 'absolute', left: '50%',
-                                                                    background: 'var(--surface-color)', 
+                                                                    background: 'var(--surface-color)',
                                                                     color: 'var(--text-main)',
                                                                     padding: '8px 14px', borderRadius: '12px', fontSize: '0.85rem',
                                                                     fontWeight: '700', whiteSpace: 'nowrap', zIndex: 100,
@@ -925,7 +918,7 @@ const Home = () => {
                                                                 <div style={{
                                                                     position: 'absolute', bottom: '-4.5px', left: '50%',
                                                                     transform: 'translateX(-50%) rotate(45deg)',
-                                                                    width: '8px', height: '8px', 
+                                                                    width: '8px', height: '8px',
                                                                     background: 'var(--surface-color)',
                                                                     borderRight: '1px solid var(--glass-border)',
                                                                     borderBottom: '1px solid var(--glass-border)',
@@ -1367,9 +1360,9 @@ const Home = () => {
                             setIsLimitActionOpen(false);
                         }}
                     >
-                        <div style={{ 
-                            maxHeight: '350px', 
-                            overflowY: 'auto', 
+                        <div style={{
+                            maxHeight: '350px',
+                            overflowY: 'auto',
                             paddingRight: '4px'
                         }}>
                             {(() => {
@@ -1377,7 +1370,7 @@ const Home = () => {
                                     const info = getCategoryInfo(t.category, t.type);
                                     return info.id === selectedLimitCat;
                                 });
-                                
+
                                 if (catTxs.length > 0) {
                                     return catTxs.map((tx, idx) => {
                                         const theme = getCategoryTheme(tx.category, tx.type);
@@ -1485,16 +1478,16 @@ const Home = () => {
                                                 value={tempLimit.categoryId}
                                                 onChange={(e) => setTempLimit({ ...tempLimit, categoryId: e.target.value })}
                                                 className="form-input"
-                                                style={{ 
-                                                    color: 'var(--text-main)', 
-                                                    boxSizing: 'border-box', 
-                                                    width: '100%', 
-                                                    padding: '14px', 
-                                                    borderRadius: '16px', 
-                                                    background: 'var(--surface-color)', 
-                                                    fontSize: '1rem', 
-                                                    outline: 'none', 
-                                                    appearance: 'none', 
+                                                style={{
+                                                    color: 'var(--text-main)',
+                                                    boxSizing: 'border-box',
+                                                    width: '100%',
+                                                    padding: '14px',
+                                                    borderRadius: '16px',
+                                                    background: 'var(--surface-color)',
+                                                    fontSize: '1rem',
+                                                    outline: 'none',
+                                                    appearance: 'none',
                                                     minHeight: '48px',
                                                     cursor: 'pointer',
                                                     border: '1px solid var(--glass-border)'
