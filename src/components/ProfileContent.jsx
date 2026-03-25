@@ -8,6 +8,8 @@ import { haptic } from '../utils/haptic';
 import ConfirmDialog from './ConfirmDialog';
 import LoadingDots from './LoadingDots';
 import { useInstall } from '../contexts/InstallContext';
+import { useSubscription } from '../hooks/useSubscription';
+import PaywallModal from './PaywallModal';
 
 const ProfileContent = ({ onOpenNotion, onClose }) => {
     const { currentUser, logout, deleteAccount } = useAuth();
@@ -22,6 +24,10 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
     const [theme, setTheme] = useState(localStorage.getItem('zimbroo_theme') || 'system');
     const [showVerse, setShowVerse] = useState(false);
     const [verseHiding, setVerseHiding] = useState(false);
+
+    const { isPremium, status, loading: subLoading } = useSubscription();
+    const [showPaywall, setShowPaywall] = useState(false);
+    const [isManagingSub, setIsManagingSub] = useState(false);
 
     const hideVerse = () => {
         setVerseHiding(true);
@@ -61,6 +67,24 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
             alert('Error');
         } finally {
             setIsResettingData(false);
+        }
+    };
+
+    const handleManageSubscription = async () => {
+        setIsManagingSub(true);
+        try {
+            const response = await fetch('/api/create-portal-session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: currentUser.uid })
+            });
+            const data = await response.json();
+            if (data.error) throw new Error(data.error);
+            window.location.href = data.url;
+        } catch (error) {
+            console.error('Erro ao acessar portal:', error);
+            alert('Não foi possível acessar o portal de assinaturas no momento.');
+            setIsManagingSub(false);
         }
     };
 
@@ -133,14 +157,47 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
 
             {/* Profile Info Summary */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px', background: 'var(--surface-color)', padding: '16px', borderRadius: '20px', border: '1px solid var(--glass-border)' }}>
-                <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'var(--bg-color)', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--primary-color)', border: '1px solid var(--glass-border)' }}>
+                <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'var(--bg-color)', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--primary-color)', border: '1px solid var(--glass-border)', position: 'relative' }}>
                     <User size={24} />
+                    {/* Status Badge */}
+                    {!subLoading && (
+                        <div style={{
+                            position: 'absolute', bottom: '-8px', background: isPremium ? 'var(--primary-color)' : 'var(--text-muted)',
+                            color: 'white', fontSize: '0.6rem', fontWeight: '800', padding: '2px 6px', borderRadius: '10px',
+                            border: '2px solid var(--surface-color)', textTransform: 'uppercase', letterSpacing: '0.5px'
+                        }}>
+                            {isPremium ? 'PRO' : 'FREE'}
+                        </div>
+                    )}
                 </div>
                 <div style={{ flex: 1, overflow: 'hidden' }}>
                     <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: '700', color: 'var(--text-main)' }}>{currentUser?.displayName || 'Perfil'}</h3>
                     <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis' }}>{currentUser?.email}</p>
                 </div>
             </div>
+
+            {/* Premium Action */}
+            <button
+                onClick={isPremium ? handleManageSubscription : () => setShowPaywall(true)}
+                disabled={isManagingSub || subLoading}
+                style={{
+                    width: '100%', background: isPremium ? 'var(--surface-color)' : 'rgba(75, 180, 90, 0.1)',
+                    padding: '16px 20px', borderRadius: '20px',
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    color: isPremium ? 'var(--text-main)' : 'var(--primary-color)', cursor: 'pointer',
+                    border: isPremium ? '1px solid var(--glass-border)' : '1px solid var(--primary-color)',
+                    marginBottom: '16px', transition: 'all 0.2s', opacity: (isManagingSub || subLoading) ? 0.7 : 1
+                }}
+            >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '32px', height: '32px', background: isPremium ? 'var(--bg-color)' : 'var(--primary-gradient)', color: isPremium ? 'var(--text-main)' : 'white', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        <Sparkles size={18} />
+                    </div>
+                    <span style={{ fontWeight: '700', fontSize: '0.95rem' }}>
+                        {subLoading ? 'Verificando...' : isManagingSub ? 'Redirecionando...' : isPremium ? 'Gerenciar Assinatura' : 'Assinar Zimbroo Premium'}
+                    </span>
+                </div>
+            </button>
 
             {/* Notion Trigger */}
             <button
@@ -419,6 +476,13 @@ const ProfileContent = ({ onOpenNotion, onClose }) => {
                 isLoading={isDeleting}
                 loadingMessage={t('deleting_account_progress', { defaultValue: 'Excluindo sua conta e dados...' })}
                 loadingSubMessage={t('please_wait_delete', { defaultValue: 'Isso pode levar alguns segundos. Não feche o app.' })}
+            />
+
+            {/* Paywall Modal for Upgrades */}
+            <PaywallModal 
+                isOpen={showPaywall} 
+                onClose={() => setShowPaywall(false)} 
+                reason="feature" 
             />
 
         </div>

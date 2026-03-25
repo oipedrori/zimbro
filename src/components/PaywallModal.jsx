@@ -85,12 +85,12 @@ const PaywallModal = ({ isOpen, onClose, reason = 'feature' }) => {
                 </div>
 
                 {/* Corpo do Modal */}
-                <div style={{ padding: '24px' }}>
+                <div style={{ padding: '16px 24px 24px', overflowY: 'auto', maxHeight: '50vh' }}>
                     <h3 style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                         O que você ganha no Premium:
                     </h3>
                     
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '32px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
                         {[
                             { icon: <Sparkles size={20} />, text: 'Adição Mágica por Texto: Escreva como fala.' },
                             { icon: <MessageCircle size={20} />, text: 'Seu Conselheiro Financeiro: Dúvidas no chat.' },
