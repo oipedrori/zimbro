@@ -592,44 +592,69 @@ const Home = () => {
                                     </button>
                                 </div>
 
-                                {/* Row 3: Main Balance (Sticky & Scale) */}
+                                {/* Row 3: Main Balance (Sticky & Horizontal Collapse) */}
                                 <div
                                     className="sticky-balance"
                                     style={{
-                                        transform: `scale(${1 - scrollProgress * 0.35}) translateY(${scrollProgress * -110}px)`,
-                                        marginBottom: '24px'
+                                        display: 'flex',
+                                        flexDirection: (scrollProgress > 0.6) ? 'row' : 'column',
+                                        alignItems: (scrollProgress > 0.6) ? 'center' : 'flex-start',
+                                        justifyContent: 'space-between',
+                                        transform: `translate3d(${scrollProgress * 40}px, ${scrollProgress * -110}px, 0) scale(${1 - scrollProgress * 0.35})`,
+                                        marginBottom: '24px',
+                                        transition: 'all 0.1s ease-out',
+                                        gap: (scrollProgress > 0.6) ? '20px' : '0'
                                     }}
                                 >
-                                    <p style={{ fontSize: '0.85rem', color: 'white', opacity: 0.8 * (1 - scrollProgress), marginBottom: '4px' }}>{t('monthly_balance')}</p>
-                                    <h2 style={{ fontSize: '2.5rem', fontWeight: '800', color: 'white', letterSpacing: '-1px', margin: 0 }}>
-                                        {formatCurrency(balance)}
-                                    </h2>
-                                </div>
-
-                                {/* Row 4: Percent Bar & Mini Info (Sticky & Transform) */}
-                                {incomes > 0 && (
-                                    <div
-                                        style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '12px',
-                                            transform: `scale(${1 - scrollProgress * 0.2}) translate(${scrollProgress * 200}px, ${scrollProgress * -190}px)`,
-                                            width: scrollProgress > 0.5 ? '80px' : 'auto'
-                                        }}
-                                    >
-                                        <div style={{ flex: 1, height: '6px', minWidth: '60px', background: 'rgba(255, 255, 255, 0.2)', borderRadius: '10px', overflow: 'hidden' }}>
-                                            <div style={{
-                                                width: `${Math.min((expenses / incomes) * 100, 100)}%`,
-                                                height: '100%',
-                                                background: 'white',
-                                                borderRadius: '10px'
-                                            }}></div>
-                                        </div>
-                                        <span style={{ fontSize: '0.8rem', fontWeight: '800', color: 'white', opacity: 0.9 }}>
-                                            {Math.round((expenses / incomes) * 100)}%
-                                        </span>
+                                    <div style={{ flexShrink: 0 }}>
+                                        <p style={{ 
+                                            fontSize: '0.85rem', 
+                                            color: 'white', 
+                                            opacity: 0.8 * (1 - scrollProgress), 
+                                            marginBottom: '4px',
+                                            display: (scrollProgress > 0.8) ? 'none' : 'block'
+                                        }}>
+                                            {t('monthly_balance')}
+                                        </p>
+                                        <h2 style={{ 
+                                            fontSize: '3.2rem', 
+                                            fontWeight: '800', 
+                                            color: 'white', 
+                                            letterSpacing: '-1.5px', 
+                                            margin: 0,
+                                            lineHeight: 1
+                                        }}>
+                                            {formatCurrency(balance)}
+                                        </h2>
                                     </div>
-                                )}
+
+                                    {/* Progress Bar (Visible on right when collapsed) */}
+                                    {incomes > 0 && (
+                                        <div style={{ 
+                                            marginTop: (scrollProgress > 0.6) ? '0' : '20px',
+                                            display: 'flex', 
+                                            alignItems: 'center', 
+                                            gap: '12px',
+                                            flex: (scrollProgress > 0.6) ? 1 : 'none',
+                                            maxWidth: (scrollProgress > 0.6) ? '180px' : 'none',
+                                            opacity: 0.9 + (0.1 * scrollProgress),
+                                            transition: 'all 0.2s ease-out'
+                                        }}>
+                                            <div style={{ flex: 1, height: '6px', background: 'rgba(255, 255, 255, 0.2)', borderRadius: '10px', overflow: 'hidden' }}>
+                                                <div style={{ 
+                                                    width: `${Math.min((expenses / incomes) * 100, 100)}%`, 
+                                                    height: '100%', 
+                                                    background: 'white', 
+                                                    borderRadius: '10px',
+                                                    transition: 'width 0.8s'
+                                                }}></div>
+                                            </div>
+                                            <span style={{ fontSize: '0.85rem', fontWeight: '800', opacity: 1, minWidth: '40px', textAlign: 'right', color: 'white' }}>
+                                                {Math.round((expenses / incomes) * 100)}%
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
 
                                 {/* Row 5: Incomes/Expenses Detail (Fade Out) */}
                                 <div
@@ -727,7 +752,7 @@ const Home = () => {
                         }}>
 
                     {!isDesktop && (
-                        <div id="onboarding-limits-section">
+                        <div id="onboarding-limits-section" style={{ marginTop: '48px' }}>
                             <LimitsSection
                                 limits={limits}
                                 transactions={transactions}
@@ -735,8 +760,8 @@ const Home = () => {
                                 t={t}
                                 setIsLimitModalOpen={(val, catId, amount) => {
                                     if (val && catId) {
-                                        setSelectedLimitCat(catId);
-                                        setIsLimitActionOpen(true);
+                                        setTempLimit({ categoryId: catId, amount: amount ? amount.toString() : '' });
+                                        setIsLimitModalOpen(true);
                                     } else {
                                         setTempLimit({ categoryId: '', amount: '' });
                                         setIsLimitModalOpen(val);
@@ -987,8 +1012,8 @@ const Home = () => {
                                         t={t}
                                         setIsLimitModalOpen={(val, catId, amount) => {
                                             if (val && catId) {
-                                                setSelectedLimitCat(catId);
-                                                setIsLimitActionOpen(true);
+                                                setTempLimit({ categoryId: catId, amount: amount ? amount.toString() : '' });
+                                                setIsLimitModalOpen(true);
                                             } else {
                                                 setTempLimit({ categoryId: '', amount: '' });
                                                 setIsLimitModalOpen(val);
@@ -1323,8 +1348,14 @@ const Home = () => {
         </div> 
     )}
 
-            {/* --- Fixed Elements --- */}
-            <TransactionModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingTx(null); }} defaultType={modalType} initialData={editingTx} onSuccess={refetch} />
+            {/* --- Modals & Overlays --- */}
+            <TransactionModal 
+                isOpen={isModalOpen} 
+                onClose={() => { setIsModalOpen(false); setEditingTx(null); }} 
+                defaultType={modalType} 
+                initialData={editingTx} 
+                onSuccess={refetch} 
+            />
 
             <ConfirmDialog
                 isOpen={isConfirmOpen}
