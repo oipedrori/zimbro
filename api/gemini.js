@@ -45,65 +45,66 @@ export default async function handler(req, res) {
         if (!isPremium) {
             // VERIFICAÇÃO DE COTA PARA USUÁRIOS FREE
             const now = new Date();
-            const todayStr = now.toISOString().split('T')[0]; // "YYYY-MM-DD"
-            
+            const todayStr = now.toISOString().split('T')[0];
             let usageCount = userData.daily_ai_usage_count || 0;
-            const lastUsageStr = userData.last_ai_usage_date || "";
+            if (userData.last_ai_usage_date !== todayStr) usageCount = 0;
 
-            // Se é um novo dia, zera o contador
-            if (lastUsageStr !== todayStr) {
-                usageCount = 0;
-            }
+            if (usageCount >= 5) return res.status(403).json({ error: 'limit_reached', action: 'show_paywall' });
 
-            if (usageCount >= 5) {
-                return res.status(403).json({ error: 'limit_reached', action: 'show_paywall' });
-            }
-
-            // Atualiza o contador de cota diária antes de processar
-            await userRef.set({
-                daily_ai_usage_count: usageCount + 1,
-                last_ai_usage_date: todayStr
-            }, { merge: true });
+            await userRef.set({ daily_ai_usage_count: usageCount + 1, last_ai_usage_date: todayStr }, { merge: true });
         }
 
-        // 2. Inicialização correta SDK
         const ai = new GoogleGenAI({ apiKey: API_KEY });
-        const modelName = "gemini-2.5-flash";
+        const model = ai.getGenerativeModel({ 
+            model: "gemini-1.5-flash",
+            generationConfig: { responseMimeType: "application/json" }
+        });
         
-        let promptText = payload?.prompt || "Olá, teste de conexão.";
-        let systemInstruction = "";
+        const systemInstruction = `Você é o Zimbroo Brain, assistente financeiro de elite. 
+Sua missão é processar a entrada do usuário e o contexto fornecido para retornar um JSON de ação.
 
-        // SELEÇÃO DE PROMPT COM BASE NO STATUS
-        if (!isPremium) {
-            // STRICT FREE PROMPT
-            systemInstruction = `Você é um classificador e extrator financeiro estrito. O usuário enviará uma frase. Sua única função é retornar um JSON puro.
-  REGRAS:
-  1. Se a frase for uma adição (ex: 'gastei 20 no mercado'), extraia os dados: {'action': 'add', 'transactions': [{'valor': number, 'categoria': string, 'tipo': 'despesa'|'receita', 'descricao': string}]}. Assuma categorias genéricas se faltar informação. NÃO faça perguntas. NÃO retorne 'need_info'. A descrição deve ser curta (ex: 'Mercado', 'Gasolina').
-  2. O GATILHO DO PAYWALL: Se a frase for uma pergunta, pedido de relatório, análise, ou exigir histórico, recuse a extração e retorne estritamente: {'action': 'paywall'}. Retorne APENAS o JSON e nada mais.`;
-            
-            // Força o prompt a ser apenas a nova string sem a sujeira do prompt premium que o frontend tentou enviar
-            promptText = payload?.prompt;
-        } else {
-            // PREMIUM PROMPT DO FRONTEND
-            systemInstruction = premiumPrompt || "Você é o assistente financeiro do Zimbroo.";
-            promptText = payload?.prompt;
-        }
+REGRAS DE OURO:
+1. Retorne APENAS o JSON. Sem texto explicativo.
+2. Identifique a INTENÇÃO:
+   - "add": Se o usuário quer adicionar gastos ou ganhos.
+   - "analyze": Se o usuário faz perguntas sobre dinheiro, saldo ou pede conselhos.
+   - "limit": Se o usuário quer definir ou mudar um teto de gastos.
 
-        console.log(`[GeminiAPI] Chamada IA (${isPremium ? 'Premium' : 'Free'}) UID: ${uid}`);
+DETALHES DA AÇÃO "add":
+- Extraia cada transação para uma lista 'transactions'.
+- 'valor': o total mencionado (numérico).
+- 'parcelas': número de vezes (ex: 'em 3x' -> 3). Default: 1.
+- 'tipo_recorrencia': 'recurring' (se fixo/mensal como aluguel) ou 'none'.
+- 'tipo': 'expense' (gasto) ou 'income' (ganho).
+- 'categoria': ID da categoria mais próxima (ex: 'alimentacao', 'transporte', 'lazer', 'saude', 'casa', 'educacao', 'compras', 'outros').
 
-        // 3. Chamada da API
-        const response = await ai.models.generateContent({
-            model: modelName,
-            contents: promptText,
-            config: {
-                systemInstruction: systemInstruction,
-                responseMimeType: "application/json",
-            }
+DETALHES DA AÇÃO "analyze":
+- Use o contexto de transações enviado no prompt. 
+- Seja amigável e direto. Use a moeda do usuário se presente (R$).
+
+GATING DE PLANO:
+- O usuário atual é: ${isPremium ? 'PREMIUM' : 'FREE'}.
+- Usuários FREE só podem realizar a ação "add".
+- Se um usuário FREE pedir "analyze" ou "limit", você DEVE retornar obrigatoriamente: {"action": "paywall"}.
+
+LAYOUT DE SAÍDA:
+{
+  "action": "add" | "analyze" | "limit" | "paywall",
+  "transactions": [...], 
+  "message": "Resposta para o usuário",
+  "category": "ID_CATEGORIA",
+  "amount": number
+}`;
+
+        const prompt = `Input: "${payload.prompt}"\nContext: ${payload.context || "Nenhum"}`;
+
+        const result = await model.generateContent({
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            systemInstruction: systemInstruction
         });
 
-        if (!response.text) throw new Error("Resposta vazia da IA");
-
-        return res.status(200).json({ text: response.text });
+        const responseText = result.response.text();
+        return res.status(200).json({ text: responseText });
 
     } catch (error) {
         console.error("[GeminiAPI] Error:", error);

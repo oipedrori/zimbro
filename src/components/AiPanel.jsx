@@ -3,6 +3,7 @@ import { Mic, Plus, Edit2, Send, X, Check } from 'lucide-react';
 import { analyzeTextWithGemini } from '../services/geminiService';
 import { useTransactions } from '../hooks/useTransactions';
 import { useLimits } from '../hooks/useLimits';
+import { useSubscription } from '../hooks/useSubscription';
 import { format } from 'date-fns';
 import { useI18n } from '../contexts/I18nContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -100,6 +101,7 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
 
     const { transactions, allTransactions, addTx, deleteTx } = useTransactions(format(new Date(), 'yyyy-MM'));
     const { limits, setLimits } = useLimits(new Date().getFullYear());
+    const subscription = useSubscription();
     const { t, locale } = useI18n();
 
     const [micPermission, setMicPermission] = useState('prompt'); // 'prompt', 'granted', 'denied'
@@ -278,192 +280,69 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
             setIsProcessing(true);
             if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
 
-            setAiMessage(''); // Clear message to show dots
-
+            setAiMessage(''); 
 
             try {
-                // --- ATALHO CONVERSACIONAL PARA RECORRÊNCIA ---
-                if (conversationContext?.type === 'recurring_suggestion') {
-                    const cleanText = textToProcess.toLowerCase().trim();
-                    const isYes = /^(sim|claro|pode|com certeza|yes|confirmar|ok|quero)/i.test(cleanText);
-                    const isNo = /^(n[ãa]o|nopes|deixa|esquece|no)/i.test(cleanText);
-
-                    if (isYes) {
-                        const tx = conversationContext.tx;
-                        await updateTx(tx.id, { ...tx, repeatType: 'recurring' });
-                        haptic.success();
-                        setAiMessage("Perfeito! Este lançamento agora se repetirá todos os meses.");
-                        setTranscript('');
-                        transcriptRef.current = '';
-                        setConversationContext(null);
-                        setTimeout(() => onClose(), 2500);
-                        setIsProcessing(false);
-                        return;
-                    } else if (isNo) {
-                        haptic.medium();
-                        setAiMessage("Sem problemas, mantive como lançamento único.");
-                        setTranscript('');
-                        transcriptRef.current = '';
-                        setConversationContext(null);
-                        setTimeout(() => onClose(), 2500);
-                        setIsProcessing(false);
-                        return;
-                    }
-                    // Se não for sim nem não, continua enviando pro Gemini normalmente
-                }
-
-                const result = await analyzeTextWithGemini(textToProcess, transactions, conversationContext, locale, allTransactions, currentUser?.uid);
-                console.log("GEMINI RAW RESULT:", result); // DEBUGS
-
-                // INTERCEPÇÃO DO PAYWALL
-                if (result.action === 'show_paywall') {
-                    setPaywallReason(result.error === 'limit_reached' ? 'quota' : 'feature');
+                const result = await analyzeTextWithGemini(textToProcess, transactions, allTransactions, currentUser?.uid);
+                
+                if (result.action === 'show_paywall' || result.action === 'paywall') {
+                    setPaywallReason('feature');
                     setShowPaywall(true);
                     haptic.error();
                     setAiMessage("");
-                    setTranscript('');
-                    transcriptRef.current = '';
-                    setConversationContext(null);
                     setIsProcessing(false);
                     return;
                 }
 
                 if (result.error) {
-                    console.error("Gemini returned an error flag:", result.error);
                     haptic.error();
                     setAiMessage(result.error);
-                    setTranscript('');
-                    transcriptRef.current = '';
-                    setConversationContext(null);
-                } else if (result.action === 'need_info') {
-                    haptic.medium();
-                    setAiMessage(result.message);
-                    setConversationContext(result.pendingData);
-                    // Do not clear the transcript so the user remembers what they just said.
-                    setManualText('');
-                    if (!isManualTextMode) {
-                        // Restart mic to listen to the answer after reading
-                        setTimeout(() => {
-                            recognitionRef.current?.start();
-                        }, 1000);
-                    }
-                } else if (result.action === 'delete') {
-                    setConfirmConfig({
-                        title: t('confirm_delete', { defaultValue: 'Excluir Movimentação' }),
-                        message: result.message || t('confirm_delete_msg', { defaultValue: 'Tem certeza que deseja excluir este registro?' }),
-                        onConfirm: async () => {
-                            try {
-                                await deleteTx(result.targetId);
-                                haptic.success();
-                                setAiMessage(t('transaction_removed', { defaultValue: "A movimentação foi removida." }));
-                                setTranscript('');
-                                transcriptRef.current = '';
-                                setTimeout(() => onClose(), 2000);
-                            } catch (e) {
-                                console.error(e);
-                                setAiMessage(t('error_deleting', { defaultValue: "Erro ao excluir." }));
-                            } finally {
-                                setIsConfirmOpen(false);
-                            }
-                        }
-                    });
-                    setIsConfirmOpen(true);
                 } else if (result.action === 'analysis') {
                     haptic.medium();
                     setAiMessage(result.message);
-                    setTranscript('');
-                    transcriptRef.current = '';
-
-                    if (!isManualTextMode) {
-                        setTimeout(() => {
-                            recognitionRef.current?.start();
-                        }, 1000); // re-open mic after reading so user can keep asking
-                    }
                 } else if (result.action === 'add') {
                     const txs = result.transactions;
-                    if (!txs || !Array.isArray(txs) || txs.length === 0) {
-                        setAiMessage("Não consegui entender os valores para adicionar.");
-                        setIsProcessing(false);
+                    if (!txs || txs.length === 0) {
+                        setAiMessage("Não entendi a movimentação.");
                         return;
                     }
 
-                    // Processar todas as transações em lote
-                    let totalAdded = 0;
-                    let lastAddedTx = null;
                     for (const tx of txs) {
-                        const finalDate = tx.date ? tx.date : format(new Date(), 'yyyy-MM-dd');
-                        // Capitalizar primeira letra da descrição
-                        const capitalizedDescription = tx.description.charAt(0).toUpperCase() + tx.description.slice(1);
-                        
-                        const added = await addTx({
+                        await addTx({
                             type: tx.type,
-                            amount: parseFloat(tx.amount),
-                            description: capitalizedDescription,
+                            amount: tx.amount,
+                            description: tx.description.charAt(0).toUpperCase() + tx.description.slice(1),
                             category: tx.category,
-                            date: finalDate,
+                            date: tx.date || format(new Date(), 'yyyy-MM-dd'),
                             repeatType: tx.repeatType,
                             installments: tx.installments || 1
                         });
-                        lastAddedTx = added;
-                        totalAdded++;
                     }
 
-                    // Lógica Conversacional de Recorrência
-                    // Só pergunta se recorrente_sugerida for true E se o usuário NÃO pediu explicitamente pra ser recorrente
-                    const hasExplicitRecurring = txs.some(t => t.repeatType === 'recurring' || t.repeatType === 'recurring_all');
-                    
-                    if (result.recorrente_sugerida && lastAddedTx && !hasExplicitRecurring) {
-                        setAiMessage(`Adicionado: ${lastAddedTx.description} (R$ ${lastAddedTx.amount}).\n\nNotei que parece ser uma conta recorrente. Deseja repetir este lançamento todos os meses?`);
-                        setConversationContext({ type: 'recurring_suggestion', tx: lastAddedTx });
-                        setTranscript('');
-                        transcriptRef.current = '';
-                        haptic.medium();
-                        
-                        if (!isManualTextMode) {
-                            setTimeout(() => {
-                                try {
-                                    recognitionRef.current?.start();
-                                } catch(e) {}
-                            }, 1500);
-                        }
-                        setIsProcessing(false);
-                        return; // Mantém o painel aberto para a resposta
-                    }
-
-                    // Confirmação de Sucesso Polida para Múltiplos ou Único
-                    if (totalAdded > 1) {
-                         setAiMessage(`Tudo certo! Adicionei ${totalAdded} novos registros para você.`);
-                    } else {
-                         const tx = txs[0];
-                         const tipoTexto = tx.type === 'income' ? 'Adicionado com sucesso' : 'Gasto registrado';
-                         setAiMessage(`Tudo certo! ${tipoTexto}: ${tx.description} (R$ ${tx.amount}).`);
-                    }
-
-                    setTranscript('');
-                    transcriptRef.current = '';
-                    setConversationContext(null);
                     haptic.success();
-
-                    // Fecha sozinho depois de ler
+                    setAiMessage(result.message || "Movimentação adicionada!");
                     setTimeout(() => onClose(), 2500);
                 } else if (result.action === 'limit') {
+                    if (!subscription.isPremium) {
+                        setShowPaywall(true);
+                        return;
+                    }
                     haptic.success();
                     setLimits({ ...limits, [result.category]: parseFloat(result.amount) });
                     setAiMessage(result.message || 'Limite definido com sucesso!');
-                    setTranscript('');
-                    transcriptRef.current = '';
-                    setConversationContext(null);
                     setTimeout(() => onClose(), 2500);
                 }
             } catch (err) {
                 console.error(err);
                 haptic.error();
-                setAiMessage('Ocorreu um erro ao processar. Tente novamente.');
+                setAiMessage('Ocorreu um erro ao processar.');
             } finally {
                 setIsProcessing(false);
+                setTranscript('');
+                transcriptRef.current = '';
             }
         };
-    }, [isProcessing, addTx, onClose]);
+    }, [isProcessing, addTx, onClose, transactions, allTransactions, subscription.isPremium, limits]);
 
     const handleProcessManualClick = () => {
         if (transcriptRef.current.trim().length > 0 && !isProcessing) {
@@ -478,6 +357,11 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
     };
 
     const toggleTextMode = () => {
+        if (!subscription.isPremium) {
+            setPaywallReason('feature');
+            setShowPaywall(true);
+            return;
+        }
         setIsManualTextMode(true);
         if (transcriptRef.current) {
             setManualText(transcriptRef.current + ' ');
