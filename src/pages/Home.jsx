@@ -1341,6 +1341,8 @@ const Home = () => {
                                     <ProfileContent
                                         onOpenNotion={() => setSidebarView('notion')}
                                         onClose={closeSidebar}
+                                        theme={theme}
+                                        setTheme={setTheme}
                                     />
                                 ) : (
                                     <NotionImportContent

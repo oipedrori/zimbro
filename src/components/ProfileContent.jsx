@@ -10,13 +10,11 @@ import LoadingDots from './LoadingDots';
 import { useInstall } from '../contexts/InstallContext';
 import { useSubscription } from '../hooks/useSubscription';
 import PaywallModal from './PaywallModal';
-import { useTheme } from '../contexts/ThemeContext'; // Added this import
 
-const ProfileContent = ({ onOpenNotion, onClose }) => {
+const ProfileContent = ({ onOpenNotion, onClose, theme, setTheme }) => {
     const { currentUser, logout, deleteAccount } = useAuth();
     const { t, locale, changeLocale, currency, changeCurrency } = useI18n();
     const { isInstallable, isStandalone, promptInstall } = useInstall();
-    const { theme, setTheme } = useTheme(); // Changed to useTheme hook
 
     const [isDeleting, setIsDeleting] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
