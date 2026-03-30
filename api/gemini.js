@@ -55,11 +55,15 @@ export default async function handler(req, res) {
         }
 
         const ai = new GoogleGenAI({ apiKey: API_KEY });
-        const model = ai.getGenerativeModel({ 
-            model: "gemini-1.5-flash",
-            generationConfig: { responseMimeType: "application/json" }
-        });
         
+        // Configuração SEGURA para evitar bloqueios por falso positivo
+        const safetySettings = [
+            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+        ];
+
         const systemInstruction = `Você é o Zimbroo Brain, assistente financeiro de elite. 
 Sua missão é processar a entrada do usuário e o contexto fornecido para retornar um JSON de ação.
 
@@ -96,12 +100,20 @@ LAYOUT DE SAÍDA:
   "amount": number
 }`;
 
+        const model = ai.getGenerativeModel({ 
+            model: "gemini-1.5-flash",
+            systemInstruction: systemInstruction,
+            generationConfig: { 
+                responseMimeType: "application/json",
+                temperature: 0.1,
+                topP: 0.95,
+            },
+            safetySettings: safetySettings
+        });
+        
         const prompt = `Input: "${payload.prompt}"\nContext: ${payload.context || "Nenhum"}`;
 
-        const result = await model.generateContent({
-            contents: [{ role: "user", parts: [{ text: prompt }] }],
-            systemInstruction: systemInstruction
-        });
+        const result = await model.generateContent(prompt); // Limpamos a chamada
 
         const responseText = result.response.text();
         return res.status(200).json({ text: responseText });

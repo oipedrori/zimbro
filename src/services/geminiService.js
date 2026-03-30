@@ -1,13 +1,44 @@
 import { CATEGORIAS_DESPESA, CATEGORIAS_RECEITA } from '../utils/categories';
 import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
 
-const callBackendAi = async (payload, uid) => {
+/**
+ * Limpa e extrai JSON de uma string de resposta (remove markdown e textos extras)
+ */
+const extractJsonContent = (str) => {
+    try {
+        const jsonMatch = str.match(/\{[\s\S]*\}/);
+        return jsonMatch ? jsonMatch[0] : str;
+    } catch (e) {
+        return str;
+    }
+};
+
+/**
+ * Fetch com timeout para evitar que a UI fique travada
+ */
+const fetchWithTimeout = async (url, options, timeout = 15000) => {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    try {
+        const response = await fetch(url, {
+            ...options,
+            signal: controller.signal
+        });
+        clearTimeout(id);
+        return response;
+    } catch (error) {
+        clearTimeout(id);
+        throw error;
+    }
+};
+
+const callBackendAi = async (payload, uid, retries = 1) => {
   try {
-    const response = await fetch('/api/gemini', {
+    const response = await fetchWithTimeout('/api/gemini', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ payload, uid })
-    });
+    }, 15000);
 
     if (!response.ok) {
         const errData = await response.json();
@@ -16,8 +47,13 @@ const callBackendAi = async (payload, uid) => {
     }
 
     const data = await response.json();
-    return JSON.parse(data.text);
+    const cleanText = extractJsonContent(data.text);
+    return JSON.parse(cleanText);
   } catch (error) {
+    if (retries > 0 && error.name !== 'AbortError') {
+        console.warn(`[GeminiService] AI Call failed, retrying... (${retries} left)`);
+        return callBackendAi(payload, uid, retries - 1);
+    }
     console.error(`[GeminiService] AI Call failed:`, error);
     throw error;
   }

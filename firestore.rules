@@ -1,0 +1,28 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Transactions - filter by userId field
+    match /transactions/{transactionId} {
+      allow read, write: if request.auth != null && (
+        (resource != null && resource.data.userId == request.auth.uid) ||
+        (resource == null && request.resource.data.userId == request.auth.uid)
+      );
+    }
+
+    // User settings - using UID as document ID
+    match /userSettings/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Users metadata - using UID as document ID
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Default deny for everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
