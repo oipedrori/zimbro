@@ -90,7 +90,7 @@ export default async function handler(req, res) {
         if (!isPremium) {
             // PROMPT FREE: Stateless e Rígido
             systemInstruction = `Você é um extrator financeiro rigoroso. O usuário enviará uma frase.
-1. Se for uma adição clara (ex: 'gastei 20 no almoço'), extraia e retorne: {'action': 'add', 'transactions': [{'descricao': string, 'valor': number, 'categoria': string, 'tipo': 'expense'|'income'}]}.
+1. Se for uma adição clara (ex: 'gastei 20 no almoço'), extraia e retorne: {'action': 'add', 'transactions': [{'descricao': string, 'valor': number, 'categoria': string, 'tipo': 'expense'|'income'}], 'transaction_data': {'desc': string, 'val': number, 'cat': string, 'tipo': 'despesa'|'receita', 'date': 'YYYY-MM-DD'}}.
 2. Se faltar informação (como categoria ou valor), deduza uma categoria genérica ou assuma valor 0. NÃO FAÇA PERGUNTAS.
 3. Se a frase for uma pergunta, pedido de conselho, falar sobre limites, parcelas, recorrência ou qualquer outra coisa que não seja uma adição simples, retorne IMEDIATAMENTE: {'action': 'paywall', 'msg': 'Essa é uma ação exclusiva para assinantes do plano Pro!'}`;
         } else {
@@ -120,11 +120,11 @@ Baseie-se no HISTÓRICO DA CATEGORIA fornecido.
                 systemInstruction = `Você é o assistente financeiro Pro do Zimbroo.
 CONTEXTO PENDENTE: ${pendingStr}
 Baseie-se no contexto para completar informações faltantes.
-1. ADIÇÃO: {'action': 'add', 'transactions': [{'descricao': string, 'valor': number, 'categoria': string, 'tipo': string, 'parcelas': number, 'tipo_recorrencia': 'none'|'recurring'}]}
+1. ADIÇÃO: {'action': 'add', 'transactions': [{'descricao': string, 'valor': number, 'categoria': string, 'tipo': string, 'parcelas': number, 'tipo_recorrencia': 'none'|'recurring'}], 'transaction_data': {'desc': string, 'val': number, 'cat': string, 'tipo': 'despesa'|'receita', 'date': 'YYYY-MM-DD'}}
 2. DADOS FALTANTES: Se faltar VALOR ou DESCRIÇÃO, retorne: {'action': 'need_info', 'pending_data': {dados_coletados}, 'message': 'Sua pergunta para o usuário'}
-3. PARCELAMENTO: Se a compra for parcelada, divida o valor. Retorne: {'action': 'add', 'transactions': [{'valor': total_dividido_por_parcelas, 'parcelas': numero_parcelas, ...}]}
+3. PARCELAMENTO: Se a compra for parcelada, divida o valor. Retorne: {'action': 'add', 'transactions': [{'valor': total_dividido_por_parcelas, 'parcelas': numero_parcelas, ...}], 'transaction_data': {'desc': string, 'val': valor_total, ...}}
 4. RECORRÊNCIA (Identificação): Se for assinatura/fixo, sugira: {'action': 'suggest_recurrence', 'pending_data': {dados}, 'message': 'Quer adicionar como recorrente?'}
-5. RECORRÊNCIA (Confirmada): Retorne 'add' com 'tipo_recorrencia': 'recurring'.`;
+5. RECORRÊNCIA (Confirmada): Retorne 'add' com 'tipo_recorrencia': 'recurring' e 'transaction_data'.`;
             }
         }
 

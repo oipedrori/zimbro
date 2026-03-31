@@ -12,6 +12,7 @@ import ProfileContent from '../components/ProfileContent';
 import NotionImportContent from '../components/NotionImportContent';
 import { Plus, ChevronLeft, ChevronRight, User, Pointer, X, Trash2, PieChart, BarChart2, Shield, Mic, Keyboard, Moon, Globe, DollarSign, LogOut, ArrowUp, ArrowDown, Eye, EyeOff } from 'lucide-react';
 import { Link, useOutletContext, useNavigate } from 'react-router-dom';
+import TransactionCard from '../components/TransactionCard';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getEmojiForDescription } from '../utils/emojiUtils';
@@ -850,43 +851,7 @@ const Home = () => {
                                 <div className="glass-panel" style={{ padding: 0, overflow: 'hidden' }}>
                                     {filteredTransactions.map((tx, i) => (
                                         <SwipeableItem key={tx.id} onDelete={() => handleConfirmDelete(tx)} onEdit={() => handleEditTx(tx)}>
-                                            <div
-                                                style={{
-                                                    display: 'flex',
-                                                    justifyContent: 'space-between',
-                                                    alignItems: 'center',
-                                                    padding: '12px 16px',
-                                                    background: 'transparent'
-                                                }}
-                                            >
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                                                    <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: getCategoryTheme(tx.category, tx.type).color + '20', display: 'flex', justifyContent: 'center', alignItems: 'center', color: getCategoryTheme(tx.category, tx.type).color, fontWeight: 'bold', fontSize: '1.2rem', flexShrink: 0 }}>
-                                                        {getEmojiForDescription(tx.description, getCategoryTheme(tx.category, tx.type).icon)}
-                                                    </div>
-                                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                        <p style={{ fontWeight: '500', margin: 0 }}>{tx.dynamicDescription || tx.description}</p>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>{tx.virtualDate.split('-').slice(1).reverse().join('/')}</p>
-                                                            {tx.repeatType && (
-                                                                <span style={{
-                                                                    fontSize: '0.65rem',
-                                                                    padding: '1px 6px',
-                                                                    borderRadius: '6px',
-                                                                    background: 'rgba(75, 180, 90, 0.1)',
-                                                                    color: '#4BB45A',
-                                                                    fontWeight: '700',
-                                                                    textTransform: 'uppercase'
-                                                                }}>
-                                                                    {tx.repeatType === 'recurring' ? t('tag_recurring') : tx.repeatType === 'installment' ? t('tag_installment') : t('tag_variable')}
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <p style={{ fontWeight: '600', color: tx.type === 'income' ? 'var(--success-color)' : 'var(--danger-color)', margin: 0, whiteSpace: 'nowrap' }}>
-                                                    {tx.type === 'income' ? '+' : '-'} {formatCurrency(tx.amount)}
-                                                </p>
-                                            </div>
+                                            <TransactionCard transaction={tx} />
                                         </SwipeableItem>
                                     ))}
                                 </div>

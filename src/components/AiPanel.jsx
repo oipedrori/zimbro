@@ -11,6 +11,7 @@ import { haptic } from '../utils/haptic';
 import ConfirmDialog from './ConfirmDialog';
 import LoadingDots from './LoadingDots';
 import PaywallModal from './PaywallModal';
+import TransactionCard from './TransactionCard';
 
 const AI_SUGGESTIONS = [
     "Gastei 50 reais no mercado",
@@ -92,6 +93,7 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
     const [showPaywall, setShowPaywall] = useState(false);
     const [paywallReason, setPaywallReason] = useState('feature'); // 'feature' ou 'quota'
     const [pendingAiData, setPendingAiData] = useState(null);
+    const [successTx, setSuccessTx] = useState(null);
 
     const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
     const [viewportOffset, setViewportOffset] = useState(0);
@@ -174,6 +176,7 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
             setIsManualTextMode(isTextMode);
             setManualText('');
             setConversationContext(null);
+            setSuccessTx(null);
 
             // Se for modo texto, foca o input
             if (isTextMode) {
@@ -322,9 +325,19 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
                     }
 
                     haptic.success();
-                    setAiMessage(result.message || "Movimentação adicionada!");
-                    setPendingAiData(null); // Limpa contexto após sucesso
-                    setTimeout(() => onClose(), 2500);
+                    setAiMessage(""); // Oculte a mensagem anterior para mostrar o novo feedback
+                    
+                    // Fallback para transaction_data caso a IA esqueça de enviar o objeto específico de feedback
+                    const fallbackData = txs[0] ? {
+                        desc: txs[0].description,
+                        val: txs[0].amount, // Para feedback visual, mostramos o valor da parcela se houver
+                        cat: txs[0].category,
+                        tipo: txs[0].type === 'income' ? 'receita' : 'despesa',
+                        date: txs[0].date
+                    } : null;
+
+                    setSuccessTx(result.transaction_data || fallbackData);
+                    setPendingAiData(null);
                 } else if (result.action === 'need_info') {
                     haptic.medium();
                     setAiMessage(result.message);
@@ -334,11 +347,19 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
                     setAiMessage(result.message);
                     setPendingAiData(result.pending_data);
                 } else if (result.action === 'add_recurrent') {
-                    // Similar ao add, mas pode ter lógica de confirmação se necessário
                     haptic.success();
-                    setAiMessage(result.message || "Recorrência configurada!");
+                    setAiMessage("");
+                    
+                    const fallbackData = result.transactions?.[0] ? {
+                        desc: result.transactions[0].description,
+                        val: result.transactions[0].amount,
+                        cat: result.transactions[0].category,
+                        tipo: result.transactions[0].type === 'income' ? 'receita' : 'despesa',
+                        date: result.transactions[0].date
+                    } : null;
+
+                    setSuccessTx(result.transaction_data || fallbackData);
                     setPendingAiData(null);
-                    setTimeout(() => onClose(), 2500);
                 } else if (result.action === 'set_limit' || result.action === 'limit') {
                     if (!subscription.isPremium) {
                         setShowPaywall(true);
@@ -397,6 +418,17 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
             if (inputRef.current) inputRef.current.focus();
         }, 100);
     };
+
+    // Auto-close success feedback
+    useEffect(() => {
+        if (successTx) {
+            const timer = setTimeout(() => {
+                onClose();
+                setSuccessTx(null);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [successTx, onClose]);
 
     return (
         <div className={`ai-overlay ${isActive ? 'active' : ''} ${viewportOffset > 0 ? 'keyboard-active' : ''}`}>
@@ -483,7 +515,7 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
                        <div style={{ marginBottom: '20px', marginTop: '10px' }}><LoadingDots style={{ color: 'white' }} /></div>
                     )}
                     
-                    {aiMessage && (
+                    {aiMessage && !successTx && (
                         <div style={{
                             position: 'relative',
                             maxHeight: '55vh',
@@ -499,7 +531,28 @@ const AiPanel = ({ isActive, isTextMode = false, onClose, onOpenManualModal, onL
                         </div>
                     )}
 
-                    {(!aiMessage && !conversationContext && !isProcessing) ? (
+                    {successTx && (
+                        <div className="animate-fade-in" style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ 
+                                    width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(74, 222, 128, 0.2)', 
+                                    display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto 16px auto',
+                                    border: '1px solid rgba(74, 222, 128, 0.4)'
+                                }}>
+                                    <Check size={32} color="#4ade80" />
+                                </div>
+                                <h3 style={{ color: 'white', fontSize: '1.4rem', fontWeight: '700' }}>
+                                    {successTx.tipo === 'receita' ? t('income_added_success', { defaultValue: 'Pronto, receita adicionada!' }) : t('expense_added_success', { defaultValue: 'Pronto, despesa adicionada!' })}
+                                </h3>
+                            </div>
+                            
+                            <div className="glass-panel" style={{ width: '100%', maxWidth: '340px', padding: 0, overflow: 'hidden', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                <TransactionCard transaction={successTx} />
+                            </div>
+                        </div>
+                    )}
+
+                    {(!aiMessage && !successTx && !conversationContext && !isProcessing) ? (
                         (isTextMode || isManualTextMode) ? (
                             <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'center' }}>
                                 <div style={{ textAlign: 'center', marginTop: '10px', flexShrink: 0 }}>

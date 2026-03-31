@@ -95,28 +95,29 @@ export const analyzeTextWithGemini = async (text, currentMonthTransactions = [],
         return { action: 'show_paywall', trigger_type: 'feature_gate' };
     }
 
-    if (aiResponse.action === 'add' && aiResponse.transactions) {
+    if ((aiResponse.action === 'add' || aiResponse.action === 'add_recurrent') && aiResponse.transactions) {
         return {
-            action: 'add',
+            action: aiResponse.action,
+            message: aiResponse.message || aiResponse.msg,
+            transaction_data: aiResponse.transaction_data,
             transactions: aiResponse.transactions.map(tx => {
-                const totalValor = parseFloat(tx.valor) || 0;
-                const parcelasCount = parseInt(tx.parcelas) || 1;
+                const totalValor = parseFloat(tx.valor || tx.amount || 0);
+                const parcelasCount = parseInt(tx.parcelas || tx.installments || 1);
                 
                 return {
                     type: tx.tipo === 'income' || tx.tipo === 'receita' ? 'income' : 'expense',
-                    amount: tx.parcelas > 1 ? totalValor / parcelasCount : totalValor,
+                    amount: parcelasCount > 1 ? totalValor / parcelasCount : totalValor,
                     totalAmount: totalValor,
-                    description: tx.descricao,
-                    category: tx.categoria || 'outros',
+                    description: tx.descricao || tx.description,
+                    category: tx.categoria || tx.category || 'outros',
                     date: format(new Date(), 'yyyy-MM-dd'),
-                    repeatType: tx.parcelas > 1 ? 'installment' : (tx.tipo_recorrencia === 'recurring' ? 'recurring' : 'none'),
+                    repeatType: parcelasCount > 1 ? 'installment' : (tx.tipo_recorrencia === 'recurring' || aiResponse.action === 'add_recurrent' ? 'recurring' : 'none'),
                     installments: parcelasCount
                 };
             })
         };
     }
 
-    // Novas Ações do Roteador Pro
     if (aiResponse.action === 'need_info') {
         return { action: 'need_info', message: aiResponse.message, pending_data: aiResponse.pending_data };
     }
@@ -125,17 +126,14 @@ export const analyzeTextWithGemini = async (text, currentMonthTransactions = [],
         return { action: 'suggest_recurrence', message: aiResponse.message, pending_data: aiResponse.pending_data };
     }
 
-    if (aiResponse.action === 'add_recurrent') {
-        return { action: 'add_recurrent', ...aiResponse };
-    }
-
-    if (aiResponse.action === 'set_limit' || aiResponse.action === 'suggest_limit') {
+    if (aiResponse.action === 'set_limit' || aiResponse.action === 'suggest_limit' || aiResponse.action === 'limit') {
         return aiResponse;
     }
 
     if (aiResponse.action === 'advice') {
         return { action: 'analysis', message: aiResponse.message };
     }
+
 
     return aiResponse;
   } catch (error) {
