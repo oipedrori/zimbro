@@ -119,23 +119,23 @@ LAYOUT DE SAÍDA:
   "amount": number
 }`;
 
-        const model = ai.getGenerativeModel({ 
+        const promptContent = `Input: "${payload.prompt}"\nContext: ${payload.context || "Nenhum"}`;
+
+        // Chamada usando a sintaxe CORRETA do @google/genai (v1.x)
+        const result = await ai.models.generateContent({
             model: "gemini-1.5-flash",
             systemInstruction: systemInstruction,
-            generationConfig: { 
+            contents: [{ role: 'user', parts: [{ text: promptContent }] }],
+            config: {
                 responseMimeType: "application/json",
                 temperature: 0.1,
                 topP: 0.95,
-            },
-            safetySettings: safetySettings
+                safetySettings: safetySettings
+            }
         });
-        
-        const prompt = `Input: "${payload.prompt}"\nContext: ${payload.context || "Nenhum"}`;
 
-        const result = await model.generateContent(prompt); // Limpamos a chamada
-
-        const responseText = result.response.text();
-        return res.status(200).json({ text: responseText });
+        // No novo SDK, o texto está em result.text
+        return res.status(200).json({ text: result.text });
 
     } catch (error) {
         console.error("[GeminiAPI] Error:", error);

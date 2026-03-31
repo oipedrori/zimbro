@@ -54,8 +54,9 @@ const callBackendAi = async (payload, uid, retries = 1) => {
         console.warn(`[GeminiService] AI Call failed, retrying... (${retries} left)`);
         return callBackendAi(payload, uid, retries - 1);
     }
+    const msg = error.message || 'Erro no servidor de IA';
     console.error(`[GeminiService] AI Call failed:`, error);
-    throw error;
+    throw new Error(msg);
   }
 };
 
